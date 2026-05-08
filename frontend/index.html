@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DevCards - Incontra il tuo prossimo Developer</title>
+    <link rel="stylesheet" href="./css/style.css">
+</head>
+<body>
+    <div class="auth-container">
+        <div class="glass-panel" id="loginPanel">
+            <h1 class="title">DevCards</h1>
+            <p style="text-align: center; color: var(--text-muted); margin-bottom: 2rem;">Accedi per continuare</p>
+            
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="loginEmail">Email</label>
+                    <input type="email" id="loginEmail" class="form-control" required placeholder="mario@email.com">
+                </div>
+                <div class="form-group">
+                    <label for="loginPassword">Password</label>
+                    <input type="password" id="loginPassword" class="form-control" required placeholder="••••••••">
+                </div>
+                <button type="submit" class="btn">Accedi</button>
+            </form>
+            
+            <div class="toggle-form">
+                Non hai un account? <a id="showRegister">Registrati ora</a>
+            </div>
+        </div>
+
+        <div class="glass-panel" id="registerPanel" style="display: none;">
+            <h1 class="title">Unisciti a noi</h1>
+            <p style="text-align: center; color: var(--text-muted); margin-bottom: 2rem;">Crea il tuo account DevCards</p>
+            
+            <form id="registerForm">
+                <div class="role-selector">
+                    <label class="role-option">
+                        <input type="radio" name="role" value="candidato" checked>
+                        <div class="role-card">👨‍💻 Candidato</div>
+                    </label>
+                    <label class="role-option">
+                        <input type="radio" name="role" value="datore">
+                        <div class="role-card">🏢 Datore</div>
+                    </label>
+                </div>
+
+                <div style="display: flex; gap: 1rem;">
+                    <div class="form-group" style="flex: 1;">
+                        <label for="regNome">Nome</label>
+                        <input type="text" id="regNome" class="form-control" required>
+                    </div>
+                    <div class="form-group" style="flex: 1;">
+                        <label for="regCognome">Cognome</label>
+                        <input type="text" id="regCognome" class="form-control" required>
+                    </div>
+                </div>
+
+                <div style="display: flex; gap: 1rem;">
+                    <div class="form-group" style="flex: 1;">
+                        <label for="regEta">Età</label>
+                        <input type="number" id="regEta" class="form-control" required>
+                    </div>
+                    <div class="form-group" style="flex: 1;">
+                        <label for="regCitta">Città</label>
+                        <input type="text" id="regCitta" class="form-control" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="regEmail">Email</label>
+                    <input type="email" id="regEmail" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="regPassword">Password</label>
+                    <input type="password" id="regPassword" class="form-control" required>
+                </div>
+                
+                <button type="submit" class="btn">Registrati</button>
+            </form>
+            
+            <div class="toggle-form">
+                Hai già un account? <a id="showLogin">Accedi</a>
+            </div>
+        </div>
+    </div>
+
+    <script src="./js/auth.js"></script>
+</body>
+</html>

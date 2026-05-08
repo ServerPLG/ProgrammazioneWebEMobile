@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Il tuo Profilo - DevCards</title>
+    <link rel="stylesheet" href="./css/style.css">
+</head>
+<body>
+    <header style="padding: 1rem 2rem; background: var(--card-bg); border-bottom: 1px solid var(--card-border); display: flex; justify-content: space-between; align-items: center; backdrop-filter: blur(10px);">
+        <h2 style="color: var(--primary-color); margin: 0; font-size: 1.5rem; font-weight: 700;">DevCards <span style="font-size: 0.9rem; color: var(--text-muted); font-weight: 400;">Candidate Dashboard</span></h2>
+        <div>
+            <button id="btnLogout" class="btn" style="padding: 0.5rem 1rem; font-size: 0.9rem; background: transparent; border: 1px solid var(--primary-color); color: var(--primary-color); width: auto;">Logout</button>
+        </div>
+    </header>
+
+    <main style="padding: 2rem; max-width: 800px; margin: 0 auto; width: 100%;">
+        <div class="glass-panel" style="max-width: 100%;">
+            <h2 class="title" style="font-size: 2rem; text-align: left; margin-bottom: 2rem;">Compila il tuo CV</h2>
+            
+            <form id="cvForm">
+                <div class="form-group">
+                    <label style="color: var(--text-main); font-weight: 600;">Breve Biografia (Testo Libero)</label>
+                    <textarea id="cvBio" class="form-control" rows="5" placeholder="Parlaci di te, delle tue esperienze e dei tuoi obiettivi..." style="resize: vertical;" required></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label style="color: var(--text-main); font-weight: 600;">Competenze (separate da virgola)</label>
+                    <input type="text" id="cvComp" class="form-control" placeholder="Es. Problem Solving, Teamwork, UI Design" required>
+                </div>
+
+                <div class="form-group">
+                    <label style="color: var(--text-main); font-weight: 600;">Linguaggi di Programmazione (separati da virgola)</label>
+                    <input type="text" id="cvLang" class="form-control" placeholder="Es. JavaScript, HTML, CSS, Python" required>
+                </div>
+
+                <h3 style="margin: 3rem 0 1.5rem; color: var(--text-main); font-size: 1.2rem; border-bottom: 1px solid var(--card-border); padding-bottom: 0.5rem;">I tuoi contatti privati</h3>
+                <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1.5rem;">Questi dati saranno nascosti nella tua DevCard finché un Datore di lavoro non clicca su "Contatta".</p>
+                
+                <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                    <div class="form-group" style="flex: 1; min-width: 250px;">
+                        <label>Numero di Telefono</label>
+                        <input type="tel" id="cvPhone" class="form-control" placeholder="+39 ...">
+                    </div>
+                    <div class="form-group" style="flex: 1; min-width: 250px;">
+                        <label>Link Instagram</label>
+                        <input type="url" id="cvInsta" class="form-control" placeholder="https://instagram.com/...">
+                    </div>
+                </div>
+
+                <button type="submit" class="btn" style="margin-top: 2rem;">Salva il CV e Aggiorna la tua DevCard</button>
+            </form>
+        </div>
+    </main>
+    <script src="./js/candidate.js"></script>
+</body>
+</html>
