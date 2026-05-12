@@ -1,0 +1,183 @@
+document.addEventListener('DOMContentLoaded', async () => {
+    // Auth check
+    const user = JSON.parse(localStorage.getItem('user'));
+    if (!user || user.ruolo !== 'candidato') {
+        alert("Accesso negato. Fai il login come candidato.");
+        window.location.href = 'index.html';
+        return;
+    }
+
+    // Logout
+    document.getElementById('btnLogout').addEventListener('click', () => {
+        localStorage.removeItem('user');
+        window.location.href = 'index.html';
+    });
+
+    // =============================
+    // 1. Mostra la propria DevCard al centro
+    // =============================
+    const cardSection = document.getElementById('myCardSection');
+    try {
+        const res = await fetch(`http://localhost:3000/api/cv/${user.id}`);
+        if (res.ok) {
+            const card = await res.json();
+            if (card && card.bio) {
+                const avatarSrc = card.foto_profilo
+                    || `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(card.nome + card.cognome)}&backgroundColor=e2e8f0`;
+
+                const langSpans = (card.linguaggi || '').split(',')
+                    .map(l => l.trim()).filter(l => l)
+                    .map(l => `<span class="lang-tag">${l}</span>`)
+                    .join('');
+
+                // Parse competenze linguistiche (JSON)
+                let lingueHtml = '';
+                try {
+                    const lingue = JSON.parse(card.competenze_linguistiche || '[]');
+                    lingueHtml = lingue.map(l => `${l.lingua} (${l.livello})`).join(', ');
+                } catch { lingueHtml = card.competenze_linguistiche || 'Non specificate'; }
+
+                cardSection.innerHTML = `
+                    <div class="glass-panel devcard" style="padding: 2rem;">
+                        <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem;">
+                            <img src="${avatarSrc}" alt="Avatar" style="width: 70px; height: 70px; border-radius: 50%; object-fit: cover; border: 3px solid var(--primary-color); box-shadow: 0 0 20px rgba(0,255,102,0.15);">
+                            <div>
+                                <h3 style="color: var(--text-main); font-size: 1.8rem; margin: 0;">${card.nome} ${card.cognome}</h3>
+                                <p style="color: var(--text-muted); margin: 0.2rem 0 0;">📍 ${card.citta} · ${card.eta || '?'} anni · ${card.anni_esperienza} anni di esperienza</p>
+                            </div>
+                        </div>
+                        <div style="display: flex; flex-wrap: wrap; gap: 0.6rem; margin-bottom: 1.5rem;">${langSpans}</div>
+                        <div style="margin-bottom: 1rem;">
+                            <h4 class="devcard-section-label">Competenze</h4>
+                            <p style="color: var(--text-main); margin: 0;">${card.competenze || 'Non specificate'}</p>
+                        </div>
+                        <div style="margin-bottom: 1rem;">
+                            <h4 class="devcard-section-label">Lingue</h4>
+                            <p style="color: var(--text-main); margin: 0;">${lingueHtml}</p>
+                        </div>
+                        <div>
+                            <h4 class="devcard-section-label">Biografia</h4>
+                            <p style="color: #ccc; line-height: 1.5; margin: 0;">${card.bio}</p>
+                        </div>
+                        ${card.disponibile_ovunque ? '<div style="margin-top: 1rem;"><span class="lang-tag">🌍 Disponibile Ovunque</span></div>' : ''}
+                    </div>
+                    <a href="candidate.html" class="edit-btn">✏️ Modifica CV</a>
+                    <a href="candidate_card.html" class="edit-btn" style="border-color: var(--card-border); color: var(--text-muted); margin-top: 0.5rem;">🃏 Visualizza DevCard con QR</a>
+                `;
+            } else {
+                cardSection.innerHTML = `
+                    <div class="glass-panel" style="text-align: center; padding: 3rem;">
+                        <h3 style="color: var(--primary-color); margin-bottom: 1rem;">👋 Benvenuto, ${user.nome}!</h3>
+                        <p style="color: var(--text-muted); margin-bottom: 1.5rem;">Non hai ancora compilato il tuo CV. Crealo ora per farti scoprire dai datori di lavoro!</p>
+                        <a href="candidate.html" class="edit-btn">✏️ Compila il tuo CV</a>
+                    </div>
+                `;
+            }
+        }
+    } catch (err) {
+        console.error(err);
+        cardSection.innerHTML = '<p style="color: #ff4b4b; text-align: center;">Errore di connessione.</p>';
+    }
+
+    // =============================
+    // 2. Carica le offerte di colloquio
+    // =============================
+    const interviewsContainer = document.getElementById('interviewsContainer');
+    try {
+        const res = await fetch(`http://localhost:3000/api/candidate/interviews?candidate_id=${user.id}`);
+        const interviews = await res.json();
+
+        if (interviews.length === 0) {
+            interviewsContainer.innerHTML = '<p style="color: var(--text-muted);">Nessuna offerta di colloquio ricevuta al momento. Le aziende interessate al tuo profilo ti contatteranno qui!</p>';
+            return;
+        }
+
+        interviewsContainer.innerHTML = '';
+        interviews.forEach(iv => {
+            let statusBadge = '';
+            let actionsHtml = '';
+
+            if (iv.status === 'pending') {
+                statusBadge = '<span class="status-badge status-pending">⏳ In Attesa</span>';
+                actionsHtml = `
+                    <div class="interview-actions">
+                        <button class="btn-accept" data-id="${iv.id}" data-action="accepted">✓ Accetta</button>
+                        <button class="btn-reject" data-id="${iv.id}" data-action="rejected">✗ Rifiuta</button>
+                    </div>
+                `;
+            } else if (iv.status === 'accepted') {
+                statusBadge = '<span class="status-badge status-accepted">✓ Accettato</span>';
+            } else {
+                statusBadge = '<span class="status-badge status-rejected">✗ Rifiutato</span>';
+            }
+
+            const html = `
+            <div class="interview-card">
+                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem;">
+                    <h4 class="company-name" data-employer-id="${iv.employer_id}">${iv.azienda_nome} ${iv.azienda_cognome}</h4>
+                    ${statusBadge}
+                </div>
+                <div class="interview-meta">
+                    <span>💼 ${iv.posizione_cercata}</span>
+                    <span>💰 ${iv.range_stipendio || 'Non specificato'}</span>
+                    <span>📍 ${iv.luogo || iv.azienda_citta} ${iv.distanza ? '(' + iv.distanza + ')' : ''}</span>
+                </div>
+                ${iv.linguaggi_richiesti ? `<p style="color: var(--text-muted); font-size: 0.85rem; margin: 0.5rem 0;">Linguaggi: <span style="color: var(--text-main);">${iv.linguaggi_richiesti}</span></p>` : ''}
+                ${iv.descrizione_azienda ? `<p style="color: #999; font-size: 0.85rem; margin-top: 0.5rem; line-height: 1.4;">${iv.descrizione_azienda.substring(0, 150)}...</p>` : ''}
+                ${actionsHtml}
+            </div>
+            `;
+            interviewsContainer.innerHTML += html;
+        });
+
+        // Event listeners per accetta/rifiuta
+        document.querySelectorAll('.btn-accept, .btn-reject').forEach(btn => {
+            btn.addEventListener('click', async function () {
+                const interviewId = this.dataset.id;
+                const status = this.dataset.action;
+                try {
+                    const res = await fetch('http://localhost:3000/api/interview/status', {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ interview_id: interviewId, status })
+                    });
+                    if (res.ok) {
+                        location.reload(); // Ricarica per aggiornare lo stato
+                    }
+                } catch (err) {
+                    console.error(err);
+                }
+            });
+        });
+
+        // Event listeners per click nome azienda (mostra dettaglio)
+        document.querySelectorAll('.company-name').forEach(el => {
+            el.addEventListener('click', async function () {
+                const empId = this.dataset.employerId;
+                try {
+                    const res = await fetch(`http://localhost:3000/api/employer/${empId}`);
+                    const company = await res.json();
+                    const modalBody = document.getElementById('companyModalBody');
+                    modalBody.innerHTML = `
+                        <h3 style="color: var(--primary-color); margin-bottom: 1rem;">${company.nome} ${company.cognome}</h3>
+                        <p style="color: var(--text-muted); margin-bottom: 0.5rem;">📍 ${company.citta}</p>
+                        <h4 class="devcard-section-label" style="margin-top: 1.5rem;">Descrizione</h4>
+                        <p style="color: #ccc; line-height: 1.6;">${company.descrizione_azienda || 'Nessuna descrizione disponibile.'}</p>
+                    `;
+                    document.getElementById('companyModal').classList.add('active');
+                } catch (err) {
+                    console.error(err);
+                }
+            });
+        });
+
+    } catch (err) {
+        console.error(err);
+        interviewsContainer.innerHTML = '<p style="color: #ff4b4b;">Errore nel caricamento delle offerte.</p>';
+    }
+
+    // Chiudi modale azienda
+    document.getElementById('closeCompanyModal').addEventListener('click', () => {
+        document.getElementById('companyModal').classList.remove('active');
+    });
+});

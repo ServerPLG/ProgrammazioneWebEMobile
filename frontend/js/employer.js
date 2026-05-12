@@ -39,20 +39,52 @@ document.addEventListener('DOMContentLoaded', () => {
         const card = candidates[currentIndex];
         
         const langSpans = (card.linguaggi || '').split(',').map(l => l.trim()).filter(l=>l).map(l => 
-            `<span style="background: rgba(0, 240, 255, 0.1); color: var(--primary-color); padding: 0.3rem 0.8rem; border-radius: 20px; font-size: 0.85rem; border: 1px solid rgba(0, 240, 255, 0.2);">${l}</span>`
+            `<span style="background: rgba(0, 255, 102, 0.1); color: var(--primary-color); padding: 0.3rem 0.8rem; border-radius: 20px; font-size: 0.85rem; border: 1px solid rgba(0, 255, 102, 0.2);">${l}</span>`
         ).join('');
 
-        // Notiamo che in questa view NON mostriamo il bottone "Contatta", che sarà nei Preferiti.
+        const avatarHtml = card.foto_profilo 
+            ? `<img src="${card.foto_profilo}" alt="Foto" style="width: 70px; height: 70px; border-radius: 50%; object-fit: cover; border: 2px solid var(--primary-color);">`
+            : `<img src="https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(card.nome + card.cognome)}&backgroundColor=e2e8f0" alt="Avatar" style="width: 70px; height: 70px; border-radius: 50%; object-fit: cover; border: 2px solid var(--primary-color);">`;
+
+        // Parse competenze linguistiche
+        let lingueHtml = '';
+        try {
+            const lingue = JSON.parse(card.competenze_linguistiche || '[]');
+            lingueHtml = lingue.map(l => `${l.lingua} (${l.livello})`).join(', ');
+        } catch { lingueHtml = card.competenze_linguistiche || 'Non specificate'; }
+
+        // Distanza
+        const distanzaHtml = card.distanza 
+            ? `<span style="display: inline-block; margin-top: 0.3rem; background: rgba(0, 255, 102, 0.1); color: var(--primary-color); padding: 0.2rem 0.6rem; border-radius: 12px; font-size: 0.85rem; border: 1px solid rgba(0, 255, 102, 0.2);">📍 ${card.distanza}</span>`
+            : '';
+
         const html = `
         <div class="glass-panel devcard" id="currentCard" style="animation: slideUp 0.4s ease-out;">
             <div>
-                <h3 style="color: var(--text-main); font-size: 2rem; margin-bottom: 0.5rem;">${card.nome} ${card.cognome}, ${card.eta}</h3>
-                <p style="color: var(--text-muted); font-size: 1.1rem; margin-bottom: 1.5rem;">📍 ${card.citta}</p>
+                <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem;">
+                    ${avatarHtml}
+                    <div>
+                        <h3 style="color: var(--text-main); font-size: 2rem; margin: 0;">${card.nome} ${card.cognome}, ${card.eta || '?'}</h3>
+                        <p style="color: var(--text-muted); font-size: 1.1rem; margin: 0; margin-top: 0.3rem;">📍 ${card.citta} · ${card.anni_esperienza} anni exp.</p>
+                        ${distanzaHtml}
+                    </div>
+                </div>
                 <div style="display: flex; flex-wrap: wrap; gap: 0.8rem; margin-bottom: 2rem;">
                     ${langSpans}
                 </div>
+                <div style="margin-bottom: 1.5rem; display: flex; gap: 2rem; flex-wrap: wrap;">
+                    <div style="flex: 1; min-width: 150px;">
+                        <h4 style="font-size: 0.9rem; color: var(--primary-color); margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 1px;">Luogo Preferito</h4>
+                        <p style="font-size: 1rem; color: var(--text-main);">${card.disponibile_ovunque ? '🌍 Ovunque' : (card.luogo_preferito || 'Non specificato')}</p>
+                        ${card.smartworking ? '<span style="display: inline-block; margin-top: 0.3rem; background: rgba(0, 255, 102, 0.1); color: var(--primary-color); padding: 0.2rem 0.6rem; border-radius: 12px; font-size: 0.8rem; border: 1px solid rgba(0, 255, 102, 0.2);">✓ Smartworking</span>' : ''}
+                    </div>
+                    <div style="flex: 1; min-width: 150px;">
+                        <h4 style="font-size: 0.9rem; color: var(--primary-color); margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 1px;">Lingue</h4>
+                        <p style="font-size: 1rem; color: var(--text-main);">${lingueHtml}</p>
+                    </div>
+                </div>
                 <div style="margin-bottom: 2rem;">
-                    <h4 style="font-size: 1rem; color: var(--primary-color); margin-bottom: 0.8rem; text-transform: uppercase; letter-spacing: 1px;">Competenze</h4>
+                    <h4 style="font-size: 1rem; color: var(--primary-color); margin-bottom: 0.8rem; text-transform: uppercase; letter-spacing: 1px;">Competenze Tech</h4>
                     <p style="font-size: 1rem; color: var(--text-main); line-height: 1.6;">${card.competenze || 'Non specificate'}</p>
                 </div>
                 <div>
@@ -74,14 +106,12 @@ document.addEventListener('DOMContentLoaded', () => {
         
         const candidate = candidates[currentIndex];
         
-        // Animazione della card in uscita (opzionale)
         const currentCard = document.getElementById('currentCard');
         if (currentCard) {
             currentCard.style.transform = action === 'save' ? 'translateX(100px) rotate(10deg)' : 'translateX(-100px) rotate(-10deg)';
             currentCard.style.opacity = '0';
         }
 
-        // Manda richiesta al server in background
         fetch('http://localhost:3000/api/interact', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -92,11 +122,10 @@ document.addEventListener('DOMContentLoaded', () => {
             })
         }).catch(err => console.error("Errore salvataggio interazione", err));
 
-        // Passa al prossimo
         setTimeout(() => {
             currentIndex++;
             renderCard();
-        }, 300); // aspetta la fine della transizione CSS
+        }, 300);
     };
 
     document.getElementById('btnSkip').addEventListener('click', () => handleInteraction('skip'));
@@ -107,6 +136,5 @@ document.addEventListener('DOMContentLoaded', () => {
         window.location.href = 'index.html';
     });
 
-    // Avvia
     loadDevCards();
 });

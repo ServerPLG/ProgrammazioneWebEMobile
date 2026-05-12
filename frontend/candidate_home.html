@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home Candidato - DevCards</title>
+    <meta name="description" content="Dashboard personale del candidato su DevCards.">
+    <link rel="stylesheet" href="./css/style.css">
+    <style>
+        .home-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 2rem;
+            background: radial-gradient(circle at top left, rgba(0, 204, 82,0.1), transparent 40%),
+                        radial-gradient(circle at bottom right, rgba(0, 255, 102,0.1), transparent 40%);
+        }
+
+        /* La propria DevCard al centro */
+        .my-card-section {
+            width: 100%;
+            max-width: 500px;
+            margin-bottom: 2rem;
+            animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .my-card-section .devcard {
+            width: 100%;
+            position: relative;
+        }
+
+        .edit-btn {
+            display: block;
+            width: 100%;
+            margin-top: 1rem;
+            padding: 1rem;
+            border: 1px solid var(--primary-color);
+            border-radius: 12px;
+            background: transparent;
+            color: var(--primary-color);
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            text-align: center;
+            transition: all 0.3s;
+        }
+
+        .edit-btn:hover {
+            background: rgba(0, 255, 102, 0.1);
+            transform: translateY(-2px);
+        }
+
+        /* Sezione Notifiche Colloqui */
+        .interviews-section {
+            width: 100%;
+            max-width: 700px;
+            margin-top: 1rem;
+            animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.2s both;
+        }
+
+        .section-title {
+            color: var(--primary-color);
+            font-size: 1.4rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+        }
+
+        .interview-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(16px);
+            border: 1px solid var(--card-border);
+            border-radius: 20px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            transition: all 0.3s;
+        }
+
+        .interview-card:hover {
+            border-color: var(--primary-color);
+        }
+
+        .interview-card h4 {
+            color: var(--text-main);
+            font-size: 1.2rem;
+            margin: 0 0 0.3rem;
+            cursor: pointer;
+        }
+
+        .interview-card h4:hover {
+            color: var(--primary-color);
+        }
+
+        .interview-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin: 0.8rem 0;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+
+        .interview-actions {
+            display: flex;
+            gap: 0.8rem;
+            margin-top: 1rem;
+        }
+
+        .interview-actions button {
+            flex: 1;
+            padding: 0.7rem;
+            border-radius: 10px;
+            border: none;
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-accept {
+            background: var(--primary-color);
+            color: #121212;
+        }
+
+        .btn-accept:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0,255,102,0.3); }
+
+        .btn-reject {
+            background: transparent;
+            border: 1px solid #ff4b4b !important;
+            color: #ff4b4b;
+        }
+
+        .btn-reject:hover { background: rgba(255,75,75,0.1); transform: translateY(-2px); }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .status-accepted { background: rgba(0,255,102,0.1); color: var(--primary-color); border: 1px solid rgba(0,255,102,0.2); }
+        .status-rejected { background: rgba(255,75,75,0.1); color: #ff4b4b; border: 1px solid rgba(255,75,75,0.2); }
+        .status-pending { background: rgba(255,200,0,0.1); color: #FFC800; border: 1px solid rgba(255,200,0,0.2); }
+
+        /* Modale dettaglio azienda */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.7);
+            z-index: 100;
+            align-items: center;
+            justify-content: center;
+        }
+        .modal-overlay.active { display: flex; }
+        .modal-content {
+            background: #1a1a2e;
+            border: 1px solid var(--card-border);
+            border-radius: 20px;
+            padding: 2.5rem;
+            width: 90%;
+            max-width: 500px;
+            animation: slideUp 0.3s ease;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        .modal-close {
+            float: right;
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        .lang-tag {
+            display: inline-block;
+            background: rgba(0, 255, 102, 0.1);
+            color: var(--primary-color);
+            padding: 0.2rem 0.6rem;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            border: 1px solid rgba(0, 255, 102, 0.2);
+        }
+
+        .devcard-section-label {
+            font-size: 0.85rem;
+            color: var(--primary-color);
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            font-weight: 600;
+            margin-bottom: 0.6rem;
+        }
+    </style>
+</head>
+<body>
+    <header style="padding: 1rem 2rem; background: var(--card-bg); border-bottom: 1px solid var(--card-border); display: flex; justify-content: space-between; align-items: center; backdrop-filter: blur(10px);">
+        <h2 style="color: var(--primary-color); margin: 0; font-size: 1.5rem; font-weight: 700;">DevCards <span style="font-size: 0.9rem; color: var(--text-muted); font-weight: 400;">Home</span></h2>
+        <div>
+            <button id="btnLogout" class="btn" style="padding: 0.5rem 1rem; font-size: 0.9rem; background: transparent; border: 1px solid var(--primary-color); color: var(--primary-color); width: auto;">Logout</button>
+        </div>
+    </header>
+
+    <main class="home-wrapper">
+        <!-- La propria DevCard -->
+        <div class="my-card-section" id="myCardSection">
+            <p style="color: var(--text-muted); text-align: center;">Caricamento della tua DevCard...</p>
+        </div>
+
+        <!-- Offerte di Colloquio Ricevute -->
+        <div class="interviews-section">
+            <h3 class="section-title">📩 Offerte di Colloquio</h3>
+            <div id="interviewsContainer">
+                <p style="color: var(--text-muted);">Caricamento...</p>
+            </div>
+        </div>
+    </main>
+
+    <!-- Modale Dettaglio Azienda -->
+    <div class="modal-overlay" id="companyModal">
+        <div class="modal-content">
+            <button class="modal-close" id="closeCompanyModal">&times;</button>
+            <div id="companyModalBody"></div>
+        </div>
+    </div>
+
+    <script src="./js/candidate_home.js"></script>
+</body>
+</html>

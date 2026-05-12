@@ -1,11 +1,11 @@
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap');
 
 :root {
-  --bg-color: #0B0E14;
+  --bg-color: #121212;
   --card-bg: rgba(255, 255, 255, 0.05);
   --card-border: rgba(255, 255, 255, 0.1);
-  --primary-color: #00F0FF;
-  --secondary-color: #7000FF;
+  --primary-color: #00ff66;
+  --secondary-color: #00cc52;
   --text-main: #FFFFFF;
   --text-muted: #A0AEC0;
   --gradient: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
@@ -34,8 +34,8 @@ body {
   align-items: center;
   min-height: 100vh;
   padding: 2rem;
-  background: radial-gradient(circle at top left, rgba(112,0,255,0.15), transparent 40%),
-              radial-gradient(circle at bottom right, rgba(0,240,255,0.15), transparent 40%);
+  background: radial-gradient(circle at top left, rgba(0, 204, 82,0.15), transparent 40%),
+              radial-gradient(circle at bottom right, rgba(0, 255, 102,0.15), transparent 40%);
 }
 
 .glass-panel {
@@ -91,7 +91,7 @@ body {
 .form-control:focus {
   outline: none;
   border-color: var(--primary-color);
-  box-shadow: 0 0 0 2px rgba(0, 240, 255, 0.2);
+  box-shadow: 0 0 0 2px rgba(0, 255, 102, 0.2);
 }
 
 .btn {
@@ -100,7 +100,7 @@ body {
   border: none;
   border-radius: 12px;
   background: var(--gradient);
-  color: white;
+  color: #121212;
   font-size: 1.1rem;
   font-weight: 600;
   cursor: pointer;
@@ -158,7 +158,7 @@ body {
 }
 
 .role-option input:checked ~ .role-card {
-  background: rgba(0, 240, 255, 0.1);
+  background: rgba(0, 255, 102, 0.1);
   border-color: var(--primary-color);
   color: var(--primary-color);
 }
