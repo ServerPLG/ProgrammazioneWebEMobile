@@ -67,24 +67,29 @@ CREATE TABLE IF NOT EXISTS interview_requests (
 -- ================================================================
 -- DATI MOCK
 -- ================================================================
--- Password: "password123" per tutti (hash bcrypt)
--- Hash generato con bcrypt, rounds=10
+-- Password: "password123" per tutti (hash SHA256)
+-- Hash: ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f
 
--- Candidati
+-- Candidati (IDs 1 to 10)
 INSERT INTO users (nome, cognome, eta, anni_esperienza, max_distanza_km, citta, lat, lon, email, password, ruolo, foto_profilo) VALUES 
-('Mario', 'Rossi', 28, 5, 50, 'Milano', 45.4642035, 9.1899799, 'mario@email.com', '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'candidato', NULL),
-('Luigi', 'Verdi', 25, 3, 30, 'Roma', 41.9027835, 12.4963655, 'luigi@email.com', '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'candidato', NULL),
-('Anna', 'Bianchi', 30, 7, NULL, 'Napoli', 40.8517746, 14.2681244, 'anna@email.com', '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'candidato', NULL),
-('Marco', 'Neri', 23, 2, 20, 'Torino', 45.0703393, 7.6868565, 'marco@email.com', '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'candidato', NULL),
-('Sara', 'Colombo', 27, 4, 100, 'Firenze', 43.7695604, 11.2558136, 'sara@email.com', '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'candidato', NULL),
-('Luca', 'Ferrari', 31, 6, 80, 'Bologna', 44.494887, 11.3426163, 'luca@email.com', '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'candidato', NULL),
-('Giulia', 'Russo', 22, 1, 40, 'Palermo', 38.1156879, 13.3612671, 'giulia@email.com', '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'candidato', NULL);
+('Mario', 'Rossi', 28, 5, 50, 'Milano', 45.4642035, 9.1899799, 'mario@email.com', 'ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f', 'candidato', NULL),
+('Luigi', 'Verdi', 25, 3, 30, 'Roma', 41.9027835, 12.4963655, 'luigi@email.com', 'ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f', 'candidato', NULL),
+('Anna', 'Bianchi', 30, 7, NULL, 'Napoli', 40.8517746, 14.2681244, 'anna@email.com', 'ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f', 'candidato', NULL),
+('Marco', 'Neri', 23, 2, 20, 'Torino', 45.0703393, 7.6868565, 'marco@email.com', 'ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f', 'candidato', NULL),
+('Sara', 'Colombo', 27, 4, 100, 'Firenze', 43.7695604, 11.2558136, 'sara@email.com', 'ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f', 'candidato', NULL),
+('Luca', 'Ferrari', 31, 6, 80, 'Bologna', 44.494887, 11.3426163, 'luca@email.com', 'ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f', 'candidato', NULL),
+('Giulia', 'Russo', 22, 1, 40, 'Palermo', 38.1156879, 13.3612671, 'giulia@email.com', 'ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f', 'candidato', NULL),
+('Roberto', 'Gallo', 29, 8, 20, 'Genova', 44.4056499, 8.946256, 'roberto@email.com', 'ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f', 'candidato', NULL),
+('Martina', 'Ricci', 26, 3, 60, 'Venezia', 45.4408474, 12.3155151, 'martina@email.com', 'ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f', 'candidato', NULL),
+('Elena', 'Marino', 24, 2, NULL, 'Bari', 41.1171432, 16.8718715, 'elena@email.com', 'ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f', 'candidato', NULL);
 
--- Datori di lavoro
+-- Datori di lavoro (IDs 11 to 15)
 INSERT INTO users (nome, cognome, anni_esperienza, citta, lat, lon, email, password, ruolo, descrizione_azienda) VALUES 
-('TechCorp', 'S.r.l.', 0, 'Milano', 45.4642035, 9.1899799, 'hr@techcorp.com', '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'datore', 'Azienda leader nello sviluppo di soluzioni SaaS enterprise. Cerchiamo talenti appassionati di tecnologia per costruire il futuro del software.'),
-('StartupHub', 'Italia', 0, 'Roma', 41.9027835, 12.4963655, 'jobs@startuphub.it', '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'datore', 'Incubatore di startup con focus su AI e Machine Learning. Offriamo un ambiente dinamico e stimolante per sviluppatori junior e senior.'),
-('WebAgency', 'Pro', 0, 'Firenze', 43.7695604, 11.2558136, 'info@webagencypro.com', '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'datore', 'Agenzia web specializzata in e-commerce e siti corporate. Lavoriamo con React, Node.js e tecnologie cloud moderne.');
+('TechCorp', 'S.r.l.', 0, 'Milano', 45.4642035, 9.1899799, 'hr@techcorp.com', 'ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f', 'datore', 'Azienda leader nello sviluppo di soluzioni SaaS enterprise. Cerchiamo talenti appassionati di tecnologia per costruire il futuro del software.'),
+('StartupHub', 'Italia', 0, 'Roma', 41.9027835, 12.4963655, 'jobs@startuphub.it', 'ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f', 'datore', 'Incubatore di startup con focus su AI e Machine Learning. Offriamo un ambiente dinamico e stimolante per sviluppatori junior e senior.'),
+('WebAgency', 'Pro', 0, 'Firenze', 43.7695604, 11.2558136, 'info@webagencypro.com', 'ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f', 'datore', 'Agenzia web specializzata in e-commerce e siti corporate. Lavoriamo con React, Node.js e tecnologie cloud moderne.'),
+('CloudSolutions', 'S.p.a.', 0, 'Torino', 45.0703393, 7.6868565, 'recruiting@cloudsolutions.it', 'ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f', 'datore', 'Sviluppiamo infrastrutture cloud sicure e scalabili per le aziende.'),
+('DevFactory', 'SRL', 0, 'Napoli', 40.8517746, 14.2681244, 'careers@devfactory.com', 'ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f', 'datore', 'Software house emergente specializzata nello sviluppo di applicazioni mobile cross-platform e web app.');
 
 -- CV dei candidati
 INSERT INTO cvs (user_id, bio, competenze, linguaggi, telefono, instagram, luogo_preferito, disponibile_ovunque, competenze_linguistiche, smartworking) VALUES 
@@ -94,4 +99,25 @@ INSERT INTO cvs (user_id, bio, competenze, linguaggi, telefono, instagram, luogo
 (4, 'Junior developer motivato, appassionato di cybersecurity e programmazione low-level.', 'Networking, Linux, Security Audit', 'Python, C, Bash, Rust', '3341112233', '@marco_cyber', 'Torino', FALSE, '[{"lingua":"Inglese","livello":"B2"}]', FALSE),
 (5, 'Sviluppatrice mobile con esperienza in app native e cross-platform. Amo la clean architecture.', 'Mobile Development, CI/CD, Testing', 'Kotlin, Swift, Dart, Flutter', '3352223344', '@sara_mobile', 'Firenze', FALSE, '[{"lingua":"Inglese","livello":"C1"},{"lingua":"Portoghese","livello":"A1"}]', TRUE),
 (6, 'DevOps engineer con esperienza su cloud AWS e containerizzazione. Focus su automazione e monitoring.', 'Docker, Kubernetes, Terraform, AWS', 'Python, Bash, Go, YAML', '3363334455', '@luca_devops', 'Bologna', FALSE, '[{"lingua":"Inglese","livello":"C2"},{"lingua":"Francese","livello":"B1"}]', TRUE),
-(7, 'Neolaureata in informatica con passione per lo sviluppo web e la data science.', 'Machine Learning, Data Analysis, Git', 'Python, JavaScript, R, SQL', '3374445566', '@giulia_data', 'Palermo', FALSE, '[{"lingua":"Inglese","livello":"B1"}]', FALSE);
+(7, 'Neolaureata in informatica con passione per lo sviluppo web e la data science.', 'Machine Learning, Data Analysis, Git', 'Python, JavaScript, R, SQL', '3374445566', '@giulia_data', 'Palermo', FALSE, '[{"lingua":"Inglese","livello":"B1"}]', FALSE),
+(8, 'Backend engineer esperto in microservizi e architetture event-driven. Lavoro molto con Kafka e Spring Boot.', 'Microservices, Kafka, Spring Boot', 'Java, Kotlin, SQL', '3385556677', '@roberto_backend', 'Genova', FALSE, '[{"lingua":"Inglese","livello":"C1"}]', TRUE),
+(9, 'Frontend Developer creativa. Mi piace costruire interfacce veloci e accessibili.', 'React, Next.js, Tailwind', 'JavaScript, TypeScript, HTML, CSS', '3396667788', '@martina_front', 'Venezia', FALSE, '[{"lingua":"Inglese","livello":"B2"},{"lingua":"Spagnolo","livello":"B1"}]', FALSE),
+(10, 'Data Engineer Junior con una forte base matematica. Mi piace manipolare i dati ed estrarne valore.', 'ETL, Data Warehousing, SQL', 'Python, SQL, Scala', '3307778899', '@elena_data', 'Bari', TRUE, '[{"lingua":"Inglese","livello":"B2"}]', TRUE);
+
+-- Proposte di Colloquio (1-2 per profilo)
+INSERT INTO interview_requests (employer_id, candidate_id, posizione_cercata, linguaggi_richiesti, range_stipendio, luogo, status) VALUES 
+(11, 1, 'Senior Full Stack Developer', 'Node.js, React', '35.000€ - 45.000€', 'Milano', 'pending'),
+(12, 1, 'Tech Lead', 'Node.js, TypeScript', '40.000€ - 55.000€', 'Milano / Remoto', 'pending'),
+(12, 2, 'Backend Developer (AI team)', 'Python, SQL', '30.000€ - 38.000€', 'Roma', 'pending'),
+(13, 3, 'Frontend / UX Designer', 'React, Vue', '25.000€ - 32.000€', 'Firenze', 'pending'),
+(14, 3, 'UI Developer', 'JavaScript, CSS', '28.000€ - 35.000€', 'Remoto', 'pending'),
+(14, 4, 'Junior Cloud / Security', 'Python, Bash', '22.000€ - 26.000€', 'Torino', 'pending'),
+(15, 5, 'Sviluppatore Mobile Flutter', 'Dart, Kotlin', '28.000€ - 35.000€', 'Napoli / Remoto', 'pending'),
+(13, 5, 'App Developer', 'Swift, Kotlin', '26.000€ - 32.000€', 'Firenze', 'pending'),
+(11, 6, 'Cloud Infrastructure Engineer', 'AWS, Terraform', '40.000€ - 50.000€', 'Remoto', 'pending'),
+(12, 7, 'Junior Data Scientist', 'Python, SQL', '24.000€ - 28.000€', 'Roma', 'pending'),
+(15, 7, 'Data Analyst', 'Python, R', '23.000€ - 27.000€', 'Napoli', 'pending'),
+(11, 8, 'Senior Java Backend', 'Java, Spring Boot', '45.000€ - 55.000€', 'Milano / Remoto', 'pending'),
+(13, 9, 'React Developer', 'JavaScript, TypeScript', '28.000€ - 36.000€', 'Venezia / Remoto', 'pending'),
+(15, 9, 'Frontend Engineer', 'Next.js', '30.000€ - 40.000€', 'Remoto', 'pending'),
+(14, 10, 'Data Engineer Junior', 'Python, SQL', '25.000€ - 30.000€', 'Torino', 'pending');

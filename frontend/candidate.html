@@ -1,7 +1,9 @@
 <!DOCTYPE html>
+<!-- Imposto la lingua italiana -->
 <html lang="it">
 
 <head>
+    <!-- Configurazione standard per far funzionare bene i testi e i telefoni -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Il tuo Profilo - DevCards</title>
@@ -41,12 +43,14 @@
 </head>
 
 <body>
+    <!-- Intestazione della pagina in alto -->
     <header
         style="padding: 1rem 2rem; background: var(--card-bg); border-bottom: 1px solid var(--card-border); display: flex; justify-content: space-between; align-items: center; backdrop-filter: blur(10px);">
         <h2 style="color: var(--primary-color); margin: 0; font-size: 1.5rem; font-weight: 700;">DevCards <span
                 style="font-size: 0.9rem; color: var(--text-muted); font-weight: 400;">Candidate Dashboard</span></h2>
         <div style="display: flex; gap: 1rem; align-items: center;">
             <a href="candidate_home.html" style="color: var(--text-main); text-decoration: none; font-size: 0.95rem; font-weight: 600; padding: 0.5rem 1rem; border-radius: 8px; background: rgba(255,255,255,0.1); transition: all 0.3s;">🏠 Home</a>
+            <!-- Bottone per uscire -->
             <button id="btnLogout" class="btn"
                 style="padding: 0.5rem 1rem; font-size: 0.9rem; background: transparent; border: 1px solid var(--primary-color); color: var(--primary-color); width: auto;">Logout</button>
         </div>
@@ -56,6 +60,7 @@
         <div class="glass-panel" style="max-width: 100%;">
             <h2 class="title" style="font-size: 2rem; text-align: left; margin-bottom: 2rem;">Compila il tuo CV</h2>
 
+            <!-- Inizio del modulo. Quando l'utente preme "Salva" il javascript cattura questo ID -->
             <form id="cvForm">
                 <div class="form-group">
                     <label style="color: var(--text-main); font-weight: 600;">Breve Biografia (Testo Libero)</label>

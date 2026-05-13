@@ -1,7 +1,10 @@
 <!DOCTYPE html>
+<!-- Dichiariamo la lingua italiana così i browser sanno come tradurre o leggere la pagina -->
 <html lang="it">
 <head>
+    <!-- Impostiamo il set di caratteri a UTF-8 per far funzionare bene gli accenti (à, è, ì, ecc.) -->
     <meta charset="UTF-8">
+    <!-- Serve per far sì che la pagina si adatti allo schermo dei cellulari, me l'ha insegnato un amico -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DevCards - Incontra il tuo prossimo Developer</title>
     <link rel="stylesheet" href="./css/style.css">
@@ -72,11 +75,14 @@
     </style>
 </head>
 <body>
+    <!-- Questo è il div principale che centra tutto grazie al flexbox che ho messo nel CSS -->
     <div class="auth-container">
+        <!-- Pannello per il login (quello che si vede appena apri la pagina) -->
         <div class="glass-panel" id="loginPanel">
             <h1 class="title">DevCards</h1>
             <p style="text-align: center; color: var(--text-muted); margin-bottom: 2rem;">Accedi per continuare</p>
             
+            <!-- Inizio del modulo di login. L'ID mi serve in Javascript per "catturare" i dati quando l'utente preme invio -->
             <form id="loginForm">
                 <div class="form-group">
                     <label for="loginEmail">Email</label>

@@ -1,41 +1,53 @@
 document.addEventListener('DOMContentLoaded', () => {
+    // Prendo gli elementi dalla pagina HTML usando il loro ID
+    // Se cambio ID nell'HTML ricordarsi di cambiarli pure qui sennò si rompe tutto!
     const loginPanel = document.getElementById('loginPanel');
     const registerPanel = document.getElementById('registerPanel');
     const showRegisterBtn = document.getElementById('showRegister');
     const showLoginBtn = document.getElementById('showLogin');
 
+    // Quando clicco su "Registrati", nascondo il login e faccio apparire la registrazione
     showRegisterBtn.addEventListener('click', () => {
-        loginPanel.style.display = 'none';
-        registerPanel.style.display = 'block';
+        loginPanel.style.display = 'none'; // none vuol dire che scompare
+        registerPanel.style.display = 'block'; // block lo fa riapparire
         // Inizializza la mappa quando il pannello di registrazione diventa visibile
+        // Metto un piccolo ritardo (100 millisecondi) se no la mappa non carica bene
         setTimeout(() => initMap(), 100);
     });
 
+    // Quando clicco su "Accedi", faccio l'inverso
     showLoginBtn.addEventListener('click', () => {
         registerPanel.style.display = 'none';
         loginPanel.style.display = 'block';
     });
 
-    // Toggle campi dinamici in base al ruolo
+    // =============================
+    // GESTIONE DEI CAMPI DIVERSI TRA CANDIDATO E DATORE
+    // =============================
+    // Toggle campi dinamici in base al ruolo scelto
     const roleRadios = document.querySelectorAll('input[name="role"]');
     const candidatoFields = document.getElementById('candidatoFields');
     const datoreFields = document.getElementById('datoreFields');
     const mapLabel = document.getElementById('mapLabel');
 
+    // Funzione che controlla quale pallino è selezionato e fa apparire i campi giusti
     function updateRoleFields() {
+        // Prendo il valore del radio button selezionato in questo momento
         const ruolo = document.querySelector('input[name="role"]:checked').value;
         if (ruolo === 'candidato') {
-            candidatoFields.style.display = 'block';
-            datoreFields.style.display = 'none';
-            mapLabel.textContent = '📍 Luogo di Residenza';
+            candidatoFields.style.display = 'block'; // Mostro i campi candidato
+            datoreFields.style.display = 'none'; // Nascondo quelli azienda
+            mapLabel.textContent = '📍 Luogo di Residenza'; // Cambio il testo della mappa
         } else {
-            candidatoFields.style.display = 'none';
-            datoreFields.style.display = 'block';
+            candidatoFields.style.display = 'none'; // Nascondo candidato
+            datoreFields.style.display = 'block'; // Mostro azienda
             mapLabel.textContent = '📍 Sede Aziendale';
         }
     }
 
+    // Aggiungo un "ascoltatore" ad ogni radio button, così quando cambia chiamo la funzione
     roleRadios.forEach(radio => radio.addEventListener('change', updateRoleFields));
+    // La chiamo subito una volta all'inizio per impostare le cose giuste di base
     updateRoleFields();
 
     // =============================
@@ -175,34 +187,43 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // =============================
-    // LOGIN
+    // LOGIN (PARTE IMPORTANTE)
     // =============================
+    // Quando premo il tasto invio o clicco il bottone del form di login
     document.getElementById('loginForm').addEventListener('submit', async (e) => {
-        e.preventDefault();
+        e.preventDefault(); // Questo serve per NON far ricaricare la pagina (altrimenti perdo i dati)
+        
+        // Prendo quello che l'utente ha scritto nelle caselle
         const email = document.getElementById('loginEmail').value;
         const password = document.getElementById('loginPassword').value;
 
         try {
+            // Faccio una "chiamata" al server (che sta sulla porta 3000)
             const response = await fetch('http://localhost:3000/api/login', {
-                method: 'POST',
+                method: 'POST', // Uso POST per mandare i dati in modo più sicuro
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email, password })
+                body: JSON.stringify({ email, password }) // Trasformo in JSON (stringa) i dati
             });
-            const data = await response.json();
+            const data = await response.json(); // Risposta del server
 
-            if (response.ok) {
+            if (response.ok) { // Se è andato tutto bene (status 200)
+                // Salvo l'utente nel local storage così mi ricordo chi è
+                // (è tipo un database dentro il browser)
                 localStorage.setItem('user', JSON.stringify(data.user));
+                
+                // Lo mando alla pagina giusta a seconda di chi è
                 if (data.user.ruolo === 'candidato') {
                     window.location.href = 'candidate_home.html';
                 } else {
                     window.location.href = 'employer.html';
                 }
             } else {
+                // Se la password è sbagliata stampo un alert bruttino
                 alert("Errore: " + data.error);
             }
         } catch (error) {
-            console.error(error);
-            alert("Errore di connessione al server.");
+            console.error(error); // Stampo l'errore nella console (F12)
+            alert("Errore di connessione al server. Il server è acceso?");
         }
     });
 

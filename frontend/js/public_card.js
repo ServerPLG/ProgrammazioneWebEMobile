@@ -1,23 +1,29 @@
+// Eseguito appena carica l'HTML
 document.addEventListener('DOMContentLoaded', async () => {
+    // Uso URLSearchParams per prendere le scritte dopo il "?" nell'indirizzo (es. ?id=123)
     const params = new URLSearchParams(window.location.search);
-    const userId = params.get('id');
+    const userId = params.get('id'); // Prendo il valore di "id"
     const container = document.getElementById('cardContainer');
 
+    // Se nel link manca l'id (l'hanno aperto male) do errore
     if (!userId) {
         container.innerHTML = '<div style="color: red; text-align: center;">Errore: ID Utente mancante nel link.</div>';
         return;
     }
 
     try {
+        // Faccio una chiamata all'API per avere il curriculum di quell'utente
         const res = await fetch(`/api/cv/${userId}`);
         
+        // Se non trovo l'utente (es. id inventato)
         if (!res.ok) {
             container.innerHTML = '<div style="color: red; text-align: center;">Profilo non trovato o non ancora compilato.</div>';
             return;
         }
 
-        const card = await res.json();
+        const card = await res.json(); // Trasformo i dati ricevuti in un oggetto javascript
         
+        // Se l'utente c'è ma non ha ancora messo la bio, stampo questo messaggio
         if (!card || !card.bio) {
             container.innerHTML = '<div style="color: var(--text-muted); text-align: center;">Questo candidato non ha ancora completato il suo profilo.</div>';
             return;

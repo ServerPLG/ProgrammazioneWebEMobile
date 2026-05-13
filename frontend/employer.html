@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
+    <!-- Soliti tag per far andare bene la pagina -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Trova Talenti - DevCards</title>
@@ -79,12 +80,16 @@
 
     <main style="padding: 2rem; max-width: 1200px; margin: 0 auto; width: 100%;">
         
+        <!-- Qui c'è la grafica tipo Tinder dove si scorrono i profili -->
         <div class="tinder-card-container">
-            <!-- La singola card verrà iniettata qui dal JS -->
+            <!-- La singola card del candidato (Javascript la metterà qui dentro) -->
             <div id="activeCardContainer"></div>
 
+            <!-- Questi sono i due bottoni rotondi sotto la card (Scarta e Salva). Di base sono nascosti. -->
             <div class="action-buttons" id="actionButtons" style="display: none;">
+                <!-- Bottone rosso con la X -->
                 <button class="btn-action btn-skip" id="btnSkip" title="Scarta">❌</button>
+                <!-- Bottone verde con il cuore -->
                 <button class="btn-action btn-save" id="btnSave" title="Salva nei Preferiti">❤️</button>
             </div>
         </div>

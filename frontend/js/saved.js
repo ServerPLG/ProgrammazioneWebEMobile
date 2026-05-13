@@ -1,22 +1,28 @@
+// Appena la pagina è pronta (DOMContentLoaded) eseguo questa mega funzione
 document.addEventListener('DOMContentLoaded', () => {
+    // Controllo chi è loggato prendendolo dalla memoria del browser (localStorage)
     const user = JSON.parse(localStorage.getItem('user'));
-    if (!user || user.ruolo !== 'datore') {
+    if (!user || user.ruolo !== 'datore') { // Se non c'è, o non è il boss (datore), lo caccio
         alert("Accesso negato. Fai il login come datore di lavoro.");
         window.location.href = 'index.html';
         return;
     }
 
+    // Questa funzione scarica i candidati salvati, accetta anche dei "filtri" opzionali
     const loadDevCards = async (filters = {}) => {
         try {
+            // Uso URLSearchParams per costruire i "pezzi" dell'indirizzo API in modo intelligente
             let queryParams = new URLSearchParams();
-            queryParams.append('employer_id', user.id);
+            queryParams.append('employer_id', user.id); // Dico all'API di darmi quelli salvati da me (il mio ID)
+            // Se ho scritto qualcosa nei filtri (città, linguaggi...) li aggiungo all'indirizzo
             if (filters.linguaggio) queryParams.append('linguaggio', filters.linguaggio);
             if (filters.citta) queryParams.append('citta', filters.citta);
             if (filters.anniExpMin) queryParams.append('anniExpMin', filters.anniExpMin);
             if (filters.lingua) queryParams.append('lingua', filters.lingua);
 
+            // Chiamo l'API con l'indirizzo costruito e aspetto la risposta (await)
             const res = await fetch(`http://localhost:3000/api/devcards/saved?${queryParams.toString()}`);
-            const devcards = await res.json();
+            const devcards = await res.json(); // Trasformo in JSON
 
             const container = document.getElementById('devcardsContainer');
             container.innerHTML = '';
@@ -86,14 +92,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 container.innerHTML += html;
             });
 
-            // Attach interview button listeners
+            // Adesso aggiungo la funzionalità ai bottoni "Proponi Colloquio"
+            // Devo farlo qui e non all'inizio perché i bottoni sono appena stati creati da javascript!
             document.querySelectorAll('.btn-interview').forEach(btn => {
                 btn.addEventListener('click', function() {
+                    // Quando clicco, apro il form nascondendo/mostrando delle cose e metto l'id giusto del candidato
                     document.getElementById('interviewCandidateId').value = this.dataset.id;
                     document.getElementById('interviewCandidateName').textContent = this.dataset.name;
-                    document.getElementById('interviewResult').innerHTML = '';
-                    document.getElementById('interviewForm').reset();
-                    document.getElementById('interviewModal').classList.add('active');
+                    document.getElementById('interviewResult').innerHTML = ''; // Pulisco messaggi vecchi
+                    document.getElementById('interviewForm').reset(); // Azzero i testi del form
+                    document.getElementById('interviewModal').classList.add('active'); // Faccio apparire il popup (modale)
                 });
             });
 

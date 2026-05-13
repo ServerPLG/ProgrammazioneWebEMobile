@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
+    <!-- Impostazioni iniziali della pagina -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Candidati Salvati - DevCards</title>
@@ -52,9 +53,11 @@
     </header>
 
     <main style="padding: 2rem; max-width: 1200px; margin: 0 auto; width: 100%;">
+        <!-- Barra dei filtri in alto -->
         <div class="filters" style="margin-bottom: 2rem; display: flex; gap: 1rem; flex-wrap: wrap; background: rgba(0,0,0,0.2); padding: 1.5rem; border-radius: 16px; border: 1px solid var(--card-border);">
             <div style="flex: 1; min-width: 180px;">
                 <label style="color: var(--text-muted); font-size: 0.9rem; display: block; margin-bottom: 0.5rem;">Linguaggio</label>
+                <!-- Casella di testo per filtrare per linguaggio. Il JS userà questo ID -->
                 <input type="text" id="filterLang" class="form-control" placeholder="Es. JavaScript">
             </div>
             <div style="flex: 1; min-width: 180px;">
@@ -74,13 +77,13 @@
             </div>
         </div>
 
-        <!-- Feed DevCards Salvate -->
+        <!-- Feed DevCards Salvate: Questa è la griglia dove andranno le carte -->
         <div class="devcards-feed" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 2rem;" id="devcardsContainer">
             <!-- Popolato da JS -->
         </div>
     </main>
 
-    <!-- Modale Proponi Colloquio -->
+    <!-- Modale (popup) Proponi Colloquio. All'inizio è nascosta -->
     <div class="modal-overlay" id="interviewModal">
         <div class="modal-content">
             <button class="modal-close" id="closeInterviewModal">&times;</button>

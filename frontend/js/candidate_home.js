@@ -1,10 +1,13 @@
+// Aspetto che la pagina HTML sia caricata prima di fare qualsiasi cosa
 document.addEventListener('DOMContentLoaded', async () => {
-    // Auth check
+    // Controllo chi è loggato usando il local storage (una specie di database nel browser)
     const user = JSON.parse(localStorage.getItem('user'));
+    
+    // Se non c'è l'utente o se non è un candidato, lo caccio via alla home
     if (!user || user.ruolo !== 'candidato') {
         alert("Accesso negato. Fai il login come candidato.");
         window.location.href = 'index.html';
-        return;
+        return; // Mi fermo qui
     }
 
     // Logout
@@ -16,12 +19,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     // =============================
     // 1. Mostra la propria DevCard al centro
     // =============================
-    const cardSection = document.getElementById('myCardSection');
+    const cardSection = document.getElementById('myCardSection'); // Prendo il div dove andrà la card
     try {
+        // Chiedo al mio server (sulla porta 3000) i dati del CV dell'utente loggato
         const res = await fetch(`http://localhost:3000/api/cv/${user.id}`);
         if (res.ok) {
-            const card = await res.json();
-            if (card && card.bio) {
+            const card = await res.json(); // Trasformo la risposta in un oggetto javascript
+            if (card && card.bio) { // Se l'utente ha già inserito una bio...
                 const avatarSrc = card.foto_profilo
                     || `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(card.nome + card.cognome)}&backgroundColor=e2e8f0`;
 
@@ -82,8 +86,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     // =============================
     // 2. Carica le offerte di colloquio
     // =============================
-    const interviewsContainer = document.getElementById('interviewsContainer');
+    const interviewsContainer = document.getElementById('interviewsContainer'); // Il contenitore per le offerte
     try {
+        // Faccio un'altra chiamata al server per prendere le offerte arrivate a me
         const res = await fetch(`http://localhost:3000/api/candidate/interviews?candidate_id=${user.id}`);
         const interviews = await res.json();
 
@@ -130,19 +135,21 @@ document.addEventListener('DOMContentLoaded', async () => {
             interviewsContainer.innerHTML += html;
         });
 
-        // Event listeners per accetta/rifiuta
+        // Aggiungo gli "ascoltatori" sui bottoni per accettare o rifiutare le offerte
         document.querySelectorAll('.btn-accept, .btn-reject').forEach(btn => {
             btn.addEventListener('click', async function () {
+                // Prendo i dati (id e se ho accettato/rifiutato) che avevo nascosto nei "data-" attributi del bottone
                 const interviewId = this.dataset.id;
                 const status = this.dataset.action;
                 try {
+                    // Mando la decisione al server con il metodo PUT (che si usa per aggiornare cose)
                     const res = await fetch('http://localhost:3000/api/interview/status', {
                         method: 'PUT',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ interview_id: interviewId, status })
                     });
                     if (res.ok) {
-                        location.reload(); // Ricarica per aggiornare lo stato
+                        location.reload(); // Se va tutto bene ricarico la pagina per vedere i cambiamenti
                     }
                 } catch (err) {
                     console.error(err);

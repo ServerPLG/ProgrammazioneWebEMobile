@@ -1,25 +1,33 @@
+// Appena la pagina è pronta eseguo questo codice
 document.addEventListener('DOMContentLoaded', () => {
+    // Controllo chi è l'utente salvato nel browser
     const user = JSON.parse(localStorage.getItem('user'));
+    
+    // Se non c'è nessuno o è un candidato, non lo faccio entrare qui!
     if (!user || user.ruolo !== 'datore') {
         alert("Accesso negato. Fai il login come datore di lavoro.");
-        window.location.href = 'index.html';
+        window.location.href = 'index.html'; // Lo rimando al login
         return;
     }
 
+    // Mi salvo due variabili: i candidati che riceverò e a che punto sono arrivato a scorrere
     let candidates = [];
     let currentIndex = 0;
 
+    // Prendo gli elementi HTML per mostrare le carte e i bottoni
     const container = document.getElementById('activeCardContainer');
     const actionButtons = document.getElementById('actionButtons');
 
+    // Funzione per scaricare i candidati dal server
     const loadDevCards = async () => {
         try {
+            // Chiamo l'API passandogli il mio ID (così non mi fa vedere quelli che ho già scartato)
             const res = await fetch(`http://localhost:3000/api/devcards?employer_id=${user.id}`);
-            candidates = await res.json();
-            currentIndex = 0;
-            renderCard();
+            candidates = await res.json(); // Salvo i risultati
+            currentIndex = 0; // Riparto dal primo
+            renderCard(); // Chiamo la funzione per disegnare la carta sullo schermo
         } catch (error) {
-            console.error(error);
+            console.error(error); // Se qualcosa va male scrivo in console
             container.innerHTML = '<div class="empty-state"><h3 style="color:red;">Errore di connessione al server</h3></div>';
         }
     };
@@ -101,15 +109,17 @@ document.addEventListener('DOMContentLoaded', () => {
         actionButtons.style.display = 'flex';
     };
 
+    // Funzione che gestisce quando clicco su "salva" o "scarta"
     const handleInteraction = async (action) => {
-        if (currentIndex >= candidates.length) return;
+        if (currentIndex >= candidates.length) return; // Se ho finito non faccio niente
         
-        const candidate = candidates[currentIndex];
+        const candidate = candidates[currentIndex]; // Prendo il candidato attuale
         
         const currentCard = document.getElementById('currentCard');
         if (currentCard) {
+            // Faccio un'animazione carina per spostare la carta a destra (save) o sinistra (skip)
             currentCard.style.transform = action === 'save' ? 'translateX(100px) rotate(10deg)' : 'translateX(-100px) rotate(-10deg)';
-            currentCard.style.opacity = '0';
+            currentCard.style.opacity = '0'; // E la faccio svanire
         }
 
         fetch('http://localhost:3000/api/interact', {

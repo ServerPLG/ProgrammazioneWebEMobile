@@ -1,16 +1,17 @@
-const express = require('express');
-const cors = require('cors');
-const bcrypt = require('bcryptjs');
-require('dotenv').config();
-const db = require('./db');
+// Importo le librerie che mi servono (installate con npm install)
+const express = require('express'); // Serve per creare il server web, il prof ha detto di usare questo
+const cors = require('cors'); // Boh serve per non avere errori rossi nel browser quando chiamo le API
+const crypto = require('crypto'); // Uso crypto di base per fare un hash semplice (niente cose complicate come bcrypt)
+require('dotenv').config(); // Per caricare il file .env con la password del database
+const db = require('./db'); // Importo il mio file db.js dove mi connetto al database mysql
 const fs = require('fs');
 const path = require('path');
-const app = express();
+const app = express(); // Inizializzo l'app, sempre così si fa
 
-// Middleware
-app.use(cors());
-app.use(express.json({ limit: '50mb' }));
-// Serve frontend static files
+// Middleware (robe che vengono eseguite prima delle richieste)
+app.use(cors()); // Attivo cors per tutti
+app.use(express.json({ limit: '50mb' })); // Permetto di inviare JSON fino a 50mb perchè le foto pesano
+// Dico ad express di servire la cartella frontend dove c'è il sito html
 app.use(express.static('frontend'));
 
 // Crea tabelle se non esistono
@@ -76,44 +77,46 @@ function haversineDistance(lat1, lon1, lat2, lon2) {
 }
 
 // =============================
-// ROUTES
+// ROUTES (le API che il frontend chiama)
 // =============================
 
-// 1. Registrazione
+// 1. Registrazione (quando uno si iscrive)
 app.post('/api/register', async (req, res) => {
     try {
+        // Prendo tutti i dati dal body della richiesta (quello che manda il form)
         let { nome, cognome, eta, anni_esperienza, max_distanza_km, citta, lat, lon, email, password, ruolo, foto_profilo, descrizione_azienda } = req.body;
 
+        // Se è un candidato e non ha messo la foto, gli metto un avatar a caso con dicebear
         if (ruolo === 'candidato' && (!foto_profilo || foto_profilo.trim() === '')) {
             foto_profilo = `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(nome + cognome)}&backgroundColor=e2e8f0`;
         }
 
-        // Check if user exists
+        // Controllo se esiste già uno con questa email sennò si spacca il db
         const [existing] = await db.execute('SELECT * FROM users WHERE email = ?', [email]);
         if (existing.length > 0) {
             return res.status(400).json({ error: 'Email già registrata' });
         }
 
-        // Se lat/lon non sono forniti dal frontend (mappa), geocodifica la città
+        // Se lat/lon non sono forniti dal frontend (mappa), trovo le coordinate dalla città
         if (!lat || !lon) {
             const coords = await geocodeCity(citta);
             lat = coords.lat;
             lon = coords.lon;
         }
 
-        // Hash password
-        const salt = await bcrypt.genSalt(10);
-        const hashedPassword = await bcrypt.hash(password, salt);
+        // Cripto la password sennò si vede sul db! Faccio un hash semplice (SHA256)
+        const hashedPassword = crypto.createHash('sha256').update(password).digest('hex');
 
-        // Insert user
+        // Inserisco l'utente nel database (i punti interrogativi servono per evitare SQL injection)
         const [result] = await db.execute(
             'INSERT INTO users (nome, cognome, eta, anni_esperienza, max_distanza_km, citta, lat, lon, email, password, ruolo, foto_profilo, descrizione_azienda) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
             [nome, cognome, eta || null, anni_esperienza || 0, max_distanza_km || null, citta, lat, lon, email, hashedPassword, ruolo, foto_profilo || null, descrizione_azienda || null]
         );
 
+        // Rispondo che è andato tutto bene (201 created)
         res.status(201).json({ message: 'Registrazione completata', userId: result.insertId });
     } catch (error) {
-        console.error(error);
+        console.error(error); // Stampo l'errore se no non capisco perchè non va
         res.status(500).json({ error: 'Errore del server durante la registrazione' });
     }
 });
@@ -129,7 +132,9 @@ app.post('/api/login', async (req, res) => {
         }
 
         const user = users[0];
-        const validPassword = await bcrypt.compare(password, user.password);
+        // Controllo se l'hash della password inserita è uguale a quello salvato nel database
+        const hashDaControllare = crypto.createHash('sha256').update(password).digest('hex');
+        const validPassword = (hashDaControllare === user.password);
         if (!validPassword) {
             return res.status(400).json({ error: 'Credenziali non valide' });
         }
@@ -156,9 +161,8 @@ app.post('/api/recover-password', async (req, res) => {
             return res.status(404).json({ error: 'Email non trovata nel sistema' });
         }
 
-        // Reset password a "123456"
-        const salt = await bcrypt.genSalt(10);
-        const newHash = await bcrypt.hash('123456', salt);
+        // Reset password a "123456" con un hash semplice
+        const newHash = crypto.createHash('sha256').update('123456').digest('hex');
         await db.execute('UPDATE users SET password = ? WHERE email = ?', [newHash, email]);
 
         res.json({ message: 'Password reimpostata a: 123456. Usala per accedere e poi cambiala.' });
@@ -442,7 +446,10 @@ app.get('/api/employer/:id', async (req, res) => {
 });
 
 // --- START ---
+// Qui decido su che porta far girare il server (se non è settata su .env uso la 3000)
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
+    // Stampo in console così so che è partito
     console.log(`Server in esecuzione su http://localhost:${PORT}`);
+    console.log(`(Ricordati di accendere XAMPP per il database!!)`);
 });

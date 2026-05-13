@@ -1,9 +1,11 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
+    <!-- Solite cose: caratteri italiani e grandezza per i cellulari -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>La tua DevCard - DevCards</title>
+    <!-- Questo serve per l'ottimizzazione sui motori di ricerca, ci ha spiegato il prof -->
     <meta name="description" content="Anteprima della tua DevCard come la vedranno i datori di lavoro su DevCards.">
     <link rel="stylesheet" href="./css/style.css">
     <style>
@@ -205,18 +207,22 @@
     </header>
 
     <main class="card-preview-wrapper">
+        <!-- Titolo sopra la card -->
         <div class="preview-title">
             <h1>La tua DevCard</h1>
             <p>Ecco come i datori di lavoro vedranno il tuo profilo</p>
         </div>
 
+        <!-- Questo div è vuoto perché ci pensa Javascript a metterci dentro l'HTML della card -->
         <div id="cardContainer">
             <!-- La card verrà iniettata qui dal JS -->
         </div>
 
+        <!-- Link per tornare indietro (meglio del bottone indietro del browser) -->
         <a href="candidate_home.html" class="back-link">← Torna alla Home</a>
     </main>
 
+    <!-- Importo una libreria esterna (qrcode.js) presa da internet per creare il codice QR, altrimenti era impossibile farlo da soli! -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <script src="./js/candidate_card.js"></script>
 </body>

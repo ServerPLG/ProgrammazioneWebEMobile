@@ -1,18 +1,24 @@
+// Quando il browser ha caricato tutto il codice HTML, eseguo questa funzione
 document.addEventListener('DOMContentLoaded', async () => {
-    // Check auth
+    // Controllo se l'utente si è loggato guardando il localStorage (la memoria del browser)
     const user = JSON.parse(localStorage.getItem('user'));
+    // Se non è loggato o non è un candidato, non può stare qua
     if (!user || user.ruolo !== 'candidato') {
         alert("Accesso negato. Fai il login come candidato.");
-        window.location.href = 'index.html';
-        return;
+        window.location.href = 'index.html'; // Lo rimando indietro
+        return; // Fermo l'esecuzione del codice
     }
 
+    // Prendo il div vuoto dove andrò a mettere tutte le righe per inserire le lingue conosciute
     const lingueContainer = document.getElementById('lingueContainer');
 
-    // Helper: crea una riga lingua
+    // Questa è una funzione "Helper" (aiutante) che serve a creare dinamicamente i campi per le lingue
+    // Così se uno sa 5 lingue posso chiamarla 5 volte invece di scrivere l'HTML a mano
     function addLinguaRow(lingua = '', livello = 'B1') {
+        // Creo un nuovo pezzo di HTML (un div) con Javascript! (Figo no?)
         const row = document.createElement('div');
-        row.className = 'lingua-row';
+        row.className = 'lingua-row'; // Gli do la classe per il CSS
+        // Uso i "template literal" (gli apici storti) per scrivere HTML mischiato a variabili Javascript
         row.innerHTML = `
             <input type="text" class="form-control lingua-nome" placeholder="Es. Inglese" value="${lingua}">
             <select class="form-control lingua-livello">
@@ -25,7 +31,9 @@ document.addEventListener('DOMContentLoaded', async () => {
             </select>
             <button type="button" class="remove-lingua" title="Rimuovi">✕</button>
         `;
+        // Quando clicco sulla X (il bottone con classe remove-lingua), tolgo questa riga
         row.querySelector('.remove-lingua').addEventListener('click', () => row.remove());
+        // Aggiungo il div appena creato dentro al contenitore principale
         lingueContainer.appendChild(row);
     }
 
@@ -81,14 +89,16 @@ document.addEventListener('DOMContentLoaded', async () => {
         const smartworking = document.getElementById('cvSmartworking').checked;
         const disponibile_ovunque = document.getElementById('cvDisponibileOvunque').checked;
 
-        // Raccogli competenze linguistiche come JSON
+        // Questa è la parte dove "pesco" i dati dalle righe dinamiche delle lingue
         const lingueRows = document.querySelectorAll('.lingua-row');
-        const lingueArray = [];
+        const lingueArray = []; // Inizializzo un array vuoto
         lingueRows.forEach(row => {
-            const lingua = row.querySelector('.lingua-nome').value.trim();
+            const lingua = row.querySelector('.lingua-nome').value.trim(); // Tolgo gli spazi inutili
             const livello = row.querySelector('.lingua-livello').value;
+            // Se l'utente ha scritto qualcosa (es. "Inglese"), lo aggiungo all'array
             if (lingua) lingueArray.push({ lingua, livello });
         });
+        // Trasformo l'array in una stringa di testo (JSON) perché il database capisce solo testo
         const competenze_linguistiche = JSON.stringify(lingueArray);
 
         try {
