@@ -196,12 +196,77 @@
             font-weight: 600;
             margin-bottom: 0.6rem;
         }
+
+        /* Modale Cambio Password */
+        .pwd-modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.7);
+            backdrop-filter: blur(4px);
+            z-index: 200;
+            align-items: center;
+            justify-content: center;
+        }
+        .pwd-modal-overlay.active { display: flex; }
+        .pwd-modal {
+            background: #1a1a2e;
+            border: 1px solid var(--card-border);
+            border-radius: 20px;
+            padding: 2.5rem;
+            width: 90%;
+            max-width: 420px;
+            animation: slideUp 0.3s ease;
+        }
+        .pwd-modal h3 {
+            color: var(--primary-color);
+            margin-bottom: 1.5rem;
+            font-size: 1.3rem;
+        }
+        .pwd-modal .form-group { margin-bottom: 1.2rem; }
+        .pwd-modal .form-group label {
+            display: block;
+            color: var(--text-main);
+            font-weight: 600;
+            margin-bottom: 0.4rem;
+            font-size: 0.9rem;
+        }
+        .pwd-modal .form-group input {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            background: #333;
+            border: 1px solid var(--card-border);
+            border-radius: 10px;
+            color: var(--text-main);
+            font-size: 1rem;
+            transition: border-color 0.2s;
+        }
+        .pwd-modal .form-group input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+        .pwd-result {
+            margin-top: 1rem;
+            font-size: 0.9rem;
+            min-height: 1.2rem;
+        }
+        .pwd-modal-close {
+            float: right;
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+        .pwd-modal-close:hover { color: #ff4b4b; }
     </style>
 </head>
 <body>
     <header style="padding: 1rem 2rem; background: var(--card-bg); border-bottom: 1px solid var(--card-border); display: flex; justify-content: space-between; align-items: center; backdrop-filter: blur(10px);">
         <h2 style="color: var(--primary-color); margin: 0; font-size: 1.5rem; font-weight: 700;">DevCards <span style="font-size: 0.9rem; color: var(--text-muted); font-weight: 400;">Home</span></h2>
-        <div>
+        <div style="display: flex; gap: 1rem; align-items: center;">
+            <button id="btnChangePassword" style="color: var(--text-main); text-decoration: none; font-size: 0.95rem; font-weight: 600; padding: 0.5rem 1rem; border-radius: 8px; background: rgba(255,255,255,0.1); border: none; cursor: pointer; transition: all 0.3s;">🔒 Password</button>
             <button id="btnLogout" class="btn" style="padding: 0.5rem 1rem; font-size: 0.9rem; background: transparent; border: 1px solid var(--primary-color); color: var(--primary-color); width: auto;">Logout</button>
         </div>
     </header>
@@ -226,6 +291,30 @@
         <div class="modal-content">
             <button class="modal-close" id="closeCompanyModal">&times;</button>
             <div id="companyModalBody"></div>
+        </div>
+    </div>
+
+    <!-- Modale Cambio Password -->
+    <div class="pwd-modal-overlay" id="changePasswordModal">
+        <div class="pwd-modal">
+            <button class="pwd-modal-close" id="closePwdModal">&times;</button>
+            <h3>🔒 Cambia Password</h3>
+            <form id="changePasswordForm">
+                <div class="form-group">
+                    <label for="oldPassword">Password Attuale</label>
+                    <input type="password" id="oldPassword" placeholder="Inserisci la password attuale" required>
+                </div>
+                <div class="form-group">
+                    <label for="newPassword">Nuova Password</label>
+                    <input type="password" id="newPassword" placeholder="Almeno 6 caratteri" required minlength="6">
+                </div>
+                <div class="form-group">
+                    <label for="confirmPassword">Conferma Nuova Password</label>
+                    <input type="password" id="confirmPassword" placeholder="Ripeti la nuova password" required minlength="6">
+                </div>
+                <button type="submit" class="btn" style="margin-top: 0.5rem;">Aggiorna Password</button>
+                <div class="pwd-result" id="pwdResult"></div>
+            </form>
         </div>
     </div>
 

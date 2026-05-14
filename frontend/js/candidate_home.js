@@ -119,7 +119,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             const html = `
             <div class="interview-card">
                 <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem;">
-                    <h4 class="company-name" data-employer-id="${iv.employer_id}">${iv.azienda_nome} ${iv.azienda_cognome}</h4>
+                    <h4 class="company-name" data-employer-id="${iv.employer_id}">${iv.nome_azienda || (iv.azienda_nome + ' ' + iv.azienda_cognome)}</h4>
                     ${statusBadge}
                 </div>
                 <div class="interview-meta">
@@ -166,7 +166,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     const company = await res.json();
                     const modalBody = document.getElementById('companyModalBody');
                     modalBody.innerHTML = `
-                        <h3 style="color: var(--primary-color); margin-bottom: 1rem;">${company.nome} ${company.cognome}</h3>
+                        <h3 style="color: var(--primary-color); margin-bottom: 1rem;">${company.nome_azienda || (company.nome + ' ' + company.cognome)}</h3>
                         <p style="color: var(--text-muted); margin-bottom: 0.5rem;">📍 ${company.citta}</p>
                         <h4 class="devcard-section-label" style="margin-top: 1.5rem;">Descrizione</h4>
                         <p style="color: #ccc; line-height: 1.6;">${company.descrizione_azienda || 'Nessuna descrizione disponibile.'}</p>
@@ -186,5 +186,53 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Chiudi modale azienda
     document.getElementById('closeCompanyModal').addEventListener('click', () => {
         document.getElementById('companyModal').classList.remove('active');
+    });
+
+    // =============================
+    // 3. Cambio Password
+    // =============================
+    document.getElementById('btnChangePassword').addEventListener('click', () => {
+        document.getElementById('changePasswordModal').classList.add('active');
+        document.getElementById('pwdResult').innerHTML = '';
+        document.getElementById('changePasswordForm').reset();
+    });
+
+    document.getElementById('closePwdModal').addEventListener('click', () => {
+        document.getElementById('changePasswordModal').classList.remove('active');
+    });
+
+    document.getElementById('changePasswordForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const oldPassword = document.getElementById('oldPassword').value;
+        const newPassword = document.getElementById('newPassword').value;
+        const confirmPassword = document.getElementById('confirmPassword').value;
+        const resultEl = document.getElementById('pwdResult');
+
+        // Controllo che le due nuove password coincidano
+        if (newPassword !== confirmPassword) {
+            resultEl.innerHTML = '<span style="color: #ff4b4b;">✗ Le due password non coincidono</span>';
+            return;
+        }
+
+        try {
+            const res = await fetch('http://localhost:3000/api/change-password', {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    user_id: user.id,
+                    old_password: oldPassword,
+                    new_password: newPassword
+                })
+            });
+            const data = await res.json();
+            if (res.ok) {
+                resultEl.innerHTML = `<span style="color: var(--primary-color);">✓ ${data.message}</span>`;
+                document.getElementById('changePasswordForm').reset();
+            } else {
+                resultEl.innerHTML = `<span style="color: #ff4b4b;">✗ ${data.error}</span>`;
+            }
+        } catch (err) {
+            resultEl.innerHTML = '<span style="color: #ff4b4b;">Errore di connessione al server.</span>';
+        }
     });
 });

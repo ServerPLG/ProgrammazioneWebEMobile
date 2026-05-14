@@ -40,7 +40,8 @@
         }
 
         /* Campi dinamici */
-        #candidatoFields, #datoreFields { display: none; }
+        #candidatoFields { display: none; }
+        #mapSection { display: none; }
 
         /* Mappa */
         #regMap {
@@ -158,19 +159,11 @@
                     </div>
                 </div>
 
-                <!-- Campi solo Datore -->
-                <div id="datoreFields">
-                    <div class="form-group">
-                        <label for="regDescAzienda">Descrizione Azienda</label>
-                        <textarea id="regDescAzienda" class="form-control" rows="3" placeholder="Descrivete brevemente la vostra azienda..."></textarea>
-                    </div>
-                </div>
-
-                <!-- Mappa per il Luogo di Residenza / Sede -->
-                <div class="form-group">
+                <!-- Mappa per il Luogo di Residenza (solo candidato) -->
+                <div class="form-group" id="mapSection">
                     <label id="mapLabel">📍 Luogo di Residenza</label>
                     <div class="map-search-row">
-                        <input type="text" id="regCitta" class="form-control" placeholder="Cerca una città..." required>
+                        <input type="text" id="regCitta" class="form-control" placeholder="Cerca una città...">
                         <button type="button" id="btnSearchMap">Cerca</button>
                     </div>
                     <div id="regMap"></div>

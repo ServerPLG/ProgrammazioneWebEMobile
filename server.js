@@ -84,7 +84,7 @@ function haversineDistance(lat1, lon1, lat2, lon2) {
 app.post('/api/register', async (req, res) => {
     try {
         // Prendo tutti i dati dal body della richiesta (quello che manda il form)
-        let { nome, cognome, eta, anni_esperienza, max_distanza_km, citta, lat, lon, email, password, ruolo, foto_profilo, descrizione_azienda } = req.body;
+        let { nome, cognome, eta, anni_esperienza, max_distanza_km, citta, lat, lon, email, password, ruolo, foto_profilo } = req.body;
 
         // Se è un candidato e non ha messo la foto, gli metto un avatar a caso con dicebear
         if (ruolo === 'candidato' && (!foto_profilo || foto_profilo.trim() === '')) {
@@ -98,7 +98,7 @@ app.post('/api/register', async (req, res) => {
         }
 
         // Se lat/lon non sono forniti dal frontend (mappa), trovo le coordinate dalla città
-        if (!lat || !lon) {
+        if (citta && (!lat || !lon)) {
             const coords = await geocodeCity(citta);
             lat = coords.lat;
             lon = coords.lon;
@@ -109,8 +109,8 @@ app.post('/api/register', async (req, res) => {
 
         // Inserisco l'utente nel database (i punti interrogativi servono per evitare SQL injection)
         const [result] = await db.execute(
-            'INSERT INTO users (nome, cognome, eta, anni_esperienza, max_distanza_km, citta, lat, lon, email, password, ruolo, foto_profilo, descrizione_azienda) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
-            [nome, cognome, eta || null, anni_esperienza || 0, max_distanza_km || null, citta, lat, lon, email, hashedPassword, ruolo, foto_profilo || null, descrizione_azienda || null]
+            'INSERT INTO users (nome, cognome, eta, anni_esperienza, max_distanza_km, citta, lat, lon, email, password, ruolo, foto_profilo) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+            [nome, cognome, eta || null, anni_esperienza || 0, max_distanza_km || null, citta || null, lat || null, lon || null, email, hashedPassword, ruolo, foto_profilo || null]
         );
 
         // Rispondo che è andato tutto bene (201 created)
@@ -143,6 +143,7 @@ app.post('/api/login', async (req, res) => {
             id: user.id, nome: user.nome, cognome: user.cognome,
             email: user.email, ruolo: user.ruolo,
             lat: user.lat, lon: user.lon, citta: user.citta,
+            nome_azienda: user.nome_azienda,
             descrizione_azienda: user.descrizione_azienda
         };
         res.json({ message: 'Login effettuato', user: userData });
@@ -169,6 +170,42 @@ app.post('/api/recover-password', async (req, res) => {
     } catch (error) {
         console.error(error);
         res.status(500).json({ error: 'Errore durante il recupero password' });
+    }
+});
+
+// 2.6 Cambio Password (utente loggato)
+app.put('/api/change-password', async (req, res) => {
+    try {
+        const { user_id, old_password, new_password } = req.body;
+
+        if (!user_id || !old_password || !new_password) {
+            return res.status(400).json({ error: 'Tutti i campi sono obbligatori' });
+        }
+
+        if (new_password.length < 6) {
+            return res.status(400).json({ error: 'La nuova password deve avere almeno 6 caratteri' });
+        }
+
+        // Trovo l'utente nel database
+        const [users] = await db.execute('SELECT * FROM users WHERE id = ?', [user_id]);
+        if (users.length === 0) {
+            return res.status(404).json({ error: 'Utente non trovato' });
+        }
+
+        // Verifico che la vecchia password sia corretta
+        const oldHash = crypto.createHash('sha256').update(old_password).digest('hex');
+        if (oldHash !== users[0].password) {
+            return res.status(400).json({ error: 'La password attuale non è corretta' });
+        }
+
+        // Hash della nuova password e salvataggio
+        const newHash = crypto.createHash('sha256').update(new_password).digest('hex');
+        await db.execute('UPDATE users SET password = ? WHERE id = ?', [newHash, user_id]);
+
+        res.json({ message: 'Password modificata con successo!' });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Errore durante il cambio password' });
     }
 });
 
@@ -386,7 +423,7 @@ app.get('/api/candidate/interviews', async (req, res) => {
         const [rows] = await db.execute(
             `SELECT ir.*, 
                     u.nome AS azienda_nome, u.cognome AS azienda_cognome, u.citta AS azienda_citta,
-                    u.lat AS azienda_lat, u.lon AS azienda_lon, u.descrizione_azienda
+                    u.lat AS azienda_lat, u.lon AS azienda_lon, u.nome_azienda, u.descrizione_azienda
              FROM interview_requests ir
              JOIN users u ON ir.employer_id = u.id
              WHERE ir.candidate_id = ?
@@ -434,7 +471,7 @@ app.put('/api/interview/status', async (req, res) => {
 app.get('/api/employer/:id', async (req, res) => {
     try {
         const [rows] = await db.execute(
-            'SELECT id, nome, cognome, citta, descrizione_azienda FROM users WHERE id = ? AND ruolo = ?',
+            'SELECT id, nome, cognome, citta, nome_azienda, descrizione_azienda FROM users WHERE id = ? AND ruolo = ?',
             [req.params.id, 'datore']
         );
         if (rows.length === 0) return res.status(404).json({ error: 'Azienda non trovata' });
@@ -442,6 +479,52 @@ app.get('/api/employer/:id', async (req, res) => {
     } catch (error) {
         console.error(error);
         res.status(500).json({ error: 'Errore nel recupero dati azienda' });
+    }
+});
+
+// 9. Profilo Azienda del Datore: Get
+app.get('/api/employer-profile/:userId', async (req, res) => {
+    try {
+        const [rows] = await db.execute(
+            'SELECT id, nome, cognome, citta, lat, lon, nome_azienda, descrizione_azienda FROM users WHERE id = ? AND ruolo = ?',
+            [req.params.userId, 'datore']
+        );
+        if (rows.length === 0) return res.status(404).json({ error: 'Datore non trovato' });
+        res.json(rows[0]);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Errore nel recupero del profilo azienda' });
+    }
+});
+
+// 9.5 Profilo Azienda del Datore: Salva/Aggiorna
+app.post('/api/employer-profile', async (req, res) => {
+    try {
+        const { user_id, nome_azienda, descrizione_azienda, citta, lat, lon } = req.body;
+
+        // Verifico che l'utente sia un datore
+        const [users] = await db.execute('SELECT * FROM users WHERE id = ? AND ruolo = ?', [user_id, 'datore']);
+        if (users.length === 0) return res.status(403).json({ error: 'Non autorizzato' });
+
+        // Se ha indicato una città, geocodificala se mancano lat/lon
+        let finalLat = lat;
+        let finalLon = lon;
+        if (citta && (!finalLat || !finalLon)) {
+            const coords = await geocodeCity(citta);
+            finalLat = coords.lat;
+            finalLon = coords.lon;
+        }
+
+        await db.execute(
+            'UPDATE users SET nome_azienda = ?, descrizione_azienda = ?, citta = ?, lat = ?, lon = ? WHERE id = ?',
+            [nome_azienda, descrizione_azienda, citta, finalLat, finalLon, user_id]
+        );
+
+        // Aggiorno anche il localStorage del client restituendo i dati aggiornati
+        res.json({ message: 'Profilo azienda aggiornato con successo!', citta, lat: finalLat, lon: finalLon, nome_azienda, descrizione_azienda });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Errore nel salvataggio del profilo azienda' });
     }
 });
 

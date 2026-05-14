@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profilo Azienda - DevCards</title>
+    <link rel="stylesheet" href="./css/style.css">
+    <!-- Leaflet CSS per la mappa -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <style>
+        /* Mappa */
+        #profileMap {
+            width: 100%;
+            height: 280px;
+            border-radius: 12px;
+            border: 1px solid var(--card-border);
+            margin-top: 0.5rem;
+            z-index: 1;
+        }
+        .map-search-row {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+        .map-search-row input { flex: 1; }
+        .map-search-row button {
+            padding: 0.6rem 1rem;
+            border: 1px solid var(--primary-color);
+            background: transparent;
+            color: var(--primary-color);
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+        #mapSelectedLocation {
+            font-size: 0.85rem;
+            color: var(--primary-color);
+            margin-top: 0.5rem;
+        }
+        .success-msg {
+            margin-top: 1rem;
+            padding: 1rem;
+            border-radius: 12px;
+            text-align: center;
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header style="padding: 1rem 2rem; background: var(--card-bg); border-bottom: 1px solid var(--card-border); display: flex; justify-content: space-between; align-items: center; backdrop-filter: blur(10px);">
+        <h2 style="color: var(--primary-color); margin: 0; font-size: 1.5rem; font-weight: 700;">DevCards <span style="font-size: 0.9rem; color: var(--text-muted); font-weight: 400;">Profilo Azienda</span></h2>
+        <div style="display: flex; gap: 1rem; align-items: center;">
+            <a href="employer.html" style="color: var(--text-main); text-decoration: none; font-size: 0.95rem; font-weight: 600; padding: 0.5rem 1rem; border-radius: 8px; background: rgba(255,255,255,0.1); transition: all 0.3s;">⬅️ Torna a Discovery</a>
+            <button id="btnLogout" class="btn" style="padding: 0.5rem 1rem; font-size: 0.9rem; background: transparent; border: 1px solid var(--primary-color); color: var(--primary-color); width: auto;">Logout</button>
+        </div>
+    </header>
+
+    <main style="padding: 2rem; max-width: 800px; margin: 0 auto; width: 100%;">
+        <div class="glass-panel" style="max-width: 100%;">
+            <h2 class="title" style="font-size: 2rem; text-align: left; margin-bottom: 0.5rem;">🏢 Profilo Azienda</h2>
+            <p style="color: var(--text-muted); margin-bottom: 2rem; font-size: 0.95rem;">Compila le informazioni sulla tua azienda. Queste verranno mostrate ai candidati nelle offerte di colloquio.</p>
+
+            <form id="employerProfileForm">
+                <!-- Nome Azienda -->
+                <div class="form-group">
+                    <label style="color: var(--text-main); font-weight: 600;">Nome Azienda</label>
+                    <input type="text" id="nomeAzienda" class="form-control" placeholder="Es. TechCorp S.r.l." required>
+                </div>
+
+                <!-- Descrizione -->
+                <div class="form-group">
+                    <label style="color: var(--text-main); font-weight: 600;">Descrizione Azienda</label>
+                    <textarea id="descAzienda" class="form-control" rows="4" placeholder="Descrivete brevemente la vostra azienda, cosa fate, cosa cercate..." required style="resize: vertical;"></textarea>
+                </div>
+
+                <!-- Sede Aziendale con Mappa -->
+                <div class="form-group">
+                    <label style="color: var(--text-main); font-weight: 600;">📍 Sede Aziendale</label>
+                    <div class="map-search-row">
+                        <input type="text" id="profileCitta" class="form-control" placeholder="Cerca una città..." required>
+                        <button type="button" id="btnSearchMap">Cerca</button>
+                    </div>
+                    <div id="profileMap"></div>
+                    <div id="mapSelectedLocation"></div>
+                    <input type="hidden" id="profileLat">
+                    <input type="hidden" id="profileLon">
+                    <small style="color: var(--text-muted); font-size: 0.8rem;">Clicca sulla mappa o cerca una città per posizionare la sede</small>
+                </div>
+
+                <button type="submit" class="btn" style="margin-top: 1.5rem;">Salva Profilo Azienda</button>
+                <div id="profileResult"></div>
+            </form>
+        </div>
+    </main>
+
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+        const user = JSON.parse(localStorage.getItem('user'));
+
+        // Controllo accesso: solo datori
+        if (!user || user.ruolo !== 'datore') {
+            alert("Accesso negato. Fai il login come datore di lavoro.");
+            window.location.href = 'index.html';
+            return;
+        }
+
+        // Logout
+        document.getElementById('btnLogout').addEventListener('click', () => {
+            localStorage.removeItem('user');
+            window.location.href = 'index.html';
+        });
+
+        // =============================
+        // Mappa Leaflet
+        // =============================
+        let map = null;
+        let marker = null;
+
+        function initMap(centerLat, centerLon, zoom) {
+            map = L.map('profileMap').setView([centerLat || 41.9028, centerLon || 12.4964], zoom || 5);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap contributors',
+                maxZoom: 19,
+            }).addTo(map);
+
+            map.on('click', function (e) {
+                setMapMarker(e.latlng.lat, e.latlng.lng);
+                reverseGeocode(e.latlng.lat, e.latlng.lng);
+            });
+        }
+
+        function setMapMarker(lat, lng) {
+            if (marker) {
+                marker.setLatLng([lat, lng]);
+            } else {
+                marker = L.marker([lat, lng], { draggable: true }).addTo(map);
+                marker.on('dragend', function () {
+                    const pos = marker.getLatLng();
+                    document.getElementById('profileLat').value = pos.lat;
+                    document.getElementById('profileLon').value = pos.lng;
+                    reverseGeocode(pos.lat, pos.lng);
+                });
+            }
+            document.getElementById('profileLat').value = lat;
+            document.getElementById('profileLon').value = lng;
+            map.setView([lat, lng], 13);
+        }
+
+        async function reverseGeocode(lat, lon) {
+            try {
+                const res = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json`, {
+                    headers: { 'User-Agent': 'DevCards/1.0' }
+                });
+                const data = await res.json();
+                const city = data.address?.city || data.address?.town || data.address?.village || data.address?.municipality || '';
+                if (city) {
+                    document.getElementById('profileCitta').value = city;
+                }
+                document.getElementById('mapSelectedLocation').textContent =
+                    `📍 ${data.display_name || 'Posizione selezionata'}`;
+            } catch (err) {
+                console.error('Errore reverse geocode:', err);
+            }
+        }
+
+        // Bottone Cerca
+        document.getElementById('btnSearchMap').addEventListener('click', async () => {
+            const query = document.getElementById('profileCitta').value.trim();
+            if (!query) return;
+            try {
+                const res = await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&limit=1`, {
+                    headers: { 'User-Agent': 'DevCards/1.0' }
+                });
+                const data = await res.json();
+                if (data && data.length > 0) {
+                    const lat = parseFloat(data[0].lat);
+                    const lon = parseFloat(data[0].lon);
+                    setMapMarker(lat, lon);
+                    document.getElementById('mapSelectedLocation').textContent =
+                        `📍 ${data[0].display_name}`;
+                } else {
+                    document.getElementById('mapSelectedLocation').textContent = '❌ Nessun risultato trovato';
+                }
+            } catch (err) {
+                console.error(err);
+            }
+        });
+
+        // =============================
+        // Carica dati esistenti
+        // =============================
+        try {
+            const res = await fetch(`http://localhost:3000/api/employer-profile/${user.id}`);
+            if (res.ok) {
+                const data = await res.json();
+                document.getElementById('nomeAzienda').value = data.nome_azienda || '';
+                document.getElementById('descAzienda').value = data.descrizione_azienda || '';
+                document.getElementById('profileCitta').value = data.citta || '';
+                document.getElementById('profileLat').value = data.lat || '';
+                document.getElementById('profileLon').value = data.lon || '';
+
+                // Inizializzo la mappa centrata sulla sede se esiste
+                if (data.lat && data.lon) {
+                    initMap(data.lat, data.lon, 13);
+                    setMapMarker(data.lat, data.lon);
+                } else {
+                    initMap();
+                }
+            } else {
+                initMap();
+            }
+        } catch (err) {
+            console.error(err);
+            initMap();
+        }
+
+        // =============================
+        // Salva profilo azienda
+        // =============================
+        document.getElementById('employerProfileForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const resultEl = document.getElementById('profileResult');
+
+            const nome_azienda = document.getElementById('nomeAzienda').value;
+            const descrizione_azienda = document.getElementById('descAzienda').value;
+            const citta = document.getElementById('profileCitta').value;
+            const lat = document.getElementById('profileLat').value || null;
+            const lon = document.getElementById('profileLon').value || null;
+
+            try {
+                const res = await fetch('http://localhost:3000/api/employer-profile', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ user_id: user.id, nome_azienda, descrizione_azienda, citta, lat, lon })
+                });
+                const data = await res.json();
+                if (res.ok) {
+                    resultEl.innerHTML = `<div class="success-msg" style="background: rgba(0,255,102,0.1); color: var(--primary-color); border: 1px solid rgba(0,255,102,0.2);">✓ ${data.message}</div>`;
+                    // Aggiorno localStorage con i nuovi dati
+                    const updatedUser = { ...user, citta: data.citta, lat: data.lat, lon: data.lon, nome_azienda: data.nome_azienda, descrizione_azienda: data.descrizione_azienda };
+                    localStorage.setItem('user', JSON.stringify(updatedUser));
+                } else {
+                    resultEl.innerHTML = `<div class="success-msg" style="background: rgba(255,75,75,0.1); color: #ff4b4b; border: 1px solid rgba(255,75,75,0.2);">✗ ${data.error}</div>`;
+                }
+            } catch (err) {
+                resultEl.innerHTML = `<div class="success-msg" style="background: rgba(255,75,75,0.1); color: #ff4b4b; border: 1px solid rgba(255,75,75,0.2);">Errore di connessione al server.</div>`;
+            }
+        });
+    });
+    </script>
+</body>
+</html>

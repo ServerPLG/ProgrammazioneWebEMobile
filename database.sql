@@ -11,13 +11,14 @@ CREATE TABLE IF NOT EXISTS users (
     eta INT DEFAULT NULL,
     anni_esperienza INT DEFAULT 0,
     max_distanza_km INT DEFAULT NULL,
-    citta VARCHAR(100) NOT NULL,
+    citta VARCHAR(100) DEFAULT NULL,
     lat DECIMAL(10, 7) DEFAULT NULL,
     lon DECIMAL(10, 7) DEFAULT NULL,
     email VARCHAR(100) UNIQUE NOT NULL,
     password VARCHAR(255) NOT NULL,
     ruolo ENUM('candidato', 'datore') NOT NULL,
     foto_profilo MEDIUMTEXT,
+    nome_azienda VARCHAR(100) DEFAULT NULL,
     descrizione_azienda TEXT DEFAULT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
@@ -84,12 +85,12 @@ INSERT INTO users (nome, cognome, eta, anni_esperienza, max_distanza_km, citta, 
 ('Elena', 'Marino', 24, 2, NULL, 'Bari', 41.1171432, 16.8718715, 'elena@email.com', 'ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f', 'candidato', NULL);
 
 -- Datori di lavoro (IDs 11 to 15)
-INSERT INTO users (nome, cognome, anni_esperienza, citta, lat, lon, email, password, ruolo, descrizione_azienda) VALUES 
-('TechCorp', 'S.r.l.', 0, 'Milano', 45.4642035, 9.1899799, 'hr@techcorp.com', 'ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f', 'datore', 'Azienda leader nello sviluppo di soluzioni SaaS enterprise. Cerchiamo talenti appassionati di tecnologia per costruire il futuro del software.'),
-('StartupHub', 'Italia', 0, 'Roma', 41.9027835, 12.4963655, 'jobs@startuphub.it', 'ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f', 'datore', 'Incubatore di startup con focus su AI e Machine Learning. Offriamo un ambiente dinamico e stimolante per sviluppatori junior e senior.'),
-('WebAgency', 'Pro', 0, 'Firenze', 43.7695604, 11.2558136, 'info@webagencypro.com', 'ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f', 'datore', 'Agenzia web specializzata in e-commerce e siti corporate. Lavoriamo con React, Node.js e tecnologie cloud moderne.'),
-('CloudSolutions', 'S.p.a.', 0, 'Torino', 45.0703393, 7.6868565, 'recruiting@cloudsolutions.it', 'ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f', 'datore', 'Sviluppiamo infrastrutture cloud sicure e scalabili per le aziende.'),
-('DevFactory', 'SRL', 0, 'Napoli', 40.8517746, 14.2681244, 'careers@devfactory.com', 'ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f', 'datore', 'Software house emergente specializzata nello sviluppo di applicazioni mobile cross-platform e web app.');
+INSERT INTO users (nome, cognome, anni_esperienza, citta, lat, lon, email, password, ruolo, nome_azienda, descrizione_azienda) VALUES 
+('Marco', 'Bianchi', 0, 'Milano', 45.4642035, 9.1899799, 'hr@techcorp.com', 'ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f', 'datore', 'TechCorp S.r.l.', 'Azienda leader nello sviluppo di soluzioni SaaS enterprise. Cerchiamo talenti appassionati di tecnologia per costruire il futuro del software.'),
+('Luca', 'Martini', 0, 'Roma', 41.9027835, 12.4963655, 'jobs@startuphub.it', 'ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f', 'datore', 'StartupHub Italia', 'Incubatore di startup con focus su AI e Machine Learning. Offriamo un ambiente dinamico e stimolante per sviluppatori junior e senior.'),
+('Giulia', 'Conti', 0, 'Firenze', 43.7695604, 11.2558136, 'info@webagencypro.com', 'ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f', 'datore', 'WebAgency Pro', 'Agenzia web specializzata in e-commerce e siti corporate. Lavoriamo con React, Node.js e tecnologie cloud moderne.'),
+('Andrea', 'Romano', 0, 'Torino', 45.0703393, 7.6868565, 'recruiting@cloudsolutions.it', 'ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f', 'datore', 'CloudSolutions S.p.a.', 'Sviluppiamo infrastrutture cloud sicure e scalabili per le aziende.'),
+('Francesca', 'Esposito', 0, 'Napoli', 40.8517746, 14.2681244, 'careers@devfactory.com', 'ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f', 'datore', 'DevFactory SRL', 'Software house emergente specializzata nello sviluppo di applicazioni mobile cross-platform e web app.');
 
 -- CV dei candidati
 INSERT INTO cvs (user_id, bio, competenze, linguaggi, telefono, instagram, luogo_preferito, disponibile_ovunque, competenze_linguistiche, smartworking) VALUES 

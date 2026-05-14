@@ -10,9 +10,11 @@ document.addEventListener('DOMContentLoaded', () => {
     showRegisterBtn.addEventListener('click', () => {
         loginPanel.style.display = 'none'; // none vuol dire che scompare
         registerPanel.style.display = 'block'; // block lo fa riapparire
-        // Inizializza la mappa quando il pannello di registrazione diventa visibile
-        // Metto un piccolo ritardo (100 millisecondi) se no la mappa non carica bene
-        setTimeout(() => initMap(), 100);
+        // Inizializza la mappa solo se è visibile (ruolo candidato)
+        const ruolo = document.querySelector('input[name="role"]:checked').value;
+        if (ruolo === 'candidato') {
+            setTimeout(() => initMap(), 100);
+        }
     });
 
     // Quando clicco su "Accedi", faccio l'inverso
@@ -27,21 +29,20 @@ document.addEventListener('DOMContentLoaded', () => {
     // Toggle campi dinamici in base al ruolo scelto
     const roleRadios = document.querySelectorAll('input[name="role"]');
     const candidatoFields = document.getElementById('candidatoFields');
-    const datoreFields = document.getElementById('datoreFields');
-    const mapLabel = document.getElementById('mapLabel');
 
     // Funzione che controlla quale pallino è selezionato e fa apparire i campi giusti
     function updateRoleFields() {
         // Prendo il valore del radio button selezionato in questo momento
         const ruolo = document.querySelector('input[name="role"]:checked').value;
+        const mapSection = document.getElementById('mapSection');
         if (ruolo === 'candidato') {
             candidatoFields.style.display = 'block'; // Mostro i campi candidato
-            datoreFields.style.display = 'none'; // Nascondo quelli azienda
-            mapLabel.textContent = '📍 Luogo di Residenza'; // Cambio il testo della mappa
+            mapSection.style.display = 'block'; // Mostro la mappa
+            // Inizializzo la mappa se non è stata ancora creata
+            setTimeout(() => initMap(), 100);
         } else {
             candidatoFields.style.display = 'none'; // Nascondo candidato
-            datoreFields.style.display = 'block'; // Mostro azienda
-            mapLabel.textContent = '📍 Sede Aziendale';
+            mapSection.style.display = 'none'; // Nascondo la mappa (il datore la compilerà dopo)
         }
     }
 
@@ -235,21 +236,21 @@ document.addEventListener('DOMContentLoaded', () => {
         const ruolo = document.querySelector('input[name="role"]:checked').value;
         const nome = document.getElementById('regNome').value;
         const cognome = document.getElementById('regCognome').value;
-        const citta = document.getElementById('regCitta').value;
         const email = document.getElementById('regEmail').value;
         const password = document.getElementById('regPassword').value;
 
-        // Coordinate dalla mappa
-        const lat = document.getElementById('regLat').value || null;
-        const lon = document.getElementById('regLon').value || null;
-
+        let citta = null;
+        let lat = null;
+        let lon = null;
         let eta = null;
         let anni_esperienza = 0;
         let max_distanza_km = null;
         let foto_profilo = null;
-        let descrizione_azienda = null;
 
         if (ruolo === 'candidato') {
+            citta = document.getElementById('regCitta').value;
+            lat = document.getElementById('regLat').value || null;
+            lon = document.getElementById('regLon').value || null;
             eta = document.getElementById('regEta').value || null;
             anni_esperienza = document.getElementById('regExp').value || 0;
             max_distanza_km = document.getElementById('regMaxDistanza').value || null;
@@ -268,15 +269,13 @@ document.addEventListener('DOMContentLoaded', () => {
             } else if (regFotoUrlInput.style.display !== 'none' && regFotoUrlInput.value.trim()) {
                 foto_profilo = regFotoUrlInput.value.trim();
             }
-        } else {
-            descrizione_azienda = document.getElementById('regDescAzienda').value;
         }
 
         try {
             const response = await fetch('http://localhost:3000/api/register', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ ruolo, nome, cognome, eta, anni_esperienza, max_distanza_km, citta, lat, lon, email, password, foto_profilo, descrizione_azienda })
+                body: JSON.stringify({ ruolo, nome, cognome, eta, anni_esperienza, max_distanza_km, citta, lat, lon, email, password, foto_profilo })
             });
             const data = await response.json();
 

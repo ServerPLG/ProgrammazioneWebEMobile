@@ -146,5 +146,52 @@ document.addEventListener('DOMContentLoaded', () => {
         window.location.href = 'index.html';
     });
 
+    // =============================
+    // Cambio Password
+    // =============================
+    document.getElementById('btnChangePassword').addEventListener('click', () => {
+        document.getElementById('changePasswordModal').classList.add('active');
+        document.getElementById('pwdResult').innerHTML = '';
+        document.getElementById('changePasswordForm').reset();
+    });
+
+    document.getElementById('closePwdModal').addEventListener('click', () => {
+        document.getElementById('changePasswordModal').classList.remove('active');
+    });
+
+    document.getElementById('changePasswordForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const oldPassword = document.getElementById('oldPassword').value;
+        const newPassword = document.getElementById('newPassword').value;
+        const confirmPassword = document.getElementById('confirmPassword').value;
+        const resultEl = document.getElementById('pwdResult');
+
+        if (newPassword !== confirmPassword) {
+            resultEl.innerHTML = '<span style="color: #ff4b4b;">✗ Le due password non coincidono</span>';
+            return;
+        }
+
+        try {
+            const res = await fetch('http://localhost:3000/api/change-password', {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    user_id: user.id,
+                    old_password: oldPassword,
+                    new_password: newPassword
+                })
+            });
+            const data = await res.json();
+            if (res.ok) {
+                resultEl.innerHTML = `<span style="color: var(--primary-color);">✓ ${data.message}</span>`;
+                document.getElementById('changePasswordForm').reset();
+            } else {
+                resultEl.innerHTML = `<span style="color: #ff4b4b;">✗ ${data.error}</span>`;
+            }
+        } catch (err) {
+            resultEl.innerHTML = '<span style="color: #ff4b4b;">Errore di connessione al server.</span>';
+        }
+    });
+
     loadDevCards();
 });
