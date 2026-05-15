@@ -58,7 +58,10 @@ document.addEventListener('DOMContentLoaded', () => {
     let marker = null;
 
     function initMap() {
-        if (map) return; // Già inizializzata
+        if (map) {
+            map.invalidateSize();
+            return; // Già inizializzata
+        }
 
         map = L.map('regMap').setView([41.9028, 12.4964], 5); // Centro Italia
 
@@ -72,6 +75,9 @@ document.addEventListener('DOMContentLoaded', () => {
             setMapMarker(e.latlng.lat, e.latlng.lng);
             reverseGeocode(e.latlng.lat, e.latlng.lng);
         });
+
+        // Forza il ricalcolo delle dimensioni dopo che è stata inserita nel DOM
+        setTimeout(() => map.invalidateSize(), 100);
     }
 
     function setMapMarker(lat, lng) {
@@ -171,7 +177,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const email = document.getElementById('recoverEmail').value;
         const resultEl = document.getElementById('recoverResult');
         try {
-            const res = await fetch('http://localhost:3000/api/recover-password', {
+            const res = await fetch('/api/recover-password', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email })
@@ -200,7 +206,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         try {
             // Faccio una "chiamata" al server (che sta sulla porta 3000)
-            const response = await fetch('http://localhost:3000/api/login', {
+            const response = await fetch('/api/login', {
                 method: 'POST', // Uso POST per mandare i dati in modo più sicuro
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email, password }) // Trasformo in JSON (stringa) i dati
@@ -272,7 +278,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         try {
-            const response = await fetch('http://localhost:3000/api/register', {
+            const response = await fetch('/api/register', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ ruolo, nome, cognome, eta, anni_esperienza, max_distanza_km, citta, lat, lon, email, password, foto_profilo })

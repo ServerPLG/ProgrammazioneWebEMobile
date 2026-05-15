@@ -6,6 +6,7 @@ require('dotenv').config(); // Per caricare il file .env con la password del dat
 const db = require('./db'); // Importo il mio file db.js dove mi connetto al database mysql
 const fs = require('fs');
 const path = require('path');
+const os = require('os');
 const app = express(); // Inizializzo l'app, sempre così si fa
 
 // Middleware (robe che vengono eseguite prima delle richieste)
@@ -36,12 +37,20 @@ db.execute(`
         linguaggi_richiesti VARCHAR(255),
         range_stipendio VARCHAR(100),
         luogo VARCHAR(200),
+        data_colloquio DATE,
+        ora_colloquio TIME,
+        luogo_colloquio VARCHAR(255),
         status ENUM('pending', 'accepted', 'rejected') DEFAULT 'pending',
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         FOREIGN KEY (employer_id) REFERENCES users(id) ON DELETE CASCADE,
         FOREIGN KEY (candidate_id) REFERENCES users(id) ON DELETE CASCADE
     )
 `).catch(err => console.error("Errore creazione tabella interview_requests:", err));
+
+// Add columns to existing table if they don't exist
+db.execute("ALTER TABLE interview_requests ADD COLUMN data_colloquio DATE").catch(() => {});
+db.execute("ALTER TABLE interview_requests ADD COLUMN ora_colloquio TIME").catch(() => {});
+db.execute("ALTER TABLE interview_requests ADD COLUMN luogo_colloquio VARCHAR(255)").catch(() => {});
 
 // =============================
 // HELPER: Geocoding con OpenStreetMap Nominatim
@@ -79,6 +88,21 @@ function haversineDistance(lat1, lon1, lat2, lon2) {
 // =============================
 // ROUTES (le API che il frontend chiama)
 // =============================
+
+// 0. API per scoprire l'IP locale del server (per il QR Code)
+app.get('/api/server-ip', (req, res) => {
+    const interfaces = os.networkInterfaces();
+    let ip = 'localhost';
+    for (const name of Object.keys(interfaces)) {
+        for (const iface of interfaces[name]) {
+            if (iface.family === 'IPv4' && !iface.internal) {
+                ip = iface.address;
+                break;
+            }
+        }
+    }
+    res.json({ ip });
+});
 
 // 1. Registrazione (quando uno si iscrive)
 app.post('/api/register', async (req, res) => {
@@ -273,6 +297,24 @@ app.post('/api/interact', async (req, res) => {
     }
 });
 
+// 3.5.5 API per i datori: Rimuovere un candidato salvato
+app.delete('/api/interact', async (req, res) => {
+    try {
+        const { employer_id, candidate_id } = req.body;
+        if (!employer_id || !candidate_id) {
+            return res.status(400).json({ error: 'Parametri mancanti' });
+        }
+        await db.execute(
+            'DELETE FROM employer_interactions WHERE employer_id = ? AND candidate_id = ? AND action = "save"',
+            [employer_id, candidate_id]
+        );
+        res.json({ message: 'Candidato rimosso dai preferiti' });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: "Errore durante la rimozione" });
+    }
+});
+
 // 3.6 API per i datori: Get DevCards Salvate (Con filtri avanzati)
 app.get('/api/devcards/saved', async (req, res) => {
     try {
@@ -398,14 +440,14 @@ app.post('/api/cv', async (req, res) => {
 // 5. Proponi colloquio (dal datore)
 app.post('/api/interview', async (req, res) => {
     try {
-        const { employer_id, candidate_id, posizione_cercata, linguaggi_richiesti, range_stipendio, luogo } = req.body;
-        if (!employer_id || !candidate_id || !posizione_cercata) {
+        const { employer_id, candidate_id, posizione_cercata, linguaggi_richiesti, range_stipendio, luogo, data_colloquio, ora_colloquio, luogo_colloquio } = req.body;
+        if (!employer_id || !candidate_id || !posizione_cercata || !data_colloquio || !ora_colloquio || !luogo_colloquio) {
             return res.status(400).json({ error: 'Parametri mancanti' });
         }
 
         await db.execute(
-            'INSERT INTO interview_requests (employer_id, candidate_id, posizione_cercata, linguaggi_richiesti, range_stipendio, luogo) VALUES (?, ?, ?, ?, ?, ?)',
-            [employer_id, candidate_id, posizione_cercata, linguaggi_richiesti, range_stipendio, luogo]
+            'INSERT INTO interview_requests (employer_id, candidate_id, posizione_cercata, linguaggi_richiesti, range_stipendio, luogo, data_colloquio, ora_colloquio, luogo_colloquio) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
+            [employer_id, candidate_id, posizione_cercata, linguaggi_richiesti, range_stipendio, luogo, data_colloquio, ora_colloquio, luogo_colloquio]
         );
         res.status(201).json({ message: 'Richiesta di colloquio inviata' });
     } catch (error) {
@@ -467,11 +509,34 @@ app.put('/api/interview/status', async (req, res) => {
     }
 });
 
+// 8.5 Recupera colloqui inviati da un datore
+app.get('/api/employer/interviews', async (req, res) => {
+    try {
+        const { employer_id } = req.query;
+        if (!employer_id) return res.status(400).json({ error: 'Manca employer_id' });
+
+        const [rows] = await db.execute(
+            `SELECT ir.*, 
+                    u.nome AS candidato_nome, u.cognome AS candidato_cognome, u.citta AS candidato_citta, u.foto_profilo
+             FROM interview_requests ir
+             JOIN users u ON ir.candidate_id = u.id
+             WHERE ir.employer_id = ?
+             ORDER BY ir.created_at DESC`,
+            [employer_id]
+        );
+
+        res.json(rows);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Errore nel recupero dei colloqui' });
+    }
+});
+
 // 8. Get info datore (per la pagina pubblica del candidato)
 app.get('/api/employer/:id', async (req, res) => {
     try {
         const [rows] = await db.execute(
-            'SELECT id, nome, cognome, citta, nome_azienda, descrizione_azienda FROM users WHERE id = ? AND ruolo = ?',
+            'SELECT id, nome, cognome, citta, lat, lon, nome_azienda, descrizione_azienda FROM users WHERE id = ? AND ruolo = ?',
             [req.params.id, 'datore']
         );
         if (rows.length === 0) return res.status(404).json({ error: 'Azienda non trovata' });
@@ -481,6 +546,7 @@ app.get('/api/employer/:id', async (req, res) => {
         res.status(500).json({ error: 'Errore nel recupero dati azienda' });
     }
 });
+
 
 // 9. Profilo Azienda del Datore: Get
 app.get('/api/employer-profile/:userId', async (req, res) => {

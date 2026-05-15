@@ -41,7 +41,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // Carica dati esistenti
     try {
-        const res = await fetch(`http://localhost:3000/api/cv/${user.id}`);
+        const res = await fetch(`/api/cv/${user.id}`);
         if (res.ok) {
             const data = await res.json();
             if (data) {
@@ -102,7 +102,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const competenze_linguistiche = JSON.stringify(lingueArray);
 
         try {
-            const res = await fetch('http://localhost:3000/api/cv', {
+            const res = await fetch('/api/cv', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({

@@ -24,7 +24,7 @@ document.addEventListener('DOMContentLoaded', () => {
 // Questa funzione asincrona (await) serve per scaricare i dati della carta dal server
 async function loadMyCard(userId, container) {
     try {
-        const res = await fetch(`http://localhost:3000/api/cv/${userId}`);
+        const res = await fetch(`/api/cv/${userId}`);
         const card = await res.json(); // Trasformo in JSON
 
         // Se è andato storto qualcosa o non ha ancora messo la biografia...
@@ -130,24 +130,25 @@ async function loadMyCard(userId, container) {
         });
 
         // Generazione del QR Code
-        setTimeout(() => {
+        setTimeout(async () => {
             try {
-                // Utilizziamo l'IP locale perché il prof ci ha detto che "localhost" non funziona dai cellulari
-                let host = "192.168.1.181";
-                // Costruisco il link pubblico da mettere nel QR
-                const publicUrl = `http://${host}:3000/public_card.html?id=${userId}`;
+                const ipRes = await fetch('/api/server-ip');
+                const ipData = await ipRes.json();
+                const serverIp = ipData.ip;
+                const port = window.location.port ? `:${window.location.port}` : '';
                 
-                // Genero fisicamente il QR Code usando la libreria che abbiamo scaricato
+                const publicUrl = `http://${serverIp}${port}/public_card.html?id=${userId}`;
+                
                 new QRCode(document.getElementById("qrcode"), {
                     text: publicUrl,
-                    width: 180,
-                    height: 180,
+                    width: 220,
+                    height: 220,
                     colorDark : "#000000",
                     colorLight : "#ffffff",
                     correctLevel : QRCode.CorrectLevel.H
                 });
             } catch (err) {
-                console.error("Errore generazione QR:", err); // Se si rompe lo stampo
+                console.error("Errore generazione QR:", err);
             }
         }, 700); // wait for slideUp animation to finish (aspetto 700ms)
 

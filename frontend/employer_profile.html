@@ -195,7 +195,7 @@
         // Carica dati esistenti
         // =============================
         try {
-            const res = await fetch(`http://localhost:3000/api/employer-profile/${user.id}`);
+            const res = await fetch(`/api/employer-profile/${user.id}`);
             if (res.ok) {
                 const data = await res.json();
                 document.getElementById('nomeAzienda').value = data.nome_azienda || '';
@@ -233,7 +233,7 @@
             const lon = document.getElementById('profileLon').value || null;
 
             try {
-                const res = await fetch('http://localhost:3000/api/employer-profile', {
+                const res = await fetch('/api/employer-profile', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ user_id: user.id, nome_azienda, descrizione_azienda, citta, lat, lon })

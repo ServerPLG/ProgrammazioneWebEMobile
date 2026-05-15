@@ -22,7 +22,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const loadDevCards = async () => {
         try {
             // Chiamo l'API passandogli il mio ID (così non mi fa vedere quelli che ho già scartato)
-            const res = await fetch(`http://localhost:3000/api/devcards?employer_id=${user.id}`);
+            const res = await fetch(`/api/devcards?employer_id=${user.id}`);
             candidates = await res.json(); // Salvo i risultati
             currentIndex = 0; // Riparto dal primo
             renderCard(); // Chiamo la funzione per disegnare la carta sullo schermo
@@ -63,7 +63,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Distanza
         const distanzaHtml = card.distanza 
-            ? `<span style="display: inline-block; margin-top: 0.3rem; background: rgba(0, 255, 102, 0.1); color: var(--primary-color); padding: 0.2rem 0.6rem; border-radius: 12px; font-size: 0.85rem; border: 1px solid rgba(0, 255, 102, 0.2);">📍 ${card.distanza}</span>`
+            ? `<div style="margin-top: 0.5rem;"><span style="display: inline-block; background: rgba(0, 255, 102, 0.1); color: var(--primary-color); padding: 0.2rem 0.6rem; border-radius: 12px; font-size: 0.85rem; border: 1px solid rgba(0, 255, 102, 0.2);">${card.distanza}</span></div>`
             : '';
 
         const html = `
@@ -122,7 +122,7 @@ document.addEventListener('DOMContentLoaded', () => {
             currentCard.style.opacity = '0'; // E la faccio svanire
         }
 
-        fetch('http://localhost:3000/api/interact', {
+        fetch('/api/interact', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -172,7 +172,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         try {
-            const res = await fetch('http://localhost:3000/api/change-password', {
+            const res = await fetch('/api/change-password', {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({

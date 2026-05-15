@@ -21,7 +21,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (filters.lingua) queryParams.append('lingua', filters.lingua);
 
             // Chiamo l'API con l'indirizzo costruito e aspetto la risposta (await)
-            const res = await fetch(`http://localhost:3000/api/devcards/saved?${queryParams.toString()}`);
+            const res = await fetch(`/api/devcards/saved?${queryParams.toString()}`);
             const devcards = await res.json(); // Trasformo in JSON
 
             const container = document.getElementById('devcardsContainer');
@@ -33,11 +33,11 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             devcards.forEach(card => {
-                const langSpans = (card.linguaggi || '').split(',').map(l => l.trim()).filter(l=>l).map(l => 
+                const langSpans = (card.linguaggi || '').split(',').map(l => l.trim()).filter(l => l).map(l =>
                     `<span style="background: rgba(0, 255, 102, 0.1); color: var(--primary-color); padding: 0.3rem 0.8rem; border-radius: 20px; font-size: 0.85rem; border: 1px solid rgba(0, 255, 102, 0.2);">${l}</span>`
                 ).join('');
 
-                const avatarHtml = card.foto_profilo 
+                const avatarHtml = card.foto_profilo
                     ? `<img src="${card.foto_profilo}" alt="Foto" style="width: 50px; height: 50px; border-radius: 50%; object-fit: cover; border: 2px solid var(--primary-color);">`
                     : `<img src="https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(card.nome + card.cognome)}&backgroundColor=e2e8f0" alt="Avatar" style="width: 50px; height: 50px; border-radius: 50%; object-fit: cover; border: 2px solid var(--primary-color);">`;
 
@@ -49,8 +49,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 } catch { lingueHtml = card.competenze_linguistiche || 'Non specificate'; }
 
                 // Distanza
-                const distanzaBadge = card.distanza 
-                    ? `<span style="display: inline-block; background: rgba(0, 255, 102, 0.1); color: var(--primary-color); padding: 0.2rem 0.5rem; border-radius: 12px; font-size: 0.75rem; border: 1px solid rgba(0, 255, 102, 0.2);">📍 ${card.distanza}</span>`
+                const distanzaBadge = card.distanza
+                    ? `<div style="margin-top: 0.5rem;"><span style="display: inline-block; background: rgba(0, 255, 102, 0.1); color: var(--primary-color); padding: 0.2rem 0.5rem; border-radius: 12px; font-size: 0.75rem; border: 1px solid rgba(0, 255, 102, 0.2);">${card.distanza}</span></div>`
                     : '';
 
                 const html = `
@@ -59,7 +59,8 @@ document.addEventListener('DOMContentLoaded', () => {
                         ${avatarHtml}
                         <div>
                             <h3 style="color: var(--text-main); font-size: 1.5rem; margin: 0;">${card.nome} ${card.cognome}, ${card.eta || '?'}</h3>
-                            <p style="color: var(--text-muted); margin: 0; margin-top: 0.2rem;">📍 ${card.citta} · ${card.anni_esperienza} anni exp. ${distanzaBadge}</p>
+                            <p style="color: var(--text-muted); margin: 0; margin-top: 0.2rem;">📍 ${card.citta} · ${card.anni_esperienza} anni exp.</p>
+                            ${distanzaBadge}
                         </div>
                     </div>
                     <div style="display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 1.5rem;">
@@ -87,6 +88,9 @@ document.addEventListener('DOMContentLoaded', () => {
                         <button class="btn btn-interview" data-id="${card.id}" data-name="${card.nome} ${card.cognome}" style="flex: 1; padding: 0.8rem; font-size: 0.9rem;">💼 Proponi Colloquio</button>
                         <button class="btn btn-contact" style="flex: 1; padding: 0.8rem; font-size: 0.9rem; background: transparent; border: 1px solid var(--text-muted); color: var(--text-main);" onclick="alert('Contatti Rivelati:\\nTelefono: ${card.telefono || 'N/D'}\\nInstagram: ${card.instagram || 'N/D'}')">📞 Contatta</button>
                     </div>
+                    <div style="margin-top: 0.8rem; text-align: center;">
+                        <button class="btn-remove" data-id="${card.id}" style="background: transparent; border: none; color: #ff4b4b; cursor: pointer; font-size: 0.85rem; text-decoration: underline;">❌ Rimuovi dai preferiti</button>
+                    </div>
                 </div>
                 `;
                 container.innerHTML += html;
@@ -95,7 +99,7 @@ document.addEventListener('DOMContentLoaded', () => {
             // Adesso aggiungo la funzionalità ai bottoni "Proponi Colloquio"
             // Devo farlo qui e non all'inizio perché i bottoni sono appena stati creati da javascript!
             document.querySelectorAll('.btn-interview').forEach(btn => {
-                btn.addEventListener('click', function() {
+                btn.addEventListener('click', function () {
                     // Quando clicco, apro il form nascondendo/mostrando delle cose e metto l'id giusto del candidato
                     document.getElementById('interviewCandidateId').value = this.dataset.id;
                     document.getElementById('interviewCandidateName').textContent = this.dataset.name;
@@ -135,10 +139,13 @@ document.addEventListener('DOMContentLoaded', () => {
         const linguaggi_richiesti = document.getElementById('ivLinguaggi').value;
         const range_stipendio = document.getElementById('ivStipendio').value;
         const luogo = document.getElementById('ivLuogo').value;
+        const luogo_colloquio = document.getElementById('ivLuogoColloquio').value;
+        const data_colloquio = document.getElementById('ivData').value;
+        const ora_colloquio = document.getElementById('ivOra').value;
         const resultEl = document.getElementById('interviewResult');
 
         try {
-            const res = await fetch('http://localhost:3000/api/interview', {
+            const res = await fetch('/api/interview', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -147,7 +154,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     posizione_cercata,
                     linguaggi_richiesti,
                     range_stipendio,
-                    luogo
+                    luogo,
+                    data_colloquio,
+                    ora_colloquio,
+                    luogo_colloquio
                 })
             });
             const data = await res.json();

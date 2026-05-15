@@ -59,6 +59,8 @@ CREATE TABLE IF NOT EXISTS interview_requests (
     linguaggi_richiesti VARCHAR(255),
     range_stipendio VARCHAR(100),
     luogo VARCHAR(200),
+    data_colloquio DATE,
+    ora_colloquio TIME,
     status ENUM('pending', 'accepted', 'rejected') DEFAULT 'pending',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (employer_id) REFERENCES users(id) ON DELETE CASCADE,
@@ -82,7 +84,10 @@ INSERT INTO users (nome, cognome, eta, anni_esperienza, max_distanza_km, citta, 
 ('Giulia', 'Russo', 22, 1, 40, 'Palermo', 38.1156879, 13.3612671, 'giulia@email.com', 'ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f', 'candidato', NULL),
 ('Roberto', 'Gallo', 29, 8, 20, 'Genova', 44.4056499, 8.946256, 'roberto@email.com', 'ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f', 'candidato', NULL),
 ('Martina', 'Ricci', 26, 3, 60, 'Venezia', 45.4408474, 12.3155151, 'martina@email.com', 'ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f', 'candidato', NULL),
-('Elena', 'Marino', 24, 2, NULL, 'Bari', 41.1171432, 16.8718715, 'elena@email.com', 'ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f', 'candidato', NULL);
+('Elena', 'Marino', 24, 2, NULL, 'Bari', 41.1171432, 16.8718715, 'elena@email.com', 'ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f', 'candidato', NULL),
+('Test', 'Candidato', 25, 3, 50, 'Milano', 45.4642035, 9.1899799, 'candidato@candidato.com', '03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4', 'candidato', NULL),
+('Alessandro', 'Gialli', 22, 1, 10, 'Milano', 45.4642035, 9.1899799, 'alessandro@email.com', 'ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f', 'candidato', NULL),
+('Beatrice', 'Viola', 35, 10, NULL, 'Torino', 45.0703393, 7.6868565, 'beatrice@email.com', 'ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f', 'candidato', NULL);
 
 -- Datori di lavoro (IDs 11 to 15)
 INSERT INTO users (nome, cognome, anni_esperienza, citta, lat, lon, email, password, ruolo, nome_azienda, descrizione_azienda) VALUES 
@@ -90,7 +95,8 @@ INSERT INTO users (nome, cognome, anni_esperienza, citta, lat, lon, email, passw
 ('Luca', 'Martini', 0, 'Roma', 41.9027835, 12.4963655, 'jobs@startuphub.it', 'ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f', 'datore', 'StartupHub Italia', 'Incubatore di startup con focus su AI e Machine Learning. Offriamo un ambiente dinamico e stimolante per sviluppatori junior e senior.'),
 ('Giulia', 'Conti', 0, 'Firenze', 43.7695604, 11.2558136, 'info@webagencypro.com', 'ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f', 'datore', 'WebAgency Pro', 'Agenzia web specializzata in e-commerce e siti corporate. Lavoriamo con React, Node.js e tecnologie cloud moderne.'),
 ('Andrea', 'Romano', 0, 'Torino', 45.0703393, 7.6868565, 'recruiting@cloudsolutions.it', 'ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f', 'datore', 'CloudSolutions S.p.a.', 'Sviluppiamo infrastrutture cloud sicure e scalabili per le aziende.'),
-('Francesca', 'Esposito', 0, 'Napoli', 40.8517746, 14.2681244, 'careers@devfactory.com', 'ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f', 'datore', 'DevFactory SRL', 'Software house emergente specializzata nello sviluppo di applicazioni mobile cross-platform e web app.');
+('Francesca', 'Esposito', 0, 'Napoli', 40.8517746, 14.2681244, 'careers@devfactory.com', 'ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f', 'datore', 'DevFactory SRL', 'Software house emergente specializzata nello sviluppo di applicazioni mobile cross-platform e web app.'),
+('Test', 'Datore', 0, 'Milano', 45.4642035, 9.1899799, 'datore@datore.com', '03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4', 'datore', 'TestCompany SPA', 'Siamo una compagnia di test usata per validare le piattaforme.');
 
 -- CV dei candidati
 INSERT INTO cvs (user_id, bio, competenze, linguaggi, telefono, instagram, luogo_preferito, disponibile_ovunque, competenze_linguistiche, smartworking) VALUES 
@@ -103,22 +109,33 @@ INSERT INTO cvs (user_id, bio, competenze, linguaggi, telefono, instagram, luogo
 (7, 'Neolaureata in informatica con passione per lo sviluppo web e la data science.', 'Machine Learning, Data Analysis, Git', 'Python, JavaScript, R, SQL', '3374445566', '@giulia_data', 'Palermo', FALSE, '[{"lingua":"Inglese","livello":"B1"}]', FALSE),
 (8, 'Backend engineer esperto in microservizi e architetture event-driven. Lavoro molto con Kafka e Spring Boot.', 'Microservices, Kafka, Spring Boot', 'Java, Kotlin, SQL', '3385556677', '@roberto_backend', 'Genova', FALSE, '[{"lingua":"Inglese","livello":"C1"}]', TRUE),
 (9, 'Frontend Developer creativa. Mi piace costruire interfacce veloci e accessibili.', 'React, Next.js, Tailwind', 'JavaScript, TypeScript, HTML, CSS', '3396667788', '@martina_front', 'Venezia', FALSE, '[{"lingua":"Inglese","livello":"B2"},{"lingua":"Spagnolo","livello":"B1"}]', FALSE),
-(10, 'Data Engineer Junior con una forte base matematica. Mi piace manipolare i dati ed estrarne valore.', 'ETL, Data Warehousing, SQL', 'Python, SQL, Scala', '3307778899', '@elena_data', 'Bari', TRUE, '[{"lingua":"Inglese","livello":"B2"}]', TRUE);
+(10, 'Data Engineer Junior con una forte base matematica. Mi piace manipolare i dati ed estrarne valore.', 'ETL, Data Warehousing, SQL', 'Python, SQL, Scala', '3307778899', '@elena_data', 'Bari', TRUE, '[{"lingua":"Inglese","livello":"B2"}]', TRUE),
+(11, 'Questo è il profilo candidato di test con cui puoi validare il sistema.', 'Testing, Debugging', 'JavaScript, HTML', '3330000000', '@candidato_test', 'Milano', FALSE, '[{"lingua":"Inglese","livello":"B2"}]', TRUE),
+(12, 'Sviluppatore alle prime armi, molta voglia di imparare.', 'HTML, CSS', 'JavaScript, C++', '3331111111', '@alessandro_dev', 'Milano', FALSE, '[{"lingua":"Inglese","livello":"A2"}]', FALSE),
+(13, 'Senior Software Engineer. Lavoro principalmente su architetture a microservizi.', 'System Design, Kubernetes', 'Go, Python, Rust', '3332222222', '@beatrice_senior', 'Torino', TRUE, '[{"lingua":"Inglese","livello":"C2"}]', TRUE);
 
 -- Proposte di Colloquio (1-2 per profilo)
-INSERT INTO interview_requests (employer_id, candidate_id, posizione_cercata, linguaggi_richiesti, range_stipendio, luogo, status) VALUES 
-(11, 1, 'Senior Full Stack Developer', 'Node.js, React', '35.000€ - 45.000€', 'Milano', 'pending'),
-(12, 1, 'Tech Lead', 'Node.js, TypeScript', '40.000€ - 55.000€', 'Milano / Remoto', 'pending'),
-(12, 2, 'Backend Developer (AI team)', 'Python, SQL', '30.000€ - 38.000€', 'Roma', 'pending'),
-(13, 3, 'Frontend / UX Designer', 'React, Vue', '25.000€ - 32.000€', 'Firenze', 'pending'),
-(14, 3, 'UI Developer', 'JavaScript, CSS', '28.000€ - 35.000€', 'Remoto', 'pending'),
-(14, 4, 'Junior Cloud / Security', 'Python, Bash', '22.000€ - 26.000€', 'Torino', 'pending'),
-(15, 5, 'Sviluppatore Mobile Flutter', 'Dart, Kotlin', '28.000€ - 35.000€', 'Napoli / Remoto', 'pending'),
-(13, 5, 'App Developer', 'Swift, Kotlin', '26.000€ - 32.000€', 'Firenze', 'pending'),
-(11, 6, 'Cloud Infrastructure Engineer', 'AWS, Terraform', '40.000€ - 50.000€', 'Remoto', 'pending'),
-(12, 7, 'Junior Data Scientist', 'Python, SQL', '24.000€ - 28.000€', 'Roma', 'pending'),
-(15, 7, 'Data Analyst', 'Python, R', '23.000€ - 27.000€', 'Napoli', 'pending'),
-(11, 8, 'Senior Java Backend', 'Java, Spring Boot', '45.000€ - 55.000€', 'Milano / Remoto', 'pending'),
-(13, 9, 'React Developer', 'JavaScript, TypeScript', '28.000€ - 36.000€', 'Venezia / Remoto', 'pending'),
-(15, 9, 'Frontend Engineer', 'Next.js', '30.000€ - 40.000€', 'Remoto', 'pending'),
-(14, 10, 'Data Engineer Junior', 'Python, SQL', '25.000€ - 30.000€', 'Torino', 'pending');
+INSERT INTO interview_requests (employer_id, candidate_id, posizione_cercata, linguaggi_richiesti, range_stipendio, luogo, data_colloquio, ora_colloquio, status) VALUES 
+(11, 1, 'Senior Full Stack Developer', 'Node.js, React', '35.000€ - 45.000€', 'Milano', '2024-06-15', '10:00', 'pending'),
+(12, 1, 'Tech Lead', 'Node.js, TypeScript', '40.000€ - 55.000€', 'Milano / Remoto', '2024-06-16', '14:30', 'pending'),
+(12, 2, 'Backend Developer (AI team)', 'Python, SQL', '30.000€ - 38.000€', 'Roma', '2024-06-17', '11:00', 'pending'),
+(13, 3, 'Frontend / UX Designer', 'React, Vue', '25.000€ - 32.000€', 'Firenze', '2024-06-18', '09:30', 'pending'),
+(14, 3, 'UI Developer', 'JavaScript, CSS', '28.000€ - 35.000€', 'Remoto', '2024-06-19', '15:00', 'pending'),
+(14, 4, 'Junior Cloud / Security', 'Python, Bash', '22.000€ - 26.000€', 'Torino', '2024-06-20', '10:30', 'pending'),
+(15, 5, 'Sviluppatore Mobile Flutter', 'Dart, Kotlin', '28.000€ - 35.000€', 'Napoli / Remoto', '2024-06-21', '16:00', 'pending'),
+(13, 5, 'App Developer', 'Swift, Kotlin', '26.000€ - 32.000€', 'Firenze', '2024-06-22', '12:00', 'pending'),
+(11, 6, 'Cloud Infrastructure Engineer', 'AWS, Terraform', '40.000€ - 50.000€', 'Remoto', '2024-06-23', '09:00', 'pending'),
+(12, 7, 'Junior Data Scientist', 'Python, SQL', '24.000€ - 28.000€', 'Roma', '2024-06-24', '14:00', 'pending'),
+(15, 7, 'Data Analyst', 'Python, R', '23.000€ - 27.000€', 'Napoli', '2024-06-25', '11:30', 'pending'),
+(11, 8, 'Senior Java Backend', 'Java, Spring Boot', '45.000€ - 55.000€', 'Milano / Remoto', '2024-06-26', '15:30', 'pending'),
+(13, 9, 'React Developer', 'JavaScript, TypeScript', '28.000€ - 36.000€', 'Venezia / Remoto', '2024-06-27', '10:00', 'pending'),
+(15, 9, 'Frontend Engineer', 'Next.js', '30.000€ - 40.000€', 'Remoto', '2024-06-28', '16:30', 'pending'),
+(14, 10, 'Data Engineer Junior', 'Python, SQL', '25.000€ - 30.000€', 'Torino', '2024-06-29', '09:30', 'pending'),
+(16, 11, 'Full Stack Engineer', 'Node.js, React', '30.000€ - 40.000€', 'Milano', '2026-06-01', '10:00', 'pending'),
+(16, 12, 'Junior Dev', 'HTML, CSS', '20.000€ - 25.000€', 'Milano', '2026-06-02', '11:00', 'pending');
+
+-- L'account datore (id 16) salva anche il candidato di test (id 11)
+INSERT INTO employer_interactions (employer_id, candidate_id, action) VALUES
+(16, 11, 'save'),
+(16, 12, 'save'),
+(16, 13, 'save');
