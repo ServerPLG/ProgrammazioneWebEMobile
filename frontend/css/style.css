@@ -12,6 +12,12 @@
   --text-muted: #cccccc; /* Colore del testo secondario (grigio chiaro) */
 }
 
+.brand-font {
+  font-family: 'Arial', sans-serif !important;
+  font-weight: 900 !important;
+  font-style: italic !important;
+}
+
 /* Regole base per tutti gli elementi HTML della pagina */
 * {
   box-sizing: border-box; /* Fa in modo che il padding non allarghi gli elementi */
@@ -156,4 +162,285 @@ body {
   background-color: #004d1a; /* Lo sfondo diventa verde scuro */
   border-color: var(--primary-color); /* Il bordo diventa verde fluo */
   color: white; /* Il testo diventa bianco */
+}
+/* ================================================================
+   NUOVE CLASSI PER LA STRUTTURA DELLA DEVCARD (PROTOTIPO)
+   ================================================================ */
+
+.devcard-layout {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  width: 100%;
+}
+
+.devcard {
+  position: relative;
+}
+
+/* Contro-bordo interno sottile */
+.devcard::before {
+  content: '';
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  right: 8px;
+  bottom: 8px;
+  border: 2.5px solid rgba(0, 255, 102, 0.4);
+  border-radius: 15px;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.card-header-top {
+  display: flex;
+  align-items: flex-start;
+  gap: 1.2rem;
+}
+
+.avatar-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.avatar-container img {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 4px solid var(--primary-color);
+  box-shadow: 0 0 30px rgba(0, 255, 102, 0.25);
+}
+
+.name-stack {
+  flex: 1;
+}
+
+.name-stack h3 {
+  font-size: 1.8rem;
+  color: var(--text-main);
+  margin-bottom: 0.2rem;
+  line-height: 1.1;
+}
+
+.name-stack .age-label {
+  font-size: 1rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  font-weight: 600;
+  margin-bottom: 0.8rem;
+  display: block;
+}
+
+.tech-tags-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.card-grid-main {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+  border-top: 1px solid var(--card-border);
+  padding-top: 1.2rem;
+}
+
+.full-width-section {
+  grid-column: 1 / -1;
+  border-top: 1px solid var(--card-border);
+  padding-top: 1.2rem;
+}
+
+.section-label-new {
+  font-size: 0.8rem;
+  color: var(--primary-color);
+  font-weight: 700;
+  letter-spacing: 1px;
+  margin-bottom: 0.6rem;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.list-content {
+  font-size: 0.95rem;
+  color: var(--text-main);
+  line-height: 1.4;
+}
+
+.card-footer-social {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--card-border);
+}
+
+.social-icons-group {
+  display: flex;
+  gap: 1rem;
+}
+
+.social-icon {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 50%;
+  color: var(--text-main);
+  transition: all 0.3s;
+  cursor: pointer;
+}
+
+.social-icon:hover {
+  background: var(--primary-color);
+  color: black;
+  transform: translateY(-2px);
+}
+
+.designed-tag {
+  font-size: 0.55rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  opacity: 0.6;
+}
+
+/* FLIP CARD SYSTEM */
+.scene {
+  perspective: 1000px;
+  width: 100%;
+  max-width: 480px;
+  cursor: pointer;
+  margin: 0 auto;
+}
+
+.devcard-wrapper {
+  width: 100%;
+  position: relative;
+  transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  transform-style: preserve-3d;
+}
+
+.devcard-wrapper.is-flipped {
+  transform: rotateY(180deg);
+}
+
+.designed-tag {
+  font-family: 'Arial', sans-serif !important;
+  font-weight: 900 !important;
+  font-style: italic !important;
+  font-size: 0.55rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  opacity: 0.6;
+}
+
+.devcard-face {
+  width: 100%;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  border-radius: 20px;
+  position: relative;
+}
+
+.devcard-face::before {
+  content: '';
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  right: 8px;
+  bottom: 8px;
+  border: 2.5px solid rgba(0, 255, 102, 0.4);
+  border-radius: 15px;
+  pointer-events: none;
+  z-index: 10;
+}
+
+.devcard-back {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  transform: rotateY(180deg);
+  background: var(--card-bg);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--card-border);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  text-align: center;
+}
+
+.card-glow {
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
+  background: var(--primary-color);
+  border-radius: 26px;
+  z-index: -1;
+  opacity: 0.1;
+  filter: blur(15px);
+}
+
+/* RESPONSIVENESS */
+@media (max-width: 550px) {
+  .card-header-top {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 1rem;
+  }
+
+  .avatar-container img {
+    width: 100px;
+    height: 100px;
+  }
+
+  .name-stack h3 {
+    font-size: 1.5rem;
+  }
+
+  .card-grid-main {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .glass-panel {
+    padding: 1.5rem;
+  }
+
+  .scene {
+    max-width: 100%;
+  }
+  
+  .auth-container {
+    padding: 1rem;
+  }
+
+  .title {
+    font-size: 1.8rem;
+  }
+}
+
+@media (max-width: 350px) {
+  .card-footer-social {
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  .social-icons-group {
+    justify-content: center;
+  }
 }

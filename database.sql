@@ -36,6 +36,8 @@ CREATE TABLE IF NOT EXISTS cvs (
     disponibile_ovunque BOOLEAN DEFAULT FALSE,
     competenze_linguistiche TEXT,
     smartworking BOOLEAN DEFAULT FALSE,
+    linkedin VARCHAR(255) DEFAULT NULL,
+    github VARCHAR(255) DEFAULT NULL,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 

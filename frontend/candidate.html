@@ -6,7 +6,8 @@
     <!-- Configurazione standard per far funzionare bene i testi e i telefoni -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Il tuo Profilo - DevCards</title>
+    <title>Profilo - DevCards</title>
+    <link rel="icon" type="image/png" href="./logo.png">
     <link rel="stylesheet" href="./css/style.css">
     <style>
         .lingua-row {
@@ -46,8 +47,8 @@
     <!-- Intestazione della pagina in alto -->
     <header
         style="padding: 1rem 2rem; background: var(--card-bg); border-bottom: 1px solid var(--card-border); display: flex; justify-content: space-between; align-items: center; backdrop-filter: blur(10px);">
-        <h2 style="color: var(--primary-color); margin: 0; font-size: 1.5rem; font-weight: 700;">DevCards <span
-                style="font-size: 0.9rem; color: var(--text-muted); font-weight: 400;">Candidate Dashboard</span></h2>
+        <h2 style="color: var(--primary-color); margin: 0; font-size: 1.5rem; font-weight: 700;"><span class="brand-font">DevCards</span> <span
+                style="font-size: 0.9rem; color: var(--text-muted); font-weight: 400;">Profilo</span></h2>
         <div style="display: flex; gap: 1rem; align-items: center;">
             <a href="candidate_home.html" style="color: var(--text-main); text-decoration: none; font-size: 0.95rem; font-weight: 600; padding: 0.5rem 1rem; border-radius: 8px; background: rgba(255,255,255,0.1); transition: all 0.3s;">🏠 Home</a>
             <!-- Bottone per uscire -->
@@ -58,7 +59,7 @@
 
     <main style="padding: 2rem; max-width: 800px; margin: 0 auto; width: 100%;">
         <div class="glass-panel" style="max-width: 100%;">
-            <h2 class="title" style="font-size: 2rem; text-align: left; margin-bottom: 2rem;">Compila il tuo CV</h2>
+            <h2 class="title" style="font-size: 2rem; text-align: left; margin-bottom: 2rem;">👤 Profilo</h2>
 
             <!-- Inizio del modulo. Quando l'utente preme "Salva" il javascript cattura questo ID -->
             <form id="cvForm">
@@ -119,8 +120,19 @@
                         <input type="tel" id="cvPhone" class="form-control" placeholder="+39 ...">
                     </div>
                     <div class="form-group" style="flex: 1; min-width: 250px;">
-                        <label>Link Instagram</label>
-                        <input type="url" id="cvInsta" class="form-control" placeholder="https://instagram.com/...">
+                        <label>Profilo LinkedIn</label>
+                        <input type="url" id="cvLinkedIn" class="form-control" placeholder="https://linkedin.com/in/...">
+                    </div>
+                </div>
+
+                <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                    <div class="form-group" style="flex: 1; min-width: 250px;">
+                        <label>Profilo GitHub</label>
+                        <input type="url" id="cvGitHub" class="form-control" placeholder="https://github.com/...">
+                    </div>
+                    <div class="form-group" style="flex: 1; min-width: 250px;">
+                        <label>Link Social (Instagram/Altro)</label>
+                        <input type="url" id="cvInsta" class="form-control" placeholder="https://...">
                     </div>
                 </div>
 

@@ -7,6 +7,7 @@
     <!-- Serve per far sì che la pagina si adatti allo schermo dei cellulari, me l'ha insegnato un amico -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DevCards - Incontra il tuo prossimo Developer</title>
+    <link rel="icon" type="image/png" href="./logo.png">
     <link rel="stylesheet" href="./css/style.css">
     <!-- Leaflet CSS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -80,7 +81,7 @@
     <div class="auth-container">
         <!-- Pannello per il login (quello che si vede appena apri la pagina) -->
         <div class="glass-panel" id="loginPanel">
-            <h1 class="title">DevCards</h1>
+            <h1 class="title"><span class="brand-font">DevCards</span></h1>
             <p style="text-align: center; color: var(--text-muted); margin-bottom: 2rem;">Accedi per continuare</p>
             
             <!-- Inizio del modulo di login. L'ID mi serve in Javascript per "catturare" i dati quando l'utente preme invio -->
@@ -107,7 +108,7 @@
 
         <div class="glass-panel" id="registerPanel" style="display: none; max-width: 650px;">
             <h1 class="title">Unisciti a noi</h1>
-            <p style="text-align: center; color: var(--text-muted); margin-bottom: 2rem;">Crea il tuo account DevCards</p>
+            <p style="text-align: center; color: var(--text-muted); margin-bottom: 2rem;">Crea il tuo account <span class="brand-font">DevCards</span></p>
             
             <form id="registerForm">
                 <div class="role-selector">

@@ -50,6 +50,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                 document.getElementById('cvLang').value = data.linguaggi || '';
                 document.getElementById('cvPhone').value = data.telefono || '';
                 document.getElementById('cvInsta').value = data.instagram || '';
+                document.getElementById('cvLinkedIn').value = data.linkedin || '';
+                document.getElementById('cvGitHub').value = data.github || '';
                 document.getElementById('cvLuogo').value = data.luogo_preferito || '';
                 document.getElementById('cvSmartworking').checked = !!data.smartworking;
                 document.getElementById('cvDisponibileOvunque').checked = !!data.disponibile_ovunque;
@@ -85,6 +87,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         const linguaggi = document.getElementById('cvLang').value;
         const telefono = document.getElementById('cvPhone').value;
         const instagram = document.getElementById('cvInsta').value;
+        const linkedin = document.getElementById('cvLinkedIn').value;
+        const github = document.getElementById('cvGitHub').value;
         const luogo_preferito = document.getElementById('cvLuogo').value;
         const smartworking = document.getElementById('cvSmartworking').checked;
         const disponibile_ovunque = document.getElementById('cvDisponibileOvunque').checked;
@@ -107,7 +111,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     user_id: user.id,
-                    bio, competenze, linguaggi, telefono, instagram,
+                    bio, competenze, linguaggi, telefono, instagram, linkedin, github,
                     luogo_preferito, disponibile_ovunque,
                     competenze_linguistiche, smartworking
                 })

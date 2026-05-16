@@ -245,8 +245,8 @@ app.get('/api/devcards', async (req, res) => {
         const empLon = employers[0]?.lon;
 
         let query = `
-            SELECT u.id, u.nome, u.cognome, u.eta, u.anni_esperienza, u.max_distanza_km, u.citta, u.lat, u.lon, u.foto_profilo,
-                   c.bio, c.competenze, c.linguaggi, c.telefono, c.instagram, 
+            SELECT u.id, u.nome, u.cognome, u.eta, u.anni_esperienza, u.max_distanza_km, u.citta, u.lat, u.lon, u.email, u.foto_profilo,
+                   c.bio, c.competenze, c.linguaggi, c.telefono, c.instagram, c.linkedin, c.github, 
                    c.luogo_preferito, c.disponibile_ovunque, c.competenze_linguistiche, c.smartworking 
             FROM users u
             LEFT JOIN cvs c ON u.id = c.user_id
@@ -327,8 +327,8 @@ app.get('/api/devcards/saved', async (req, res) => {
         const empLon = employers[0]?.lon;
 
         let query = `
-            SELECT u.id, u.nome, u.cognome, u.eta, u.anni_esperienza, u.max_distanza_km, u.citta, u.lat, u.lon, u.foto_profilo,
-                   c.bio, c.competenze, c.linguaggi, c.telefono, c.instagram, 
+            SELECT u.id, u.nome, u.cognome, u.eta, u.anni_esperienza, u.max_distanza_km, u.citta, u.lat, u.lon, u.email, u.foto_profilo,
+                   c.bio, c.competenze, c.linguaggi, c.telefono, c.instagram, c.linkedin, c.github, 
                    c.luogo_preferito, c.disponibile_ovunque, c.competenze_linguistiche, c.smartworking 
             FROM users u
             LEFT JOIN cvs c ON u.id = c.user_id
@@ -380,8 +380,8 @@ app.get('/api/cv/:userId', async (req, res) => {
     try {
         const { userId } = req.params;
         const [rows] = await db.execute(
-            `SELECT u.id, u.nome, u.cognome, u.eta, u.anni_esperienza, u.max_distanza_km, u.citta, u.lat, u.lon, u.foto_profilo,
-                    c.bio, c.competenze, c.linguaggi, c.telefono, c.instagram,
+            `SELECT u.id, u.nome, u.cognome, u.eta, u.anni_esperienza, u.max_distanza_km, u.citta, u.lat, u.lon, u.email, u.foto_profilo,
+                    c.bio, c.competenze, c.linguaggi, c.telefono, c.instagram, c.linkedin, c.github,
                     c.luogo_preferito, c.disponibile_ovunque, c.competenze_linguistiche, c.smartworking 
              FROM users u
              LEFT JOIN cvs c ON u.id = c.user_id
@@ -399,7 +399,7 @@ app.get('/api/cv/:userId', async (req, res) => {
 // 4.5 API per i candidati: Upsert CV
 app.post('/api/cv', async (req, res) => {
     try {
-        const { user_id, bio, competenze, linguaggi, telefono, instagram, luogo_preferito, disponibile_ovunque, competenze_linguistiche, smartworking } = req.body;
+        const { user_id, bio, competenze, linguaggi, telefono, instagram, linkedin, github, luogo_preferito, disponibile_ovunque, competenze_linguistiche, smartworking } = req.body;
 
         const [users] = await db.execute('SELECT * FROM users WHERE id = ? AND ruolo = ?', [user_id, 'candidato']);
         if (users.length === 0) return res.status(403).json({ error: 'Non autorizzato o utente non trovato' });
@@ -416,14 +416,14 @@ app.post('/api/cv', async (req, res) => {
 
         if (cvs.length > 0) {
             await db.execute(
-                'UPDATE cvs SET bio=?, competenze=?, linguaggi=?, telefono=?, instagram=?, luogo_preferito=?, disponibile_ovunque=?, competenze_linguistiche=?, smartworking=? WHERE user_id=?',
-                [bio, competenze, linguaggi, telefono, instagram, luogo_preferito, disponibile_ovunque, competenze_linguistiche, smartworking, user_id]
+                'UPDATE cvs SET bio=?, competenze=?, linguaggi=?, telefono=?, instagram=?, linkedin=?, github=?, luogo_preferito=?, disponibile_ovunque=?, competenze_linguistiche=?, smartworking=? WHERE user_id=?',
+                [bio, competenze, linguaggi, telefono, instagram, linkedin, github, luogo_preferito, disponibile_ovunque, competenze_linguistiche, smartworking, user_id]
             );
             res.json({ message: 'CV aggiornato con successo' });
         } else {
             await db.execute(
-                'INSERT INTO cvs (user_id, bio, competenze, linguaggi, telefono, instagram, luogo_preferito, disponibile_ovunque, competenze_linguistiche, smartworking) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
-                [user_id, bio, competenze, linguaggi, telefono, instagram, luogo_preferito, disponibile_ovunque, competenze_linguistiche, smartworking]
+                'INSERT INTO cvs (user_id, bio, competenze, linguaggi, telefono, instagram, linkedin, github, luogo_preferito, disponibile_ovunque, competenze_linguistiche, smartworking) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+                [user_id, bio, competenze, linguaggi, telefono, instagram, linkedin, github, luogo_preferito, disponibile_ovunque, competenze_linguistiche, smartworking]
             );
             res.json({ message: 'CV creato con successo' });
         }

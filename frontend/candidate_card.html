@@ -4,7 +4,8 @@
     <!-- Solite cose: caratteri italiani e grandezza per i cellulari -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>La tua DevCard - DevCards</title>
+    <title>La tua Card - DevCards</title>
+    <link rel="icon" type="image/png" href="./logo.png">
     <!-- Questo serve per l'ottimizzazione sui motori di ricerca, ci ha spiegato il prof -->
     <meta name="description" content="Anteprima della tua DevCard come la vedranno i datori di lavoro su DevCards.">
     <link rel="stylesheet" href="./css/style.css">
@@ -120,73 +121,7 @@
             transform: translateX(-4px);
         }
 
-        .card-glow {
-            position: absolute;
-            top: -2px;
-            left: -2px;
-            right: -2px;
-            bottom: -2px;
-            background: var(--gradient);
-            border-radius: 26px;
-            z-index: -1;
-            opacity: 0.15;
-            filter: blur(20px);
-            animation: pulseGlow 3s ease-in-out infinite;
-        }
-
-        @keyframes pulseGlow {
-            0%, 100% { opacity: 0.1; transform: scale(1); }
-            50% { opacity: 0.2; transform: scale(1.02); }
-        }
-
-        /* Flip Card styles */
-        .scene {
-            perspective: 1000px;
-            width: 100%;
-            max-width: 480px;
-            cursor: pointer;
-            margin: 0 auto;
-        }
-
-        .devcard-wrapper {
-            width: 100%;
-            position: relative;
-            transition: transform 0.8s;
-            transform-style: preserve-3d;
-        }
-
-        .devcard-wrapper.is-flipped {
-            transform: rotateY(180deg);
-        }
-
-        .devcard-face {
-            width: 100%;
-            -webkit-backface-visibility: hidden;
-            backface-visibility: hidden;
-            border-radius: 20px;
-        }
-
-        .devcard-front {
-            /* front specific styles if any */
-        }
-
-        .devcard-back {
-            position: absolute;
-            top: 0;
-            left: 0;
-            height: 100%;
-            transform: rotateY(180deg);
-            background: var(--card-bg);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border: 1px solid var(--card-border);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 2rem;
-            text-align: center;
-        }
+        /* Gli stili strutturali sono ora in style.css */
 
         .qr-container {
             background: white;
@@ -199,7 +134,7 @@
 </head>
 <body>
     <header style="padding: 1rem 2rem; background: var(--card-bg); border-bottom: 1px solid var(--card-border); display: flex; justify-content: space-between; align-items: center; backdrop-filter: blur(10px);">
-        <h2 style="color: var(--primary-color); margin: 0; font-size: 1.5rem; font-weight: 700;">DevCards <span style="font-size: 0.9rem; color: var(--text-muted); font-weight: 400;">La tua Card</span></h2>
+        <h2 style="color: var(--primary-color); margin: 0; font-size: 1.5rem; font-weight: 700;"><span class="brand-font">DevCards</span> <span style="font-size: 0.9rem; color: var(--text-muted); font-weight: 400;">La tua Card</span></h2>
         <div style="display: flex; gap: 1rem; align-items: center;">
             <a href="candidate_home.html" style="color: var(--text-main); text-decoration: none; font-size: 0.95rem; font-weight: 600; padding: 0.5rem 1rem; border-radius: 8px; background: rgba(255,255,255,0.1); transition: all 0.3s;">🏠 Home</a>
             <button id="btnLogout" class="btn" style="padding: 0.5rem 1rem; font-size: 0.9rem; background: transparent; border: 1px solid var(--primary-color); color: var(--primary-color); width: auto;">Logout</button>
