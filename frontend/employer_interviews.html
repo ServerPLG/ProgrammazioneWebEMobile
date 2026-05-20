@@ -22,9 +22,8 @@
         }
 
         .interview-card {
-            background: var(--card-bg);
-            backdrop-filter: blur(16px);
-            border: 1px solid var(--card-border);
+            background: var(--card-bg-light);
+            border: 4px solid var(--secondary-color);
             border-radius: 20px;
             padding: 1.5rem;
             margin-bottom: 1.5rem;
@@ -57,7 +56,7 @@
         }
 
         .interview-info h4 {
-            color: var(--text-main);
+            color: var(--text-dark);
             font-size: 1.2rem;
             margin: 0 0 0.3rem;
         }
@@ -68,7 +67,7 @@
             gap: 1rem;
             margin: 0.5rem 0;
             font-size: 0.9rem;
-            color: var(--text-muted);
+            color: var(--text-muted-dark);
         }
 
         .status-badge {
@@ -88,11 +87,13 @@
     </style>
 </head>
 <body>
-    <header style="padding: 1rem 2rem; background: var(--card-bg); border-bottom: 1px solid var(--card-border); display: flex; justify-content: space-between; align-items: center; backdrop-filter: blur(10px);">
-        <h2 style="color: var(--primary-color); margin: 0; font-size: 1.5rem; font-weight: 700;"><span class="brand-font">DevCards</span> <span style="font-size: 0.9rem; color: var(--text-muted); font-weight: 400;">Colloqui</span></h2>
+
+
+    <header style="padding: 1rem 2rem; background: var(--card-bg-light); border-bottom: 4px solid var(--secondary-color); display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+        <h2 style="color: var(--primary-color); margin: 0; font-size: 1.5rem; font-weight: 700;"><span class="brand-font">DevCards</span> <span style="font-size: 0.9rem; color: var(--text-muted-dark); font-weight: 400;">Colloqui</span></h2>
         <div style="display: flex; gap: 1rem; align-items: center;">
-            <a href="employer.html" style="color: var(--text-main); text-decoration: none; font-size: 0.95rem; font-weight: 600; padding: 0.5rem 1rem; border-radius: 8px; background: rgba(255,255,255,0.1); transition: all 0.3s;">⬅️ Torna a Discovery</a>
-            <button id="btnLogout" class="btn" style="padding: 0.5rem 1rem; font-size: 0.9rem; background: transparent; border: 1px solid var(--primary-color); color: var(--primary-color); width: auto;">Logout</button>
+            <a href="employer.html" class="nav-btn">⬅️ Torna a Discovery</a>
+            <button id="btnLogout" class="nav-btn-logout">Logout</button>
         </div>
     </header>
 
@@ -101,10 +102,11 @@
         
         <!-- Contenitore dove JavaScript aggiungerà i colloqui -->
         <div id="interviewsContainer">
-            <p style="color: var(--text-muted);">Caricamento...</p>
+            <p style="color: var(--text-muted-dark);">Caricamento...</p>
         </div>
     </main>
 
     <script src="./js/employer_interviews.js"></script>
+    <script src="./js/bg-script.js"></script>
 </body>
 </html>

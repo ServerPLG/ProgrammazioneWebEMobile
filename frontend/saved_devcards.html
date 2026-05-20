@@ -26,8 +26,8 @@
         }
         .modal-overlay.active { display: flex; }
         .modal-content {
-            background: #1a1a2e;
-            border: 1px solid var(--card-border);
+            background: var(--card-bg-light);
+            border: 4px solid var(--secondary-color);
             border-radius: 20px;
             padding: 2.5rem;
             width: 90%;
@@ -38,40 +38,42 @@
             float: right;
             background: none;
             border: none;
-            color: var(--text-muted);
+            color: var(--text-muted-dark);
             font-size: 1.5rem;
             cursor: pointer;
         }
     </style>
 </head>
 <body>
-    <header style="padding: 1rem 2rem; background: var(--card-bg); border-bottom: 1px solid var(--card-border); display: flex; justify-content: space-between; align-items: center; backdrop-filter: blur(10px);">
-        <h2 style="color: var(--primary-color); margin: 0; font-size: 1.5rem; font-weight: 700;"><span class="brand-font">DevCards</span> <span style="font-size: 0.9rem; color: var(--text-muted); font-weight: 400;">Preferiti</span></h2>
+
+
+    <header style="padding: 1rem 2rem; background: var(--card-bg-light); border-bottom: 4px solid var(--secondary-color); display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+        <h2 style="color: var(--primary-color); margin: 0; font-size: 1.5rem; font-weight: 700;"><span class="brand-font">DevCards</span> <span style="font-size: 0.9rem; color: var(--text-muted-dark); font-weight: 400;">Preferiti</span></h2>
         <div style="display: flex; gap: 1rem; align-items: center;">
-            <a href="employer.html" style="color: var(--text-main); text-decoration: none; font-size: 0.95rem; font-weight: 600; padding: 0.5rem 1rem; border-radius: 8px; background: rgba(255,255,255,0.1); transition: all 0.3s;">⬅️ Torna a Discovery</a>
-            <a href="employer_interviews.html" style="color: var(--text-main); text-decoration: none; font-size: 0.95rem; font-weight: 600; padding: 0.5rem 1rem; border-radius: 8px; background: rgba(255,255,255,0.1); transition: all 0.3s;">📅 Colloqui</a>
-            <button id="btnLogout" class="btn" style="padding: 0.5rem 1rem; font-size: 0.9rem; background: transparent; border: 1px solid var(--primary-color); color: var(--primary-color); width: auto;">Logout</button>
+            <a href="employer.html" class="nav-btn">⬅️ Torna a Discovery</a>
+            <a href="employer_interviews.html" class="nav-btn">📅 Colloqui</a>
+            <button id="btnLogout" class="nav-btn-logout">Logout</button>
         </div>
     </header>
 
     <main style="padding: 2rem; max-width: 1200px; margin: 0 auto; width: 100%;">
         <!-- Barra dei filtri in alto -->
-        <div class="filters" style="margin-bottom: 2rem; display: flex; gap: 1rem; flex-wrap: wrap; background: rgba(0,0,0,0.2); padding: 1.5rem; border-radius: 16px; border: 1px solid var(--card-border);">
+        <div class="filters" style="margin-bottom: 2rem; display: flex; gap: 1rem; flex-wrap: wrap; background: var(--card-bg-light); padding: 1.5rem; border-radius: 16px; border: 4px solid var(--secondary-color); box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
             <div style="flex: 1; min-width: 180px;">
-                <label style="color: var(--text-muted); font-size: 0.9rem; display: block; margin-bottom: 0.5rem;">Linguaggio</label>
+                <label style="color: var(--text-muted-dark); font-size: 0.9rem; display: block; margin-bottom: 0.5rem;">Linguaggio</label>
                 <!-- Casella di testo per filtrare per linguaggio. Il JS userà questo ID -->
                 <input type="text" id="filterLang" class="form-control" placeholder="Es. JavaScript">
             </div>
             <div style="flex: 1; min-width: 180px;">
-                <label style="color: var(--text-muted); font-size: 0.9rem; display: block; margin-bottom: 0.5rem;">Città</label>
+                <label style="color: var(--text-muted-dark); font-size: 0.9rem; display: block; margin-bottom: 0.5rem;">Città</label>
                 <input type="text" id="filterCity" class="form-control" placeholder="Es. Milano">
             </div>
             <div style="flex: 1; min-width: 150px;">
-                <label style="color: var(--text-muted); font-size: 0.9rem; display: block; margin-bottom: 0.5rem;">Anni Esperienza Minimi</label>
+                <label style="color: var(--text-muted-dark); font-size: 0.9rem; display: block; margin-bottom: 0.5rem;">Anni Esperienza Minimi</label>
                 <input type="number" id="filterExp" class="form-control" placeholder="Es. 5" min="0">
             </div>
             <div style="flex: 1; min-width: 180px;">
-                <label style="color: var(--text-muted); font-size: 0.9rem; display: block; margin-bottom: 0.5rem;">Lingua</label>
+                <label style="color: var(--text-muted-dark); font-size: 0.9rem; display: block; margin-bottom: 0.5rem;">Lingua</label>
                 <input type="text" id="filterLingua" class="form-control" placeholder="Es. Inglese">
             </div>
             <div style="display: flex; align-items: flex-end;">
@@ -90,35 +92,35 @@
         <div class="modal-content">
             <button class="modal-close" id="closeInterviewModal">&times;</button>
             <h3 style="color: var(--primary-color); margin-bottom: 1.5rem;">💼 Proponi Colloquio</h3>
-            <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 1.5rem;">Compila i dettagli della posizione che vuoi offrire a <strong id="interviewCandidateName" style="color: var(--text-main);"></strong>.</p>
+            <p style="color: var(--text-muted-dark); font-size: 0.85rem; margin-bottom: 1.5rem;">Compila i dettagli della posizione che vuoi offrire a <strong id="interviewCandidateName" style="color: var(--text-dark);"></strong>.</p>
             <form id="interviewForm">
                 <input type="hidden" id="interviewCandidateId">
                 <div class="form-group">
-                    <label style="color: var(--text-muted);">Posizione Cercata</label>
+                    <label style="color: var(--text-muted-dark);">Posizione Cercata</label>
                     <input type="text" id="ivPosizione" class="form-control" placeholder="Es. Frontend Developer Senior" required>
                 </div>
                 <div class="form-group">
-                    <label style="color: var(--text-muted);">Linguaggi Richiesti</label>
+                    <label style="color: var(--text-muted-dark);">Linguaggi Richiesti</label>
                     <input type="text" id="ivLinguaggi" class="form-control" placeholder="Es. React, TypeScript">
                 </div>
                 <div class="form-group">
-                    <label style="color: var(--text-muted);">Range Stipendio</label>
+                    <label style="color: var(--text-muted-dark);">Range Stipendio</label>
                     <input type="text" id="ivStipendio" class="form-control" placeholder="Es. 30.000€ - 45.000€">
                 </div>
                 <div class="form-group">
-                    <label style="color: var(--text-muted);">Luogo di Lavoro</label>
+                    <label style="color: var(--text-muted-dark);">Luogo di Lavoro</label>
                     <input type="text" id="ivLuogo" class="form-control" placeholder="Es. Milano / Remoto">
                 </div>
                 <div class="form-group">
-                    <label style="color: var(--text-muted);">Luogo del Colloquio</label>
+                    <label style="color: var(--text-muted-dark);">Luogo del Colloquio</label>
                     <input type="text" id="ivLuogoColloquio" class="form-control" placeholder="Es. Sede Centrale, Stanza 3 / Link Zoom" required>
                 </div>
                 <div class="form-group">
-                    <label style="color: var(--text-muted);">Data del Colloquio</label>
+                    <label style="color: var(--text-muted-dark);">Data del Colloquio</label>
                     <input type="date" id="ivData" class="form-control" required>
                 </div>
                 <div class="form-group">
-                    <label style="color: var(--text-muted);">Ora del Colloquio</label>
+                    <label style="color: var(--text-muted-dark);">Ora del Colloquio</label>
                     <input type="time" id="ivOra" class="form-control" required>
                 </div>
                 <button type="submit" class="btn" style="margin-top: 1rem;">Invia Proposta</button>
@@ -128,5 +130,6 @@
     </div>
 
     <script src="./js/saved.js"></script>
+    <script src="./js/bg-script.js"></script>
 </body>
 </html>

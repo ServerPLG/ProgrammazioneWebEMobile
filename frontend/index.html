@@ -23,8 +23,8 @@
         }
         .modal-overlay.active { display: flex; }
         .modal-content {
-            background: #1a1a2e;
-            border: 1px solid var(--card-border);
+            background: var(--card-bg-light);
+            border: 4px solid var(--secondary-color);
             border-radius: 20px;
             padding: 2.5rem;
             width: 90%;
@@ -35,7 +35,7 @@
             float: right;
             background: none;
             border: none;
-            color: var(--text-muted);
+            color: var(--text-muted-dark);
             font-size: 1.5rem;
             cursor: pointer;
         }
@@ -49,7 +49,7 @@
             width: 100%;
             height: 250px;
             border-radius: 12px;
-            border: 1px solid var(--card-border);
+            border: 1px solid var(--card-border-light);
             margin-top: 0.5rem;
             z-index: 1;
         }
@@ -82,7 +82,7 @@
         <!-- Pannello per il login (quello che si vede appena apri la pagina) -->
         <div class="glass-panel" id="loginPanel">
             <h1 class="title"><span class="brand-font">DevCards</span></h1>
-            <p style="text-align: center; color: var(--text-muted); margin-bottom: 2rem;">Accedi per continuare</p>
+            <p style="text-align: center; color: var(--text-muted-dark); margin-bottom: 2rem;">Accedi per continuare</p>
             
             <!-- Inizio del modulo di login. L'ID mi serve in Javascript per "catturare" i dati quando l'utente preme invio -->
             <form id="loginForm">
@@ -108,7 +108,7 @@
 
         <div class="glass-panel" id="registerPanel" style="display: none; max-width: 650px;">
             <h1 class="title">Unisciti a noi</h1>
-            <p style="text-align: center; color: var(--text-muted); margin-bottom: 2rem;">Crea il tuo account <span class="brand-font">DevCards</span></p>
+            <p style="text-align: center; color: var(--text-muted-dark); margin-bottom: 2rem;">Crea il tuo account <span class="brand-font">DevCards</span></p>
             
             <form id="registerForm">
                 <div class="role-selector">
@@ -153,7 +153,7 @@
                         <label>Foto Profilo</label>
                         <div style="display: flex; gap: 0.5rem; margin-bottom: 0.5rem;">
                             <button type="button" id="btnFotoFile" class="btn" style="flex:1; padding: 0.6rem; font-size: 0.85rem; background: transparent; border: 1px solid var(--primary-color); color: var(--primary-color);">📁 Da Dispositivo</button>
-                            <button type="button" id="btnFotoLink" class="btn" style="flex:1; padding: 0.6rem; font-size: 0.85rem; background: transparent; border: 1px solid var(--card-border); color: var(--text-muted);">🔗 Da Link</button>
+                            <button type="button" id="btnFotoLink" class="btn" style="flex:1; padding: 0.6rem; font-size: 0.85rem; background: transparent; border: 1px solid var(--card-border); color: var(--text-muted-dark);">🔗 Da Link</button>
                         </div>
                         <input type="file" id="regFoto" class="form-control" accept="image/*" style="display: none;">
                         <input type="url" id="regFotoUrl" class="form-control" placeholder="https://esempio.com/foto.jpg" style="display: none;">
@@ -196,7 +196,7 @@
         <div class="modal-content">
             <button class="modal-close" id="closeRecoverModal">&times;</button>
             <h3 style="color: var(--primary-color); margin-bottom: 1.5rem;">Recupera Password</h3>
-            <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1.5rem;">Inserisci la tua email. La password verrà reimpostata a <strong style="color: var(--text-main);">123456</strong>.</p>
+            <p style="color: var(--text-muted-dark); font-size: 0.9rem; margin-bottom: 1.5rem;">Inserisci la tua email. La password verrà reimpostata a <strong style="color: var(--text-dark);">123456</strong>.</p>
             <form id="recoverForm">
                 <div class="form-group">
                     <input type="email" id="recoverEmail" class="form-control" required placeholder="La tua email">
@@ -210,5 +210,6 @@
     <!-- Leaflet JS -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="./js/auth.js"></script>
+    <script src="./js/bg-script.js"></script>
 </body>
 </html>

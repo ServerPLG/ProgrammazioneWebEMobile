@@ -14,7 +14,7 @@
             width: 100%;
             height: 280px;
             border-radius: 12px;
-            border: 1px solid var(--card-border);
+            border: 1px solid var(--card-border-light);
             margin-top: 0.5rem;
             z-index: 1;
         }
@@ -50,36 +50,38 @@
     </style>
 </head>
 <body>
+
+
     <!-- Header -->
-    <header style="padding: 1rem 2rem; background: var(--card-bg); border-bottom: 1px solid var(--card-border); display: flex; justify-content: space-between; align-items: center; backdrop-filter: blur(10px);">
-        <h2 style="color: var(--primary-color); margin: 0; font-size: 1.5rem; font-weight: 700;"><span class="brand-font">DevCards</span> <span style="font-size: 0.9rem; color: var(--text-muted); font-weight: 400;">Azienda</span></h2>
+    <header style="padding: 1rem 2rem; background: var(--card-bg-light); border-bottom: 4px solid var(--secondary-color); display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+        <h2 style="color: var(--primary-color); margin: 0; font-size: 1.5rem; font-weight: 700;"><span class="brand-font">DevCards</span> <span style="font-size: 0.9rem; color: var(--text-muted-dark); font-weight: 400;">Azienda</span></h2>
         <div style="display: flex; gap: 1rem; align-items: center;">
-            <a href="employer.html" style="color: var(--text-main); text-decoration: none; font-size: 0.95rem; font-weight: 600; padding: 0.5rem 1rem; border-radius: 8px; background: rgba(255,255,255,0.1); transition: all 0.3s;">⬅️ Torna a Discovery</a>
-            <button id="btnLogout" class="btn" style="padding: 0.5rem 1rem; font-size: 0.9rem; background: transparent; border: 1px solid var(--primary-color); color: var(--primary-color); width: auto;">Logout</button>
+            <a href="employer.html" class="nav-btn">⬅️ Torna a Discovery</a>
+            <button id="btnLogout" class="nav-btn-logout">Logout</button>
         </div>
     </header>
 
     <main style="padding: 2rem; max-width: 800px; margin: 0 auto; width: 100%;">
         <div class="glass-panel" style="max-width: 100%;">
             <h2 class="title" style="font-size: 2rem; text-align: left; margin-bottom: 0.5rem;">🏢 Azienda</h2>
-            <p style="color: var(--text-muted); margin-bottom: 2rem; font-size: 0.95rem;">Compila le informazioni sulla tua azienda. Queste verranno mostrate ai candidati nelle offerte di colloquio.</p>
+            <p style="color: var(--text-muted-dark); margin-bottom: 2rem; font-size: 0.95rem;">Compila le informazioni sulla tua azienda. Queste verranno mostrate ai candidati nelle offerte di colloquio.</p>
 
             <form id="employerProfileForm">
                 <!-- Nome Azienda -->
                 <div class="form-group">
-                    <label style="color: var(--text-main); font-weight: 600;">Nome Azienda</label>
+                    <label style="color: var(--text-dark); font-weight: 600;">Nome Azienda</label>
                     <input type="text" id="nomeAzienda" class="form-control" placeholder="Es. TechCorp S.r.l." required>
                 </div>
 
                 <!-- Descrizione -->
                 <div class="form-group">
-                    <label style="color: var(--text-main); font-weight: 600;">Descrizione Azienda</label>
+                    <label style="color: var(--text-dark); font-weight: 600;">Descrizione Azienda</label>
                     <textarea id="descAzienda" class="form-control" rows="4" placeholder="Descrivete brevemente la vostra azienda, cosa fate, cosa cercate..." required style="resize: vertical;"></textarea>
                 </div>
 
                 <!-- Sede Aziendale con Mappa -->
                 <div class="form-group">
-                    <label style="color: var(--text-main); font-weight: 600;">📍 Sede Aziendale</label>
+                    <label style="color: var(--text-dark); font-weight: 600;">📍 Sede Aziendale</label>
                     <div class="map-search-row">
                         <input type="text" id="profileCitta" class="form-control" placeholder="Cerca una città..." required>
                         <button type="button" id="btnSearchMap">Cerca</button>
@@ -88,7 +90,7 @@
                     <div id="mapSelectedLocation"></div>
                     <input type="hidden" id="profileLat">
                     <input type="hidden" id="profileLon">
-                    <small style="color: var(--text-muted); font-size: 0.8rem;">Clicca sulla mappa o cerca una città per posizionare la sede</small>
+                    <small style="color: var(--text-muted-dark); font-size: 0.8rem;">Clicca sulla mappa o cerca una città per posizionare la sede</small>
                 </div>
 
                 <button type="submit" class="btn" style="margin-top: 1.5rem;">Salva Profilo Azienda</button>
@@ -242,7 +244,6 @@
                 const data = await res.json();
                 if (res.ok) {
                     resultEl.innerHTML = `<div class="success-msg" style="background: rgba(0,255,102,0.1); color: var(--primary-color); border: 1px solid rgba(0,255,102,0.2);">✓ ${data.message}</div>`;
-                    // Aggiorno localStorage con i nuovi dati
                     const updatedUser = { ...user, citta: data.citta, lat: data.lat, lon: data.lon, nome_azienda: data.nome_azienda, descrizione_azienda: data.descrizione_azienda };
                     localStorage.setItem('user', JSON.stringify(updatedUser));
                 } else {
@@ -254,5 +255,6 @@
         });
     });
     </script>
+    <script src="./js/bg-script.js"></script>
 </body>
 </html>

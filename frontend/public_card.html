@@ -16,6 +16,8 @@
             margin: 0;
             background: var(--bg-color);
             padding: 1rem;
+            position: relative;
+            z-index: 1;
         }
 
         .public-wrapper {
@@ -39,16 +41,6 @@
             margin-bottom: 0.6rem;
         }
 
-        .lang-tag {
-            display: inline-block;
-            background: rgba(0, 255, 102, 0.1);
-            color: var(--primary-color);
-            padding: 0.3rem 0.8rem;
-            border-radius: 20px;
-            font-size: 0.85rem;
-            border: 1px solid rgba(0, 255, 102, 0.2);
-        }
-
         .devcard-avatar {
             width: 80px;
             height: 80px;
@@ -58,44 +50,15 @@
             box-shadow: 0 0 25px rgba(0, 255, 102, 0.2);
         }
 
-        .smartworking-badge {
-            display: inline-block;
-            margin-top: 0.3rem;
-            background: rgba(0, 255, 102, 0.1);
-            color: var(--primary-color);
-            padding: 0.25rem 0.7rem;
-            border-radius: 12px;
-            font-size: 0.8rem;
-            border: 1px solid rgba(0, 255, 102, 0.2);
-        }
-
-        .card-glow {
-            position: absolute;
-            top: -2px;
-            left: -2px;
-            right: -2px;
-            bottom: -2px;
-            background: var(--gradient);
-            border-radius: 26px;
-            z-index: -1;
-            opacity: 0.15;
-            filter: blur(20px);
-            animation: pulseGlow 3s ease-in-out infinite;
-        }
-
-        @keyframes pulseGlow {
-            0%, 100% { opacity: 0.1; transform: scale(1); }
-            50% { opacity: 0.2; transform: scale(1.02); }
-        }
-        
         .loading {
             text-align: center;
-            color: var(--text-muted);
+            color: var(--text-muted-dark);
             font-size: 1.2rem;
         }
     </style>
 </head>
 <body>
+
 
     <!-- In questo div Javascript ci stamperà dentro il curriculum del candidato quando qualcuno inquadra il QR Code -->
     <div class="public-wrapper" id="cardContainer">
@@ -104,5 +67,6 @@
     </div>
 
     <script src="./js/public_card.js"></script>
+    <script src="./js/bg-script.js"></script>
 </body>
 </html>

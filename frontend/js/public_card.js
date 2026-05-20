@@ -60,57 +60,48 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         const html = `
         <div style="position: relative;">
-            <div class="card-glow"></div>
             <div class="glass-panel devcard devcard-layout" style="animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.1s both;">
                 
-                <!-- Header: Avatar + Nome + Age + Tech -->
+                <!-- Header: Avatar + Nome + Age -->
                 <div class="card-header-top">
                     <div class="avatar-container">
                         <img src="${avatarSrc}" alt="Foto Profilo" crossorigin="anonymous">
                     </div>
                     <div class="name-stack">
-                        <h3>${card.nome} ${card.cognome}</h3>
+                        <h3>${card.nome}<br>${card.cognome}</h3>
                         <span class="age-label">${card.eta || '?'} ANNI</span>
-                        <div class="tech-tags-row">
-                            ${langSpans}
-                        </div>
                     </div>
                 </div>
 
-                <!-- Griglia Principale: Lingue e Competenze -->
+                <!-- Tech Tags -->
+                <div class="tech-tags-row">
+                    ${langSpans}
+                </div>
+
+                <!-- Competenze -->
+                <div class="full-width-section" style="padding-top: 0.5rem; margin-top: 0.5rem; border: none;">
+                    <h4 class="section-label-new">⚙ COMPETENZE</h4>
+                    <div class="list-content">${card.competenze || 'Non specificate'}</div>
+                </div>
+
+                <!-- Grid: Lingue, Luogo, Esperienza -->
                 <div class="card-grid-main">
-                    <div class="lingue-col">
-                        <h4 class="section-label-new">${icons.lingue} LINGUE</h4>
+                    <div class="grid-col">
+                        <h4 class="section-label-new">🌐 LINGUE</h4>
                         <div class="list-content">${formattedLingue}</div>
                     </div>
-                    <div class="competenze-col full-width-section">
-                        <h4 class="section-label-new">${icons.competenze} COMPETENZE</h4>
-                        <div class="list-content">${card.competenze || 'Non specificate'}</div>
-                    </div>
-                </div>
-
-                <!-- Row: Esperienza e Luogo -->
-                <div class="card-grid-main" style="border-top: none; padding-top: 0;">
-                    <div class="esper-col">
-                        <h4 class="section-label-new">${icons.esperienza} ESPERIENZA</h4>
-                        <div class="list-content" style="font-weight: 700; text-transform: uppercase;">
-                            ${card.anni_esperienza} ANNI
-                            <div style="font-weight: 400; font-size: 0.85rem; margin-top: 0.2rem;">Developer</div>
-                        </div>
-                    </div>
-                    <div class="luogo-col">
-                        <h4 class="section-label-new">${icons.luogo} LUOGO</h4>
+                    <div class="grid-col">
+                        <h4 class="section-label-new">📍 LUOGO</h4>
                         <div class="list-content" style="font-weight: 700; text-transform: uppercase;">
                             ${card.citta || 'N/D'}
                         </div>
                     </div>
-                </div>
-
-                <!-- Biografia -->
-                <div class="full-width-section">
-                    <h4 class="section-label-new">${icons.biografia} BIOGRAFIA</h4>
-                    <div class="list-content" style="font-style: italic; color: var(--text-muted); line-height: 1.4;">
-                        ${card.bio || 'Nessuna biografia inserita.'}
+                    <div class="grid-col">
+                        <h4 class="section-label-new">⏱ ESPERIENZA</h4>
+                        <div class="list-content" style="font-weight: 700; text-transform: uppercase;">
+                            ${card.anni_esperienza} ANNI
+                            <div style="font-weight: 400; font-size: 0.75rem; margin-top: 0.1rem; color: var(--text-muted-dark);">Developer</div>
+                        </div>
                     </div>
                 </div>
 

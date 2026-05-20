@@ -16,8 +16,6 @@
             align-items: center;
             padding: 2rem;
             min-height: 100vh;
-            background: radial-gradient(circle at top left, rgba(0, 204, 82,0.1), transparent 40%),
-                        radial-gradient(circle at bottom right, rgba(0, 255, 102,0.1), transparent 40%);
         }
 
         @media (max-width: 550px) {
@@ -74,9 +72,8 @@
         }
 
         .interview-card {
-            background: var(--card-bg);
-            backdrop-filter: blur(16px);
-            border: 1px solid var(--card-border);
+            background: var(--card-bg-light);
+            border: 4px solid var(--secondary-color);
             border-radius: 20px;
             padding: 1.5rem;
             margin-bottom: 1rem;
@@ -88,7 +85,7 @@
         }
 
         .interview-card h4 {
-            color: var(--text-main);
+            color: var(--text-dark);
             font-size: 1.2rem;
             margin: 0 0 0.3rem;
             cursor: pointer;
@@ -104,7 +101,7 @@
             gap: 1rem;
             margin: 0.8rem 0;
             font-size: 0.9rem;
-            color: var(--text-muted);
+            color: var(--text-muted-dark);
         }
 
         .interview-actions {
@@ -165,8 +162,8 @@
         }
         .modal-overlay.active { display: flex; }
         .modal-content {
-            background: #1a1a2e;
-            border: 1px solid var(--card-border);
+            background: var(--card-bg-light);
+            border: 4px solid var(--secondary-color);
             border-radius: 20px;
             padding: 2.5rem;
             width: 90%;
@@ -179,7 +176,7 @@
             float: right;
             background: none;
             border: none;
-            color: var(--text-muted);
+            color: var(--text-muted-dark);
             font-size: 1.5rem;
             cursor: pointer;
         }
@@ -216,8 +213,8 @@
         }
         .pwd-modal-overlay.active { display: flex; }
         .pwd-modal {
-            background: #1a1a2e;
-            border: 1px solid var(--card-border);
+            background: var(--card-bg-light);
+            border: 4px solid var(--secondary-color);
             border-radius: 20px;
             padding: 2.5rem;
             width: 90%;
@@ -232,7 +229,7 @@
         .pwd-modal .form-group { margin-bottom: 1.2rem; }
         .pwd-modal .form-group label {
             display: block;
-            color: var(--text-main);
+            color: var(--text-dark);
             font-weight: 600;
             margin-bottom: 0.4rem;
             font-size: 0.9rem;
@@ -240,10 +237,10 @@
         .pwd-modal .form-group input {
             width: 100%;
             padding: 0.75rem 1rem;
-            background: #333;
-            border: 1px solid var(--card-border);
+            background: #ffffff;
+            border: 1px solid var(--card-border-light);
             border-radius: 10px;
-            color: var(--text-main);
+            color: var(--text-dark);
             font-size: 1rem;
             transition: border-color 0.2s;
         }
@@ -260,7 +257,7 @@
             float: right;
             background: none;
             border: none;
-            color: var(--text-muted);
+            color: var(--text-muted-dark);
             font-size: 1.5rem;
             cursor: pointer;
             transition: color 0.2s;
@@ -269,25 +266,27 @@
     </style>
 </head>
 <body>
-    <header style="padding: 1rem 2rem; background: var(--card-bg); border-bottom: 1px solid var(--card-border); display: flex; justify-content: space-between; align-items: center; backdrop-filter: blur(10px);">
-        <h2 style="color: var(--primary-color); margin: 0; font-size: 1.5rem; font-weight: 700;"><span class="brand-font">DevCards</span> <span style="font-size: 0.9rem; color: var(--text-muted); font-weight: 400;">Home</span></h2>
+
+
+    <header style="padding: 1rem 2rem; background: var(--card-bg-light); border-bottom: 4px solid var(--secondary-color); display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+        <h2 style="color: var(--primary-color); margin: 0; font-size: 1.5rem; font-weight: 700;"><span class="brand-font">DevCards</span> <span style="font-size: 0.9rem; color: var(--text-muted-dark); font-weight: 400;">Home</span></h2>
         <div style="display: flex; gap: 1rem; align-items: center;">
-            <button id="btnChangePassword" style="color: var(--text-main); text-decoration: none; font-size: 0.95rem; font-weight: 600; padding: 0.5rem 1rem; border-radius: 8px; background: rgba(255,255,255,0.1); border: none; cursor: pointer; transition: all 0.3s;">🔒 Password</button>
-            <button id="btnLogout" class="btn" style="padding: 0.5rem 1rem; font-size: 0.9rem; background: transparent; border: 1px solid var(--primary-color); color: var(--primary-color); width: auto;">Logout</button>
+            <button id="btnChangePassword" class="nav-btn">🔒 Password</button>
+            <button id="btnLogout" class="nav-btn-logout">Logout</button>
         </div>
     </header>
 
     <main class="home-wrapper">
         <!-- Qui ci andrà la DevCard vera e propria generata da Javascript -->
         <div class="my-card-section" id="myCardSection">
-            <p style="color: var(--text-muted); text-align: center;">Caricamento della tua DevCard...</p>
+            <p style="color: var(--text-muted-dark); text-align: center;">Caricamento della tua DevCard...</p>
         </div>
 
         <!-- Sezione in basso dove Javascript inserirà tutte le richieste di colloquio ricevute dalle aziende -->
         <div class="interviews-section">
             <h3 class="section-title">📩 Offerte di Colloquio</h3>
             <div id="interviewsContainer">
-                <p style="color: var(--text-muted);">Caricamento...</p>
+                <p style="color: var(--text-muted-dark);">Caricamento...</p>
             </div>
         </div>
     </main>
@@ -327,5 +326,6 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <script src="./js/candidate_home.js"></script>
+    <script src="./js/bg-script.js"></script>
 </body>
 </html>

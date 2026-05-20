@@ -44,8 +44,8 @@
             justify-content: center;
             font-size: 2rem;
             transition: transform 0.2s, box-shadow 0.2s;
-            background: var(--card-bg);
-            border: 2px solid var(--card-border);
+            background: #ffffff;
+            border: 4px solid var(--secondary-color);
             backdrop-filter: blur(10px);
         }
         .btn-skip:hover {
@@ -63,9 +63,9 @@
         .empty-state {
             text-align: center;
             padding: 3rem;
-            background: var(--card-bg);
-            border-radius: 24px;
-            border: 1px solid var(--card-border);
+            background: var(--card-bg-light);
+            border-radius: 20px;
+            border: 4px solid var(--secondary-color);
             max-width: 500px;
         }
 
@@ -82,8 +82,8 @@
         }
         .pwd-modal-overlay.active { display: flex; }
         .pwd-modal {
-            background: #1a1a2e;
-            border: 1px solid var(--card-border);
+            background: var(--card-bg-light);
+            border: 4px solid var(--secondary-color);
             border-radius: 20px;
             padding: 2.5rem;
             width: 90%;
@@ -98,7 +98,7 @@
         .pwd-modal .form-group { margin-bottom: 1.2rem; }
         .pwd-modal .form-group label {
             display: block;
-            color: var(--text-main);
+            color: var(--text-dark);
             font-weight: 600;
             margin-bottom: 0.4rem;
             font-size: 0.9rem;
@@ -106,10 +106,10 @@
         .pwd-modal .form-group input {
             width: 100%;
             padding: 0.75rem 1rem;
-            background: #333;
-            border: 1px solid var(--card-border);
+            background: #ffffff;
+            border: 1px solid var(--card-border-light);
             border-radius: 10px;
-            color: var(--text-main);
+            color: var(--text-dark);
             font-size: 1rem;
             transition: border-color 0.2s;
         }
@@ -126,7 +126,7 @@
             float: right;
             background: none;
             border: none;
-            color: var(--text-muted);
+            color: var(--text-muted-dark);
             font-size: 1.5rem;
             cursor: pointer;
             transition: color 0.2s;
@@ -135,14 +135,16 @@
     </style>
 </head>
 <body>
-    <header style="padding: 1rem 2rem; background: var(--card-bg); border-bottom: 1px solid var(--card-border); display: flex; justify-content: space-between; align-items: center; backdrop-filter: blur(10px);">
-        <h2 style="color: var(--primary-color); margin: 0; font-size: 1.5rem; font-weight: 700;"><span class="brand-font">DevCards</span> <span style="font-size: 0.9rem; color: var(--text-muted); font-weight: 400;">Discovery</span></h2>
+
+
+    <header style="padding: 1rem 2rem; background: var(--card-bg-light); border-bottom: 4px solid var(--secondary-color); display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+        <h2 style="color: var(--primary-color); margin: 0; font-size: 1.5rem; font-weight: 700;"><span class="brand-font">DevCards</span> <span style="font-size: 0.9rem; color: var(--text-muted-dark); font-weight: 400;">Discovery</span></h2>
         <div style="display: flex; gap: 1rem; align-items: center;">
-            <a href="saved_devcards.html" style="color: var(--text-main); text-decoration: none; font-size: 0.95rem; font-weight: 600; padding: 0.5rem 1rem; border-radius: 8px; background: rgba(255,255,255,0.1); transition: all 0.3s;">❤️ Preferiti</a>
-            <a href="employer_profile.html" style="color: var(--text-main); text-decoration: none; font-size: 0.95rem; font-weight: 600; padding: 0.5rem 1rem; border-radius: 8px; background: rgba(255,255,255,0.1); transition: all 0.3s;">🏢 Azienda</a>
-            <a href="employer_interviews.html" style="color: var(--text-main); text-decoration: none; font-size: 0.95rem; font-weight: 600; padding: 0.5rem 1rem; border-radius: 8px; background: rgba(255,255,255,0.1); transition: all 0.3s;">📅 Colloqui</a>
-            <button id="btnChangePassword" style="color: var(--text-main); text-decoration: none; font-size: 0.95rem; font-weight: 600; padding: 0.5rem 1rem; border-radius: 8px; background: rgba(255,255,255,0.1); border: none; cursor: pointer; transition: all 0.3s;">🔒 Password</button>
-            <button id="btnLogout" class="btn" style="padding: 0.5rem 1rem; font-size: 0.9rem; background: transparent; border: 1px solid var(--primary-color); color: var(--primary-color); width: auto;">Logout</button>
+            <a href="saved_devcards.html" class="nav-btn">❤️ Preferiti</a>
+            <a href="employer_profile.html" class="nav-btn">🏢 Azienda</a>
+            <a href="employer_interviews.html" class="nav-btn">📅 Colloqui</a>
+            <button id="btnChangePassword" class="nav-btn">🔒 Password</button>
+            <button id="btnLogout" class="nav-btn-logout">Logout</button>
         </div>
     </header>
 
@@ -189,5 +191,6 @@
     </div>
 
     <script src="./js/employer.js"></script>
+    <script src="./js/bg-script.js"></script>
 </body>
 </html>

@@ -4,12 +4,16 @@
 /* Qui definiamo i colori principali del sito per usarli più facilmente nel codice */
 :root {
   --bg-color: #121212;
-  --card-bg: #2a2a2a; /* Colore di sfondo scuro per i riquadri */
-  --card-border: #444; /* Colore per i bordi dei riquadri */
+  --card-bg: #2a2a2a; /* Colore di sfondo scuro per i riquadri (usato in home/login) */
+  --card-bg-light: #eef2f5; /* Sfondo chiaro per le DevCard */
+  --card-border: #444;
+  --card-border-light: #d1d9e6; /* Bordo chiaro per separatori interni */
   --primary-color: #00ff66; /* Verde acceso principale */
-  --secondary-color: #00cc52; /* Verde più scuro per gli effetti hover */
-  --text-main: #FFFFFF; /* Colore del testo principale */
-  --text-muted: #cccccc; /* Colore del testo secondario (grigio chiaro) */
+  --secondary-color: #00cc52;
+  --text-main: #FFFFFF; /* Testo bianco */
+  --text-dark: #1a1a1a; /* Testo scuro per la DevCard */
+  --text-muted: #cccccc;
+  --text-muted-dark: #666666; /* Testo scuro attenuato per la DevCard */
 }
 
 .brand-font {
@@ -42,17 +46,19 @@ body {
   align-items: center; /* Centra in verticale */
   min-height: 100vh;
   padding: 2rem;
-  background-color: #1a1a1a; /* Sfondo leggermente più chiaro del body */
+  background-color: transparent; /* Lascia intravedere lo sfondo a onde */
 }
 
 /* Stile per il riquadro centrale che contiene il login o la registrazione */
 .glass-panel {
-  background-color: var(--card-bg); /* Colore del riquadro */
-  border: 2px solid var(--card-border); /* Bordo di 2 pixel attorno al riquadro */
-  border-radius: 10px; /* Arrotonda gli angoli del riquadro */
+  background-color: var(--card-bg-light); /* Colore del riquadro chiaro */
+  color: var(--text-dark); /* Testo scuro di default all'interno */
+  border: 4px solid var(--secondary-color); /* Bordo spesso verde come la DevCard */
+  border-radius: 20px; /* Angoli molto arrotondati */
   padding: 2rem; /* Spazio interno tra il bordo e il contenuto */
   width: 100%;
   max-width: 500px; /* Il riquadro non diventa più largo di 500px sui computer */
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
 }
 
 /* Stile per il titolo grande in alto */
@@ -61,7 +67,7 @@ body {
   margin-bottom: 2rem; /* Spazio sotto al titolo */
   font-size: 2.5rem; /* Dimensione del font grande */
   font-weight: bold; /* Rende il testo in grassetto */
-  color: var(--primary-color); /* Colora il titolo di verde */
+  color: var(--secondary-color); /* Verde scuro leggibile */
 }
 
 /* Contenitore per i singoli campi del modulo (es. email o password) */
@@ -74,24 +80,30 @@ body {
   display: block; /* Va a capo dopo l'etichetta */
   margin-bottom: 0.5rem; /* Spazio tra l'etichetta e la barra in cui si scrive */
   font-size: 1rem;
-  color: var(--text-main);
+  color: var(--text-dark); /* Testo scuro */
+  font-weight: 600;
 }
 
 /* Stile per le barre dove l'utente inserisce i testi */
 .form-control {
   width: 100%; /* Occupa tutto lo spazio orizzontale disponibile */
-  padding: 10px; /* Spazio interno per non far toccare il testo ai bordi */
-  background-color: #333; /* Sfondo scuro per il campo */
-  border: 1px solid var(--card-border); /* Bordo sottile */
-  border-radius: 5px; /* Angoli leggermente arrotondati */
-  color: var(--text-main);
+  padding: 12px; /* Spazio interno per non far toccare il testo ai bordi */
+  background-color: #ffffff; /* Sfondo bianco per il campo */
+  border: 1px solid var(--card-border-light); /* Bordo sottile chiaro */
+  border-radius: 8px; /* Angoli leggermente arrotondati */
+  color: var(--text-dark);
   font-size: 1rem;
+}
+
+.form-control::placeholder {
+  color: var(--text-muted-dark);
 }
 
 /* Cambia lo stile del campo quando l'utente ci clicca dentro per scrivere */
 .form-control:focus {
   outline: none; /* Rimuove il bordo blu di default del browser */
-  border-color: var(--primary-color); /* Fa diventare il bordo verde */
+  border-color: var(--secondary-color); /* Fa diventare il bordo verde */
+  box-shadow: 0 0 0 3px rgba(0, 204, 82, 0.2);
 }
 
 /* Stile per il bottone di conferma principale */
@@ -117,14 +129,16 @@ body {
   text-align: center; /* Centra il testo */
   margin-top: 20px;
   font-size: 1rem;
-  color: var(--text-main);
+  color: var(--text-dark);
+  font-weight: 500;
 }
 
 /* Stile per i link cliccabili dentro toggle-form */
 .toggle-form a {
-  color: var(--primary-color); /* Colore verde per capire che si può cliccare */
+  color: #008033; /* Colore verde scuro per il link */
   text-decoration: underline; /* La linea sotto il testo fa capire che è un link */
   cursor: pointer;
+  font-weight: 700;
 }
 
 /* Contenitore orizzontale per scegliere se si è Candidato o Azienda */
@@ -150,18 +164,21 @@ body {
 /* Grafica del rettangolo cliccabile che sostituisce il radio button nascosto */
 .role-card {
   padding: 15px;
-  border: 2px solid var(--card-border);
-  border-radius: 5px;
+  border: 2px solid var(--card-border-light);
+  border-radius: 10px;
   text-align: center; /* Centra il testo ("👨‍💻 Candidato" o "🏢 Datore") */
   cursor: pointer;
-  background-color: #333; /* Sfondo scuro di default */
+  background-color: #ffffff; /* Sfondo bianco di default */
+  color: var(--text-dark);
+  font-weight: 600;
+  transition: all 0.2s ease;
 }
 
 /* Cambia colore al rettangolo (.role-card) se il radio button (.role-option input) invisibile è stato selezionato (checked) */
 .role-option input:checked ~ .role-card {
-  background-color: #004d1a; /* Lo sfondo diventa verde scuro */
-  border-color: var(--primary-color); /* Il bordo diventa verde fluo */
-  color: white; /* Il testo diventa bianco */
+  background-color: rgba(0, 204, 82, 0.15); /* Sfondo verde tenue */
+  border-color: var(--secondary-color); /* Il bordo diventa verde fluo */
+  color: #008033; /* Il testo diventa verde scuro */
 }
 /* ================================================================
    NUOVE CLASSI PER LA STRUTTURA DELLA DEVCARD (PROTOTIPO)
@@ -170,32 +187,25 @@ body {
 .devcard-layout {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
   width: 100%;
 }
 
 .devcard {
   position: relative;
-}
-
-/* Contro-bordo interno sottile */
-.devcard::before {
-  content: '';
-  position: absolute;
-  top: 8px;
-  left: 8px;
-  right: 8px;
-  bottom: 8px;
-  border: 2.5px solid rgba(0, 255, 102, 0.4);
-  border-radius: 15px;
-  pointer-events: none;
-  z-index: 1;
+  background-color: var(--card-bg-light);
+  color: var(--text-dark);
+  border: 4px solid var(--secondary-color);
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  padding: 1.5rem;
 }
 
 .card-header-top {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   gap: 1.2rem;
+  margin-bottom: 1.5rem;
 }
 
 .avatar-container {
@@ -205,12 +215,12 @@ body {
 }
 
 .avatar-container img {
-  width: 120px;
-  height: 120px;
+  width: 90px;
+  height: 90px;
   border-radius: 50%;
   object-fit: cover;
-  border: 4px solid var(--primary-color);
-  box-shadow: 0 0 30px rgba(0, 255, 102, 0.25);
+  border: 4px solid var(--secondary-color);
+  background-color: white;
 }
 
 .name-stack {
@@ -218,18 +228,19 @@ body {
 }
 
 .name-stack h3 {
-  font-size: 1.8rem;
-  color: var(--text-main);
+  font-size: 1.6rem;
+  color: var(--text-dark);
   margin-bottom: 0.2rem;
   line-height: 1.1;
+  font-weight: 700;
 }
 
 .name-stack .age-label {
-  font-size: 1rem;
-  color: var(--text-muted);
+  font-size: 0.9rem;
+  color: var(--text-muted-dark);
   text-transform: uppercase;
   font-weight: 600;
-  margin-bottom: 0.8rem;
+  margin-bottom: 0;
   display: block;
 }
 
@@ -237,51 +248,73 @@ body {
   display: flex;
   flex-wrap: wrap;
   gap: 0.5rem;
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+}
+
+.lang-tag {
+  display: inline-block;
+  background: rgba(0, 204, 82, 0.15);
+  color: #008033; /* Verde più scuro per contrasto */
+  padding: 0.3rem 0.8rem;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  border: 1px solid rgba(0, 204, 82, 0.3);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .card-grid-main {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 1.5rem;
-  border-top: 1px solid var(--card-border);
-  padding-top: 1.2rem;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.grid-col {
+  min-width: 0; /* prevent overflow */
 }
 
 .full-width-section {
-  grid-column: 1 / -1;
-  border-top: 1px solid var(--card-border);
-  padding-top: 1.2rem;
+  width: 100%;
+  margin-top: 0.8rem;
 }
 
 .section-label-new {
-  font-size: 0.8rem;
-  color: var(--primary-color);
-  font-weight: 700;
+  font-size: 0.7rem;
+  color: var(--text-dark);
+  font-weight: 800;
   letter-spacing: 1px;
-  margin-bottom: 0.6rem;
+  margin-bottom: 0.4rem;
   display: flex;
   align-items: center;
   gap: 0.4rem;
+  border-top: 2px solid var(--secondary-color);
+  padding-top: 0.5rem;
 }
 
 .list-content {
-  font-size: 0.95rem;
-  color: var(--text-main);
+  font-size: 0.85rem;
+  color: var(--text-dark);
   line-height: 1.4;
+  font-weight: 500;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 
 .card-footer-social {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-top: 1rem;
+  margin-top: 1.5rem;
   padding-top: 1rem;
-  border-top: 1px solid var(--card-border);
+  border-top: 1px solid var(--card-border-light);
 }
 
 .social-icons-group {
   display: flex;
-  gap: 1rem;
+  gap: 0.8rem;
 }
 
 .social-icon {
@@ -290,25 +323,25 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(255, 255, 255, 0.1);
+  background: #e0e6ed;
   border-radius: 50%;
-  color: var(--text-main);
+  color: var(--text-dark);
   transition: all 0.3s;
   cursor: pointer;
 }
 
 .social-icon:hover {
-  background: var(--primary-color);
-  color: black;
+  background: var(--secondary-color);
+  color: white;
   transform: translateY(-2px);
 }
 
 .designed-tag {
   font-size: 0.55rem;
-  color: var(--text-muted);
+  color: var(--text-muted-dark);
   text-transform: uppercase;
   letter-spacing: 1px;
-  opacity: 0.6;
+  font-weight: 700;
 }
 
 /* FLIP CARD SYSTEM */
@@ -331,17 +364,6 @@ body {
   transform: rotateY(180deg);
 }
 
-.designed-tag {
-  font-family: 'Arial', sans-serif !important;
-  font-weight: 900 !important;
-  font-style: italic !important;
-  font-size: 0.55rem;
-  color: var(--text-muted);
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  opacity: 0.6;
-}
-
 .devcard-face {
   width: 100%;
   -webkit-backface-visibility: hidden;
@@ -350,29 +372,15 @@ body {
   position: relative;
 }
 
-.devcard-face::before {
-  content: '';
-  position: absolute;
-  top: 8px;
-  left: 8px;
-  right: 8px;
-  bottom: 8px;
-  border: 2.5px solid rgba(0, 255, 102, 0.4);
-  border-radius: 15px;
-  pointer-events: none;
-  z-index: 10;
-}
-
 .devcard-back {
   position: absolute;
   top: 0;
   left: 0;
   height: 100%;
   transform: rotateY(180deg);
-  background: var(--card-bg);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid var(--card-border);
+  background: var(--card-bg-light);
+  border: 4px solid var(--secondary-color);
+  border-radius: 20px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -381,17 +389,126 @@ body {
   text-align: center;
 }
 
-.card-glow {
-  position: absolute;
-  top: -2px;
-  left: -2px;
-  right: -2px;
-  bottom: -2px;
-  background: var(--primary-color);
-  border-radius: 26px;
+.click-to-flip {
+  text-align: center;
+  color: var(--text-main);
+  font-size: 0.8rem;
+  margin-top: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  opacity: 0.8;
+  animation: bounce 2s infinite;
+}
+
+@keyframes bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-5px); }
+}
+
+/* ORGANIC ANIMATED BACKGROUND */
+body {
+  background-color: #111111;
+  background-image: 
+    linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+
+.wave-container {
+  position: fixed;
+  top: 0; left: 0; width: 100vw; height: 100vh;
+  overflow: hidden;
   z-index: -1;
-  opacity: 0.1;
-  filter: blur(15px);
+  pointer-events: none;
+}
+
+.organic-blob {
+  position: absolute;
+  filter: drop-shadow(0 15px 25px rgba(0,0,0,0.6));
+  animation: blobFloat 15s ease-in-out infinite alternate;
+  transition: all 0.5s ease;
+}
+
+/* TOP RIGHT BLOBS — compact corner accents */
+.blob-tr-1 {
+  top: -20vw; right: -15vw; width: 45vw; height: 45vw;
+  background: #0d381b;
+  border-radius: 35% 65% 35% 65% / 45% 40% 60% 55%;
+  animation-duration: 18s;
+}
+.blob-tr-2 {
+  top: -22vw; right: -18vw; width: 38vw; height: 38vw;
+  background: #176b30;
+  border-radius: 45% 55% 40% 60% / 55% 45% 55% 45%;
+  animation-duration: 14s;
+  animation-delay: -2s;
+}
+.blob-tr-3 {
+  top: -24vw; right: -20vw; width: 30vw; height: 30vw;
+  background: #ffffff;
+  border-radius: 50% 50% 30% 70% / 50% 50% 50% 50%;
+  animation-duration: 16s;
+  animation-delay: -4s;
+}
+
+/* BOTTOM LEFT BLOBS — compact corner accents */
+.blob-bl-1 {
+  bottom: -20vw; left: -15vw; width: 45vw; height: 45vw;
+  background: #ffffff;
+  border-radius: 45% 55% 55% 45% / 45% 55% 45% 55%;
+  animation-duration: 19s;
+}
+.blob-bl-2 {
+  bottom: -22vw; left: -18vw; width: 38vw; height: 38vw;
+  background: #176b30;
+  border-radius: 60% 40% 50% 50% / 50% 50% 50% 50%;
+  animation-duration: 15s;
+  animation-delay: -3s;
+}
+.blob-bl-3 {
+  bottom: -24vw; left: -20vw; width: 30vw; height: 30vw;
+  background: #0d381b;
+  border-radius: 50% 50% 60% 40% / 55% 45% 55% 45%;
+  animation-duration: 17s;
+  animation-delay: -5s;
+}
+
+/* THIN CONNECTING LINE */
+.thin-curve {
+  position: absolute;
+  top: 0; left: 0; width: 100vw; height: 100vh;
+  z-index: 1;
+}
+.thin-curve path {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.8);
+  stroke-width: 2;
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
+  stroke-dasharray: 4000;
+  stroke-dashoffset: 4000;
+  animation: drawLineAnim 12s linear infinite alternate;
+}
+
+@keyframes drawLineAnim {
+  to { stroke-dashoffset: 0; }
+}
+
+@keyframes blobFloat {
+  0% { transform: rotate(0deg) scale(1); }
+  50% { transform: rotate(8deg) scale(1.05); }
+  100% { transform: rotate(-4deg) scale(0.95); }
+}
+
+/* Fix per mobile — keep blobs small and in corners */
+@media (max-width: 768px) {
+  .blob-tr-1 { top: -25vw; right: -20vw; width: 55vw; height: 55vw; }
+  .blob-tr-2 { top: -28vw; right: -23vw; width: 48vw; height: 48vw; }
+  .blob-tr-3 { top: -30vw; right: -25vw; width: 40vw; height: 40vw; }
+  .blob-bl-1 { bottom: -25vw; left: -20vw; width: 55vw; height: 55vw; }
+  .blob-bl-2 { bottom: -28vw; left: -23vw; width: 48vw; height: 48vw; }
+  .blob-bl-3 { bottom: -30vw; left: -25vw; width: 40vw; height: 40vw; }
 }
 
 /* RESPONSIVENESS */
@@ -414,7 +531,11 @@ body {
 
   .card-grid-main {
     grid-template-columns: 1fr;
-    gap: 1rem;
+    gap: 0.8rem;
+  }
+
+  .tech-tags-row {
+    justify-content: center;
   }
 
   .glass-panel {
@@ -432,6 +553,10 @@ body {
   .title {
     font-size: 1.8rem;
   }
+
+  .devcard {
+    padding: 1.2rem;
+  }
 }
 
 @media (max-width: 350px) {
@@ -444,3 +569,59 @@ body {
     justify-content: center;
   }
 }
+
+/* PREMIUM GLOBAL NAVIGATION BUTTONS & LINKS */
+.nav-btn {
+  color: var(--text-dark) !important;
+  text-decoration: none !important;
+  font-size: 0.95rem;
+  font-weight: 600;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  background: #ffffff !important; /* Solid clean white */
+  border: 1px solid var(--card-border-light) !important;
+  transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.nav-btn:hover {
+  background: var(--card-bg-light) !important;
+  border-color: var(--secondary-color) !important;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.08);
+}
+
+.nav-btn.active {
+  background: rgba(0, 204, 82, 0.15) !important; /* Rich active green */
+  border-color: var(--secondary-color) !important;
+  border-width: 2px !important;
+  color: #008033 !important; /* Premium dark green text */
+  box-shadow: 0 4px 10px rgba(0, 204, 82, 0.15);
+}
+
+.nav-btn-logout {
+  padding: 0.5rem 1rem;
+  font-size: 0.95rem;
+  font-weight: 700;
+  border-radius: 8px;
+  background: transparent !important;
+  border: 1px solid #ff4b4b !important;
+  color: #ff4b4b !important;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: auto;
+}
+
+.nav-btn-logout:hover {
+  background: rgba(255, 75, 75, 0.1) !important;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(255, 75, 75, 0.1);
+}
+
