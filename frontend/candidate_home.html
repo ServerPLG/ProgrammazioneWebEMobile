@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <!-- Metto la decodifica dei caratteri e viewport per i telefoni -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home - DevCards</title>
+    <link rel="icon" type="image/png" href="./logo.png">
+    <meta name="description" content="Dashboard personale del candidato su DevCards.">
+    <link rel="stylesheet" href="./css/style.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <style>
+        .home-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 2rem;
+            min-height: 100vh;
+        }
+
+        @media (max-width: 550px) {
+            .home-wrapper {
+                padding: 1rem;
+            }
+        }
+
+        .my-card-section {
+            width: 100%;
+            max-width: 480px;
+            margin: 0 auto 2rem;
+            animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .edit-btn {
+            display: block;
+            width: 100%;
+            margin-top: 1.2rem;
+            padding: 1.2rem;
+            border: 1px solid var(--primary-color);
+            border-radius: 16px;
+            background: rgba(0, 255, 102, 0.05);
+            color: var(--primary-color);
+            font-size: 1.1rem;
+            font-weight: 700;
+            text-align: center;
+            text-decoration: none;
+            transition: all 0.3s;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .edit-btn:hover {
+            background: var(--primary-color);
+            color: #121212;
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0, 255, 102, 0.3);
+        }
+
+        /* Sezione Notifiche Colloqui */
+        .interviews-section {
+            width: 100%;
+            max-width: 700px;
+            margin-top: 1rem;
+            animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.2s both;
+        }
+
+        .section-title {
+            color: var(--primary-color);
+            font-size: 1.4rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+        }
+
+        .interview-card {
+            background: rgba(18, 18, 18, 0.88);
+            border: 2px solid rgba(0, 204, 82, 0.72);
+            border-radius: 20px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            transition: all 0.3s;
+            box-shadow: 0 14px 35px rgba(0, 0, 0, 0.34);
+        }
+
+        .interview-card:hover {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 26px rgba(0, 255, 102, 0.18), 0 18px 42px rgba(0, 0, 0, 0.42);
+        }
+
+        .interview-card h4 {
+            color: var(--text-main);
+            font-size: 1.2rem;
+            margin: 0 0 0.3rem;
+            cursor: pointer;
+        }
+
+        .interview-card h4:hover {
+            color: var(--primary-color);
+        }
+
+        .interview-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin: 0.8rem 0;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+
+        .interview-card p,
+        .interview-card span {
+            color: var(--text-muted);
+        }
+
+        .interview-card strong,
+        .interview-card p span {
+            color: var(--text-main) !important;
+        }
+
+        .interview-actions {
+            display: flex;
+            gap: 0.8rem;
+            margin-top: 1rem;
+        }
+
+        .interview-actions button {
+            flex: 1;
+            padding: 0.7rem;
+            border-radius: 10px;
+            border: none;
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-accept {
+            background: var(--primary-color);
+            color: #121212;
+        }
+
+        .btn-accept:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0,255,102,0.3); }
+
+        .btn-reject {
+            background: transparent;
+            border: 1px solid #ff4b4b !important;
+            color: #ff4b4b;
+        }
+
+        .btn-reject:hover { background: rgba(255,75,75,0.1); transform: translateY(-2px); }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .status-accepted { background: rgba(0,255,102,0.1); color: var(--primary-color); border: 1px solid rgba(0,255,102,0.2); }
+        .status-rejected { background: rgba(255,75,75,0.1); color: #ff4b4b; border: 1px solid rgba(255,75,75,0.2); }
+        .status-pending { background: rgba(255,200,0,0.1); color: #FFC800; border: 1px solid rgba(255,200,0,0.2); }
+
+        /* Modale dettaglio azienda */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.7);
+            z-index: 100;
+            align-items: center;
+            justify-content: center;
+        }
+        .modal-overlay.active { display: flex; }
+        .modal-content {
+            background: var(--card-bg-light);
+            border: 4px solid var(--secondary-color);
+            border-radius: 20px;
+            padding: 2.5rem;
+            width: 90%;
+            max-width: 500px;
+            animation: slideUp 0.3s ease;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        .modal-close {
+            float: right;
+            background: none;
+            border: none;
+            color: var(--text-muted-dark);
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        .lang-tag {
+            display: inline-block;
+            background: rgba(0, 255, 102, 0.1);
+            color: var(--primary-color);
+            padding: 0.2rem 0.6rem;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            border: 1px solid rgba(0, 255, 102, 0.2);
+        }
+
+        .devcard-section-label {
+            font-size: 0.85rem;
+            color: var(--primary-color);
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            font-weight: 600;
+            margin-bottom: 0.6rem;
+        }
+
+        /* Modale Cambio Password */
+        .pwd-modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.7);
+            backdrop-filter: blur(4px);
+            z-index: 200;
+            align-items: center;
+            justify-content: center;
+        }
+        .pwd-modal-overlay.active { display: flex; }
+        .pwd-modal {
+            background: var(--card-bg-light);
+            border: 4px solid var(--secondary-color);
+            border-radius: 20px;
+            padding: 2.5rem;
+            width: 90%;
+            max-width: 420px;
+            animation: slideUp 0.3s ease;
+        }
+        .pwd-modal h3 {
+            color: var(--primary-color);
+            margin-bottom: 1.5rem;
+            font-size: 1.3rem;
+        }
+        .pwd-modal .form-group { margin-bottom: 1.2rem; }
+        .pwd-modal .form-group label {
+            display: block;
+            color: var(--text-dark);
+            font-weight: 600;
+            margin-bottom: 0.4rem;
+            font-size: 0.9rem;
+        }
+        .pwd-modal .form-group input {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            background: #ffffff;
+            border: 1px solid var(--card-border-light);
+            border-radius: 10px;
+            color: var(--text-dark);
+            font-size: 1rem;
+            transition: border-color 0.2s;
+        }
+        .pwd-modal .form-group input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+        .pwd-result {
+            margin-top: 1rem;
+            font-size: 0.9rem;
+            min-height: 1.2rem;
+        }
+        .pwd-modal-close {
+            float: right;
+            background: none;
+            border: none;
+            color: var(--text-muted-dark);
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+        .pwd-modal-close:hover { color: #ff4b4b; }
+    </style>
+</head>
+<body>
+
+
+    <header style="padding: 1rem 2rem; background: var(--card-bg-light); border-bottom: 4px solid var(--secondary-color); display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+        <h2 style="color: var(--primary-color); margin: 0; font-size: 1.5rem; font-weight: 700;"><span class="brand-font">DevCards</span> <span style="font-size: 0.9rem; color: var(--text-muted-dark); font-weight: 400;">Home</span></h2>
+        <div style="display: flex; gap: 1rem; align-items: center;">
+            <button id="btnChangePassword" class="nav-btn">🔒 Password</button>
+            <button id="btnLogout" class="nav-btn-logout">Logout</button>
+        </div>
+    </header>
+
+    <main class="home-wrapper">
+        <!-- Qui ci andrà la DevCard vera e propria generata da Javascript -->
+        <div class="my-card-section" id="myCardSection">
+            <p style="color: var(--text-muted-dark); text-align: center;">Caricamento della tua DevCard...</p>
+        </div>
+
+        <!-- Sezione in basso dove Javascript inserirà tutte le richieste di colloquio ricevute dalle aziende -->
+        <div class="interviews-section">
+            <h3 class="section-title">📩 Offerte di Colloquio</h3>
+            <div id="interviewsContainer">
+                <p style="color: var(--text-muted-dark);">Caricamento...</p>
+            </div>
+        </div>
+    </main>
+
+    <!-- Modale Dettaglio Azienda -->
+    <div class="modal-overlay" id="companyModal">
+        <div class="modal-content">
+            <button class="modal-close" id="closeCompanyModal">&times;</button>
+            <div id="companyModalBody"></div>
+        </div>
+    </div>
+
+    <!-- Modale Cambio Password -->
+    <div class="pwd-modal-overlay" id="changePasswordModal">
+        <div class="pwd-modal">
+            <button class="pwd-modal-close" id="closePwdModal">&times;</button>
+            <h3>🔒 Cambia Password</h3>
+            <form id="changePasswordForm">
+                <div class="form-group">
+                    <label for="oldPassword">Password Attuale</label>
+                    <input type="password" id="oldPassword" placeholder="Inserisci la password attuale" required>
+                </div>
+                <div class="form-group">
+                    <label for="newPassword">Nuova Password</label>
+                    <input type="password" id="newPassword" placeholder="Almeno 6 caratteri" required minlength="6">
+                </div>
+                <div class="form-group">
+                    <label for="confirmPassword">Conferma Nuova Password</label>
+                    <input type="password" id="confirmPassword" placeholder="Ripeti la nuova password" required minlength="6">
+                </div>
+                <button type="submit" class="btn" style="margin-top: 0.5rem;">Aggiorna Password</button>
+                <div class="pwd-result" id="pwdResult"></div>
+            </form>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script src="./js/devcard.js"></script>
+    <script src="./js/candidate_home.js"></script>
+    <script src="./js/bg-script.js"></script>
+</body>
+</html>

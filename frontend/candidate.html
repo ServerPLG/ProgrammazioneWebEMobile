@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<!-- Imposto la lingua italiana -->
+<html lang="it">
+
+<head>
+    <!-- Configurazione standard per far funzionare bene i testi e i telefoni -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profilo - DevCards</title>
+    <link rel="icon" type="image/png" href="./logo.png">
+    <link rel="stylesheet" href="./css/style.css">
+    <style>
+        .lingua-row {
+            display: flex;
+            gap: 0.8rem;
+            align-items: center;
+            margin-bottom: 0.8rem;
+            animation: slideUp 0.3s ease;
+        }
+        .lingua-row input { flex: 2; }
+        .lingua-row select { flex: 1; }
+        .lingua-row button {
+            background: none;
+            border: none;
+            color: #ff4b4b;
+            font-size: 1.3rem;
+            cursor: pointer;
+            padding: 0 0.5rem;
+        }
+        .add-lingua-btn {
+            width: 100%;
+            padding: 0.8rem;
+            border: 1px dashed var(--primary-color);
+            border-radius: 12px;
+            background: transparent;
+            color: var(--primary-color);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-top: 0.5rem;
+        }
+        .add-lingua-btn:hover { background: rgba(0,255,102,0.05); }
+    </style>
+</head>
+
+<body>
+
+
+    <!-- Intestazione della pagina in alto -->
+    <header
+        style="padding: 1rem 2rem; background: var(--card-bg-light); border-bottom: 4px solid var(--secondary-color); display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+        <h2 style="color: var(--primary-color); margin: 0; font-size: 1.5rem; font-weight: 700;"><span class="brand-font">DevCards</span> <span
+                style="font-size: 0.9rem; color: var(--text-muted-dark); font-weight: 400;">Profilo</span></h2>
+        <div style="display: flex; gap: 1rem; align-items: center;">
+            <a href="candidate_home.html" class="nav-btn">🏠 Home</a>
+            <!-- Bottone per uscire -->
+            <button id="btnLogout" class="nav-btn-logout">Logout</button>
+        </div>
+    </header>
+
+    <main style="padding: 2rem; max-width: 800px; margin: 0 auto; width: 100%;">
+        <div class="glass-panel" style="max-width: 100%;">
+            <h2 class="title" style="font-size: 2rem; text-align: left; margin-bottom: 2rem;">👤 Profilo</h2>
+
+            <!-- Inizio del modulo. Quando l'utente preme "Salva" il javascript cattura questo ID -->
+            <form id="cvForm">
+                <div class="form-group">
+                    <label style="color: var(--text-dark); font-weight: 600;">Breve Biografia (Testo Libero)</label>
+                    <textarea id="cvBio" class="form-control" rows="5"
+                        placeholder="Parlaci di te, delle tue esperienze e dei tuoi obiettivi..."
+                        style="resize: vertical;" required></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label style="color: var(--text-dark); font-weight: 600;">Competenze (separate da virgola)</label>
+                    <input type="text" id="cvComp" class="form-control"
+                        placeholder="Es. Problem Solving, Teamwork, UI Design" required>
+                </div>
+
+                <div class="form-group">
+                    <label style="color: var(--text-dark); font-weight: 600;">Linguaggi di Programmazione (separati da virgola)</label>
+                    <input type="text" id="cvLang" class="form-control" placeholder="Es. JavaScript, HTML, CSS, Python" required>
+                </div>
+
+                <div class="form-group">
+                    <label style="color: var(--text-dark); font-weight: 600;">Luogo in cui preferisci lavorare</label>
+                    <input type="text" id="cvLuogo" class="form-control" placeholder="Es. Milano, Roma, Remoto" required>
+                    <small style="color: var(--text-muted-dark); font-size: 0.8rem;">Verrà geolocalizzato automaticamente via OpenStreetMap</small>
+                </div>
+
+                <div class="form-group" style="display: flex; align-items: center; gap: 0.5rem; margin-top: 0.5rem;">
+                    <input type="checkbox" id="cvDisponibileOvunque"
+                        style="width: 1.2rem; height: 1.2rem; accent-color: var(--primary-color); cursor: pointer;">
+                    <label for="cvDisponibileOvunque"
+                        style="color: var(--text-dark); font-weight: 600; cursor: pointer;">Disponibile a lavorare ovunque</label>
+                </div>
+
+                <div class="form-group" style="display: flex; align-items: center; gap: 0.5rem; margin-top: 0.5rem;">
+                    <input type="checkbox" id="cvSmartworking"
+                        style="width: 1.2rem; height: 1.2rem; accent-color: var(--primary-color); cursor: pointer;">
+                    <label for="cvSmartworking"
+                        style="color: var(--text-dark); font-weight: 600; cursor: pointer;">Disponibile a lavorare in Smartworking</label>
+                </div>
+
+                <!-- Competenze Linguistiche con livello -->
+                <div class="form-group" style="margin-top: 1.5rem;">
+                    <label style="color: var(--text-dark); font-weight: 600;">Competenze Linguistiche</label>
+                    <div id="lingueContainer"></div>
+                    <button type="button" class="add-lingua-btn" id="addLingua">+ Aggiungi Lingua</button>
+                </div>
+
+                <h3
+                    style="margin: 3rem 0 1.5rem; color: var(--text-dark); font-size: 1.2rem; border-bottom: 1px solid var(--card-border); padding-bottom: 0.5rem;">
+                    I tuoi contatti privati</h3>
+                <p style="font-size: 0.85rem; color: var(--text-muted-dark); margin-bottom: 1.5rem;">Questi dati saranno
+                    nascosti nella tua DevCard finché un Datore di lavoro non clicca su "Contatta".</p>
+
+                <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                    <div class="form-group" style="flex: 1; min-width: 250px;">
+                        <label>Numero di Telefono</label>
+                        <input type="tel" id="cvPhone" class="form-control" placeholder="+39 ...">
+                    </div>
+                    <div class="form-group" style="flex: 1; min-width: 250px;">
+                        <label>Profilo LinkedIn</label>
+                        <input type="url" id="cvLinkedIn" class="form-control" placeholder="https://linkedin.com/in/...">
+                    </div>
+                </div>
+
+                <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                    <div class="form-group" style="flex: 1; min-width: 250px;">
+                        <label>Profilo GitHub</label>
+                        <input type="url" id="cvGitHub" class="form-control" placeholder="https://github.com/...">
+                    </div>
+                    <div class="form-group" style="flex: 1; min-width: 250px;">
+                        <label>Link Social (Instagram/Altro)</label>
+                        <input type="url" id="cvInsta" class="form-control" placeholder="https://...">
+                    </div>
+                </div>
+
+                <button type="submit" class="btn" style="margin-top: 2rem;">Salva il CV e Aggiorna la tua DevCard</button>
+            </form>
+        </div>
+    </main>
+    <script src="./js/candidate.js"></script>
+    <script src="./js/bg-script.js"></script>
+</body>
+
+</html>
