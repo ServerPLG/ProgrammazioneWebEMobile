@@ -594,6 +594,25 @@ app.post('/api/employer-profile', async (req, res) => {
     }
 });
 
+// Endpoint per recuperare l'IP locale del server per far funzionare i QR code in locale
+app.get('/api/server-ip', (req, res) => {
+    try {
+        const interfaces = os.networkInterfaces();
+        let localIp = 'localhost';
+        for (const name of Object.keys(interfaces)) {
+            for (const iface of interfaces[name]) {
+                if (iface.family === 'IPv4' && !iface.internal) {
+                    localIp = iface.address;
+                    break;
+                }
+            }
+        }
+        res.json({ ip: localIp });
+    } catch (error) {
+        res.status(500).json({ error: 'Errore nel recupero dell\'IP locale' });
+    }
+});
+
 // --- START ---
 const PORT = process.env.PORT || 3000;
 

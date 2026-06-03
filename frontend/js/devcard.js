@@ -242,7 +242,20 @@
     }
 
     async function getPublicProfileUrl(userId) {
-        return `${window.location.origin}/public_profile.html?id=${encodeURIComponent(userId)}`;
+        let origin = window.location.origin;
+        const hostname = window.location.hostname;
+        if (hostname === "localhost" || hostname === "127.0.0.1") {
+            try {
+                const res = await fetch('/api/server-ip');
+                const data = await res.json();
+                if (data && data.ip && data.ip !== 'localhost') {
+                    origin = `${window.location.protocol}//${data.ip}:${window.location.port}`;
+                }
+            } catch (err) {
+                console.error("Errore nel recupero dell'IP locale del server:", err);
+            }
+        }
+        return `${origin}/public_profile.html?id=${encodeURIComponent(userId)}`;
     }
 
     function createQrCode(elementId, url, size = 210) {

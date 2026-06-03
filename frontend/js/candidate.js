@@ -54,10 +54,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Questa è una funzione "Helper" (aiutante) che serve a creare dinamicamente i campi per le lingue
     // Così se uno sa 5 lingue posso chiamarla 5 volte invece di scrivere l'HTML a mano
     function addLinguaRow(lingua = '', livello = 'B1') {
-        // Creo un nuovo pezzo di HTML (un div) con Javascript! (Figo no?)
+        // Creo un nuovo pezzo di HTML (un div) con Javascript! 
         const row = document.createElement('div');
         row.className = 'lingua-row'; // Gli do la classe per il CSS
-        // Uso i "template literal" (gli apici storti) per scrivere HTML mischiato a variabili Javascript
+        // Uso i "template literal" per scrivere HTML mischiato a variabili Javascript
         row.innerHTML = `
             <input type="text" class="form-control lingua-nome" placeholder="Es. Inglese" value="${lingua}">
             <select class="form-control lingua-livello">
