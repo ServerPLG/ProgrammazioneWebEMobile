@@ -1,0 +1,159 @@
+# ANALISI COMPLETA E DETTAGLIATA DEL PROGETTO DEVCARDS (PARTE 1)
+
+## 1. PANORAMICA GENERALE DEL PROGETTO
+
+DevCards è una web application completa e complessa concepita per rivoluzionare il processo di recruiting nel settore dell'ingegneria del software. L'applicazione si basa su un'interfaccia interattiva "Tinder-like" in cui i candidati creano profili ricchi di dettagli professionali (DevCards) e i datori di lavoro scorrono queste carte esprimendo preferenze binarie (Salva o Scarta). L'intero sistema è supportato da un backend Node.js robusto che gestisce autenticazione, flussi di swipe, geolocalizzazione, calcolo delle distanze e schedulazione dei colloqui. L'app non si limita all'ambito virtuale: ogni carta possiede un lato fisico (retro) generato dinamicamente con un codice QR, permettendo ai programmatori di stamparla e mostrarla agli eventi di networking o fiere del lavoro (job fairs).
+
+**Tecnologie, Linguaggi e Framework utilizzati:**
+*   **Backend:** Node.js, Express.js (gestione rotte e API RESTful).
+*   **Database:** MariaDB / MySQL. Interfacciamento tramite il driver `mysql2` per garantire connettività asincrona non bloccante.
+*   **Frontend:** HTML5 Semantico, CSS3 (con transizioni 3D, variabili CSS e grid layout per il design responsive), JavaScript (ES6+ Vanilla).
+*   **Librerie Client:** Leaflet.js (Mappe e interazioni geografiche), QRCode.js (generazione asincrona di matrici QR).
+*   **Librerie Server:** `crypto` (hashing nativo SHA-256), `cors` (gestione policy Cross-Origin), `dotenv` (gestione delle variabili d'ambiente).
+
+**Architettura e Flusso Dati:**
+L'architettura è di tipo Client-Server Monolitico (Single Tier Backend con Frontend disaccoppiato). 
+- Il **Frontend** agisce come strato di visualizzazione e interazione. Comunica con il server esclusivamente inviando payload JSON asincroni tramite la `Fetch API` integrata nei browser.
+- Il **Server** riceve i payload JSON, effettua le query SQL sul Database, implementa la logica di business (es: l'algoritmo di esclusione per non mostrare carte già valutate) e restituisce oggetti JSON serializzati.
+- Il **Database** funge da sorgente di verità assoluta (Single Source of Truth), contenendo sia dati relazionali (tabelle users, cvs) che dati aggregati JSON-like (come i linguaggi e le competenze testuali formattate).
+
+---
+
+## 2. ANALISI FILE PER FILE (SEZIONE BACKEND E DATABASE)
+
+### 📄 Nome del file: `db.js`
+
+*   **Scopo generale:** 
+    Questo modulo Node.js costituisce il ponte di comunicazione vitale tra l'applicazione Express e il sistema RDBMS (MariaDB). Il suo ruolo è isolare e configurare l'oggetto `pool` di connessione in modo che possa essere riutilizzato globalmente da tutte le altre porzioni del server senza esaurire i socket di rete o aprire infinite connessioni simultanee, il che causerebbe un "Too Many Connections Error" sul database.
+*   **Dipendenze:**
+    *   `mysql2`: Un driver ottimizzato scritto nativamente per Node.js. È stato preferito a `mysql` perché fornisce nativamente il supporto per le Promises e l'`async/await`.
+    *   `dotenv`: Carica in memoria (all'interno di `process.env`) il contenuto del file `.env` nascosto.
+*   **Variabili e costanti principali:**
+    *   `pool` (const): È l'oggetto principale creato da `mysql.createPool()`. Contiene la configurazione delle credenziali. Parametri critici:
+        *   `waitForConnections: true`: Se il limite di connessioni è raggiunto, la query non viene rigettata, ma messa in coda (queue).
+        *   `connectionLimit: 10`: Numero massimo di query eseguibili simultaneamente dal thread event loop.
+        *   `queueLimit: 0`: Consente una coda di query virtualmente infinita (limitata solo dalla RAM del server).
+
+*   **Funzioni / Metodi / Classi:**
+    *   Non ci sono funzioni globali dichiarate esplicitamente. Il file esegue una configurazione diretta e lineare e restituisce un oggetto avvolto.
+    *   **Elemento esportato (`module.exports`)**: `pool.promise()`. È una funzione membro dell'oggetto pool fornito da `mysql2` che "promisify" (avvolge in promesse) tutti i metodi nativi (`query`, `execute`), permettendo a `server.js` di usare la sintassi fluida `const [rows] = await db.query(...)` anziché l'obsoleta sintassi a callback annidate (callback hell).
+
+*   **Flusso di esecuzione:**
+    Quando il file viene richiesto dal server tramite `require('./db')`, l'interprete V8:
+    1. Richiede e compila il driver mysql2.
+    2. Richiede `dotenv` e invoca `.config()`, popolando `process.env` con le variabili lette da disco.
+    3. Alloca in memoria la configurazione passata a `createPool` (leggendo `DB_HOST`, `DB_USER`, ecc.).
+    4. Crea il pool (che non apre immediatamente le connessioni, ma le "lazy-loads" al primo utilizzo).
+    5. Esporta il wrapper Promise del pool.
+*   **Effetti collaterali:** L'esecuzione di questo file alloca la configurazione e apre socket TCP/IP passivi verso il database. Le credenziali non valide porteranno all'impossibilità di stabilire il link quando la prima query verrà lanciata, causando un errore bloccante.
+
+---
+
+### 📄 Nome del file: `server.js`
+
+*   **Scopo generale:** 
+    È il cuore pulsante dell'applicazione. È il demone (daemon) che rimane in ascolto (listening) sulla porta configurata. Riceve richieste HTTP, applica il routing (routing), esegue chiamate a database o chiamate di rete esterne, applica business logic complessa (es: calcolo di geodistanze) e sputa fuori codice HTTP di stato e payload JSON.
+*   **Dipendenze:** `express` (routing), `cors` (sicurezza), `crypto` (hashing), `dotenv`, `db.js` (connessione), `os` (lettura interfacce rete host).
+*   **Variabili e costanti principali:**
+    *   `app` (const): L'istanza creata chiamando `express()`. È il router principale.
+    *   `PORT` (const): Ottenuta da `process.env.PORT` o fallback sulla porta `3000`.
+
+*   **Funzioni / Metodi / Classi:**
+
+    *   **Elemento:** `geocodeCity`
+        *   **Tipo:** `async function`
+        *   **Descrizione:** Converte asincronamente un nome di città umano (es. "Milano") in un set di coordinate geografiche matematiche (Latitudine e Longitudine).
+        *   **Input:** `cityName` (String) - Il nome del comune da cercare.
+        *   **Output:** `[latitudine, longitudine]` (Array di stringhe numeriche) in caso di successo, o `[null, null]` in caso di fallimento.
+        *   **Flusso interno:** Costruisce un URL per l'API pubblica di Nominatim includendo il countrycodes=it (per restringere la ricerca all'Italia) e la stringa in formato uri-encoded (`encodeURIComponent`). Lancia la `fetch`. Aspetta la risposta, fa il parsing con `.json()`. Se l'array risultante ha lunghezza maggiore di 0, estrae `lat` e `lon` dal primo risultato (il più rilevante) e lo restituisce. Altrimenti restituisce null.
+
+    *   **Elemento:** `haversineDistance`
+        *   **Tipo:** `function`
+        *   **Descrizione:** Risolve un problema di geometria non euclidea. Implementa la complessa Formula di Haversine per calcolare la distanza "aerea" tra due punti su una sfera (la Terra) forniti i loro radianti di lat/lon. Questa operazione è essenziale per dire all'azienda quanti chilometri di trasferta dovrà fare un candidato.
+        *   **Input:** `lat1, lon1, lat2, lon2` (Float).
+        *   **Output:** `d` (Float) - Distanza calcolata espressa in Chilometri (arrotondata matematicamente).
+        *   **Flusso interno:** Usa `Math.PI / 180` per trasformare i gradi in radianti. Calcola i delta (`dLat`, `dLon`). Applica seni, coseni, tangenti inverse sull'arco sferico, basandosi su un raggio terrestre costante `R = 6371`.
+
+    *   **Elemento:** `startServer`
+        *   **Tipo:** `async function`
+        *   **Descrizione:** Funzione di Bootstrap e Controllo Salute (Health Check). Non si limita ad avviare Express, ma fa controlli diagnostici pre-avvio e raccoglie informazioni dinamiche sulla rete LAN.
+        *   **Input:** Nessuno.
+        *   **Output:** Nessuno (stampa su console locale o terminale).
+        *   **Flusso interno:** Avvia un blocco try. Lancia un `await pool.query('SELECT 1')` come "ping" al database. Se il DB è spento o non raggiungibile, entra nel blocco catch, disegna una enorme "X" rossa in ASCII art sulla console per avvertire pesantemente lo sviluppatore e invoca `process.exit(1)` che termina brutalmente l'intero script. Se la query ha successo, invoca `os.networkInterfaces()`, parsa gli array associativi di tutte le schede di rete (Ethernet, WiFi, Tailscale), scarta gli IP locali (`127.0.0.1` o IPv6) e stampa log console colorati contenenti l'IP LAN a cui gli utenti della rete locale possono collegarsi. Infine, lega `app.listen` sulla porta.
+
+*   **Analisi Dettagliata delle Rotte API esposte (Endpoint):**
+
+    *   **`POST /api/register`**
+        *   **Scopo:** Registrazione utente e allocazione tabelle dipendenti.
+        *   **Payload Inviato:** Oggetto JSON contenente `nome, cognome, eta, anniExp, citta, email, password, ruolo` e i dati base del CV o dell'Azienda.
+        *   **Flusso:** (1) Controlla via `SELECT` se l'email esiste. Invia status 400 in caso affermativo. (2) Invoca il modulo `crypto` nativo: crea l'hash SHA-256 della password inviata in chiaro. (3) Lancia la query `INSERT INTO users` estraendo dal payload solo le chiavi relative all'utente. (4) Ottiene l'`insertId`. (5) Verifica se il `ruolo` inviato dal client è `candidato`. In caso positivo, lancia una seconda query di inserimento in cascata `INSERT INTO cvs` che imposta l'`user_id` generato nel passo 4 come Foreign Key e inietta la stringa `competenze`, la `bio` testuale e i `linguaggi`.
+        *   **Risposta:** `201 Created` con `{success: true, userId: id}`.
+        
+    *   **`POST /api/login`**
+        *   **Scopo:** Validazione delle credenziali ed emissione della pseudo-sessione.
+        *   **Payload Inviato:** `{email, password}`.
+        *   **Flusso:** (1) `SELECT * FROM users WHERE email=?`. Se i risultati sono zero, sputa 400 "Credenziali non valide". (2) Crea dinamicamente l'hash `crypto` sulla password inviata e lo compara in modo secco (strict equality `===`) con l'hash storicizzato estratto dal DB. Se divergono, sputa 400. (3) Se combaciano, costruisce un payload JSON che elide la password (per evitare data leakage) ma include tutto il resto, e lo invia con stato `200 OK`.
+        
+    *   **`GET /api/devcards`**
+        *   **Scopo:** Generare la coda di carte da visualizzare nel feed "Tinder" per lo swiping.
+        *   **Parametri (Query String):** `?employer_id=ID`
+        *   **Flusso:** (1) Richiede le coordinate geografiche `lat, lon` dell'Azienda (`employer_id`) eseguendo `SELECT lat, lon FROM users`. (2) Sferra la query "mammut" di applicazione: Fa una `LEFT JOIN` tra `users` e `cvs`. Filtra inserendo la clausola `WHERE ruolo = 'candidato'`. Applica l'algoritmo di scarto Tinder tramite sub-query: `AND users.id NOT IN (SELECT candidate_id FROM employer_interactions WHERE employer_id=?)`. Usa una seconda sub-query per scartare chi è già a processo finale di colloquio. Chiude con `ORDER BY RAND()` per rimescolare il "mazzo". (3) Per ogni elemento JSON generato, il server lancia in ram un `.map()` che ricalcola on-the-fly con `haversineDistance()` la lontananza del candidato. (4) Spedisce l'array JSON calcolato.
+
+    *   **`POST /api/interact`**
+        *   **Scopo:** Salvare il "Like" (save) o il "Dislike" (skip) di un datore verso un candidato.
+        *   **Payload Inviato:** `{ employer_id, candidate_id, action }`.
+        *   **Flusso:** Invia l'istruzione SQL con Upsert (ON DUPLICATE KEY UPDATE) per memorizzare che il datore X ha generato l'azione Y sul candidato Z.
+
+    *   **`GET /api/devcards/saved`**
+        *   **Scopo:** Il potente e complesso motore di filtraggio lato server dei candidati preferiti.
+        *   **Parametri (Query String):** `employer_id`, e opzionalmente `linguaggio, citta, anniExpMin, lingua`.
+        *   **Flusso:** Costruisce dinamicamente la stringa SQL in runtime. Inizia con un template base di `SELECT ... INNER JOIN ... WHERE employer_interactions.action='save'`. Successivamente, valuta le chiavi presenti nell'oggetto `req.query`: se l'azienda ha inserito "React", concatena alla query string la riga `AND cvs.linguaggi LIKE '%React%'` e pusha la stringa `%React%` nell'array di parametri. Se ha inserito "Milano", concatena `AND users.citta LIKE '%Milano%'`. Se ha inserito anni di esperienza, usa l'operatore matematico logico `>=`, ovvero `AND users.anni_esperienza >= 3`. (4) Infine esegue l'array di parametri preparati, ricalcola le distanze di Haversine e spedisce la JSON response dei preferiti filtrati.
+
+    *   **`POST /api/cv`**
+        *   **Scopo:** Upsert (Aggiornamento Inserimento Combinato) delle informazioni del candidato. Usato quando il candidato apre "candidate.html" e preme Salva.
+        *   **Payload Inviato:** Tutti i campi input del form (`bio, competenze, smartworking, lingue, etc.`) inclusa la colossale stringa codificata Base64 della `foto_profilo`.
+        *   **Flusso:** Identifica prima di tutto se l'utente ha mutato la propria città. Se ha digitato una stringa "Milano" che prima era diversa, richiama `await geocodeCity("Milano")`. Esegue l'update di `users` con lat/lon ricalcolate. Applica l'update massivo della colonna base64 `foto_profilo` se quest'ultima non è una banale stringa vuota. Esegue l'`INSERT INTO cvs ... ON DUPLICATE KEY UPDATE` scatenando il sovrascrittura distruttiva se il CV del candidato esisteva già precedentemente.
+
+*   **Effetti collaterali Complessivi di server.js:** Il server manipola continuativamente lo stato non in memoria volatile (RAM), ma permanentemente sui cluster disco del database MariaDB. Mantiene connessioni socket TCP perpetue in background. La sua latenza e i blocchi CPU (seppur non previsti grazie all'uso sfrenato della concorrenza `async/await`) bloccherebbero istantaneamente il rendering dei client a valle, essendo il proxy ultimo e definitivo di smistamento dati.
+
+---
+
+## 3. FLUSSO DATI E INTERAZIONI TRA FILE (WORKFLOWS ARCHITETTURALI)
+
+L'applicazione non adotta uno stream unidirezionale persistente (no WebSocket, no SSE), bensì l'architettura REST standardizzata. Ogni workflow segue una precisa cronologia a staffetta, dove il DOM si anima in risposta ai mutamenti di stato asincroni ricevuti dal Server.
+
+### Workflow A: La Dinamica "Swipe e Salva" (Tinder-Pattern)
+1.  **L'Azienda logga** e naviga su `employer.html`.
+2.  L'interprete JS browser esegue il file collegato `employer.js`. Al caricamento del DOM (listener `DOMContentLoaded`), il client chiama `loadDevCards()`.
+3.  `employer.js` inoltra un request HTTP GET a `server.js` verso `/api/devcards`.
+4.  `server.js` incrocia i filtri complessi in SQL su `database.sql` e restituisce in frazioni di secondo un JSON contente 30 programmatori sconosciuti.
+5.  `employer.js` stocca il JSON nell'array RAM `candidates`. Chiama la render engine visiva delegata a `devcard.js`.
+6.  `devcard.js` esegue `renderCompactFront()` e `.innerHTML` montando la carta del primo elemento (Index 0) sul DOM visuale.
+7.  L'azienda legge e clicca sul bottone Verde (Salva).
+8.  L'evento `click` lancia la funzione `handleInteraction('save')` dentro `employer.js`.
+9.  Si avvia una promise: si inietta una classe CSS `.fly-right` che usa `transform: translateX(100vw) rotate(30deg);` sul div visibile per scagliarlo fuori schermo in 300 millisecondi. In parallelo e contemporaneamente, il browser lancia `fetch('/api/interact', POST)`.
+10. `server.js` riceve la POST e scrive la preferenza nel database fisico. L'indice RAM locale `currentIndex` incrementa di 1. La successiva chiamata a `renderCard()` porta l'Index 1 a schermo.
+
+### Workflow B: L'Organizzazione del Colloquio Fisico
+1.  L'azienda naviga su `saved_devcards.html` (alimentato da `saved.js`).
+2.  L'HTML carica e richiede dal backend i profili salvati. Clicca su "Proponi Colloquio".
+3.  `saved.js` intercetta e lancia `setupInterviewModal()`. Popola a schermo una interfaccia visiva (Modal) sopra l'array pre-esistente.
+4.  L'azienda digita la posizione, la Retribuzione Annua Lorda (es: 35.000€) e le coordinate GPS del colloquio. Fa submit del form.
+5.  Il form raccoglie tutto in un payload JSON denso. Lancia `POST /api/interview`.
+6.  `server.js` esegue `INSERT INTO interview_requests` registrando stato di default stringa `pending`.
+7.  Meno di 24 ore dopo, il Programmatore si logga in `candidate_home.html` (gestito da `candidate_home.js`).
+8.  Viene richiamato `loadInterviews()`, che interroga a sua volta `/api/candidate/interviews`.
+9.  Il backend rileva l'entry `pending` di cui sopra e la invia. Il front end visualizza un enorme div con due pulsanti HTML "Accetta" (colore primario) e "Rifiuta" (colore warning/rosso).
+10. Il programmatore clicca su "Accetta". `candidate_home.js` lancia la fetch sovrascrittiva finale `PUT /api/interview/status` con parametro `accepted`. Il girotondo funzionale è concluso con successo.
+
+---
+
+## 4. GESTIONE DELLO STATO
+
+Essendo costruita con **Vanilla JS senza React/Vue**, non esiste uno State Management tree centralizzato o reattivo in memoria virtuale (VDOM). Lo stato risiede in tre strati separati:
+
+1.  **Lo Stato Globale di Riconoscimento (Sessione):** È implementato con l'API browser `window.localStorage`. Nel momento in cui `auth.js` verifica la password (Login), scrive fisicamente un oggetto JSON formattato sotto la chiave testuale `user` all'interno dell'Application Storage del browser locale. Su ogni pagina secondaria, lo script JS "sveglia" lo stato tramite `JSON.parse(localStorage.getItem('user'))`. Se fallisce, spara un `window.location.href = 'index.html'` buttando fuori (Kick) l'utente abusivo.
+2.  **Lo Stato Logico Parziale in RAM (Variabili Locali):** Moduli pesanti come `employer.js` instanziano variabili let mutabili (`let candidates = []; let currentIndex = 0;`). Lo scorrimento temporaneo o le transizioni CSS visibili causate dai "Mi Piace" modificano queste costanti per calcolare la renderizzazione successiva. Se si preme F5 o "Ricarica", l'intero strato locale viene azzerato in ram (flushed) e la fetch verso il server deve essere brutalmente reiterata per riacquisire lo stato iniziale.
+3.  **Lo Stato Geografico (Canvas):** Utilizzato dalle mappe `Leaflet.js`. Il Layer Map genera oggetti DOM SVG. Il tracking dell'icona (Marker), lo Zoom Level ed il Panning vengono aggiornati passivamente dai Mouse Events (Drag n Drop) per via di callback native inviate dalle librerie e salvate dentro l'oggetto window context reference `marker`. Non vi è alcuna propagazione reattiva ad altre UI esterne alla mappa (il marker aggiorna un tag `<input>` nascosto passandogli lat e lon tramite i trigger Javascript).
+
+Questa frammentazione garantisce flessibilità per architetture semplici ma introduce evidenti limitazioni per Single Page Applications più grandi a causa dei cosiddetti bug da "State Syncing Desyncronization" che portano l'UI a mostrare dati già spazzati via se non refreshata ciclicamente tramite chiamate XHR o fetch continue (necessità aggirabile tramite Socket o server SSE push).

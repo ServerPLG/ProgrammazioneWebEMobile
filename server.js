@@ -4,8 +4,6 @@ const cors = require('cors'); // Boh serve per non avere errori rossi nel browse
 const crypto = require('crypto'); // Uso crypto di base per fare un hash semplice (niente cose complicate come bcrypt)
 require('dotenv').config(); // Per caricare il file .env con la password del database
 const db = require('./db'); // Importo il mio file db.js dove mi connetto al database mysql
-const fs = require('fs');
-const path = require('path');
 const os = require('os');
 const app = express(); // Inizializzo l'app, sempre così si fa
 
@@ -48,10 +46,10 @@ db.execute(`
 `).catch(err => console.error("Errore creazione tabella interview_requests:", err));
 
 // Add columns to existing table if they don't exist
-db.execute("ALTER TABLE interview_requests ADD COLUMN data_colloquio DATE").catch(() => {});
-db.execute("ALTER TABLE interview_requests ADD COLUMN ora_colloquio TIME").catch(() => {});
-db.execute("ALTER TABLE interview_requests ADD COLUMN luogo_colloquio VARCHAR(255)").catch(() => {});
-db.execute("ALTER TABLE cvs MODIFY COLUMN linguaggi TEXT").catch(() => {});
+db.execute("ALTER TABLE interview_requests ADD COLUMN data_colloquio DATE").catch(() => { });
+db.execute("ALTER TABLE interview_requests ADD COLUMN ora_colloquio TIME").catch(() => { });
+db.execute("ALTER TABLE interview_requests ADD COLUMN luogo_colloquio VARCHAR(255)").catch(() => { });
+db.execute("ALTER TABLE cvs MODIFY COLUMN linguaggi TEXT").catch(() => { });
 
 // =============================
 // HELPER: Geocoding con OpenStreetMap Nominatim
@@ -90,20 +88,6 @@ function haversineDistance(lat1, lon1, lat2, lon2) {
 // ROUTES (le API che il frontend chiama)
 // =============================
 
-// 0. API per scoprire l'IP locale del server (per il QR Code)
-app.get('/api/server-ip', (req, res) => {
-    const interfaces = os.networkInterfaces();
-    let ip = 'localhost';
-    for (const name of Object.keys(interfaces)) {
-        for (const iface of interfaces[name]) {
-            if (iface.family === 'IPv4' && !iface.internal) {
-                ip = iface.address;
-                break;
-            }
-        }
-    }
-    res.json({ ip });
-});
 
 // 1. Registrazione (quando uno si iscrive)
 app.post('/api/register', async (req, res) => {
@@ -611,12 +595,50 @@ app.post('/api/employer-profile', async (req, res) => {
 });
 
 // --- START ---
-// la porta definita nel .env (che nel tuo caso è la 3333)
 const PORT = process.env.PORT || 3000;
 
-// IMPORTANTE: '0.0.0.0' per accettare connessioni esterne al NAS
-app.listen(PORT, '0.0.0.0', () => {
-    console.log(`✅ Server NAS pronto!`);
-    console.log(`🌍 Accessibile da rete locale/Tailscale sulla porta: ${PORT}`);
-    console.log(`💡 Non serve più XAMPP, ora stai usando MariaDB del NAS!`);
-});
+async function startServer() {
+    // Testo la connessione al database prima di avviare il server
+    try {
+        await db.execute('SELECT 1');
+    } catch (err) {
+        console.error('\n╔══════════════════════════════════════════════════╗');
+        console.error('║     ERRORE CONNESSIONE DATABASE                  ║');
+        console.error('╚══════════════════════════════════════════════════╝');
+        console.error(`  Host: ${process.env.DB_HOST}`);
+        console.error(`  User: ${process.env.DB_USER}`);
+        console.error(`  Database: ${process.env.DB_NAME}`);
+        console.error(`  Errore: ${err.message}\n`);
+        console.error('  💡 Controlla che MySQL/XAMPP sia avviato e che');
+        console.error('     le credenziali nel file .env siano corrette.\n');
+        process.exit(1);
+    }
+
+    // Trova l'IP locale per mostrarlo nel terminale
+    const interfaces = os.networkInterfaces();
+    let localIp = 'localhost';
+    for (const name of Object.keys(interfaces)) {
+        for (const iface of interfaces[name]) {
+            if (iface.family === 'IPv4' && !iface.internal) {
+                localIp = iface.address;
+                break;
+            }
+        }
+    }
+
+    app.listen(PORT, '0.0.0.0', () => {
+        console.clear();
+        console.log('╔══════════════════════════════════════════════════╗');
+        console.log('║               DevCards Server Avviato            ║');
+        console.log('╚══════════════════════════════════════════════════╝');
+        console.log();
+        console.log(`  ✅ Database:   connesso (${process.env.DB_NAME})`);
+        console.log(`  🌐 Locale:     http://localhost:${PORT}`);
+        console.log(`  📡 Rete:       http://${localIp}:${PORT}`);
+        console.log();
+        console.log('  Premi Ctrl+C per fermare il server.');
+        console.log('──────────────────────────────────────────────────');
+    });
+}
+
+startServer();

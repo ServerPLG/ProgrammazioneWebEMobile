@@ -242,15 +242,7 @@
     }
 
     async function getPublicProfileUrl(userId) {
-        const fallback = `${window.location.origin}/public_profile.html?id=${encodeURIComponent(userId)}`;
-        try {
-            const response = await fetch("/api/server-ip");
-            const data = await response.json();
-            const port = window.location.port ? `:${window.location.port}` : "";
-            return `http://${data.ip}${port}/public_profile.html?id=${encodeURIComponent(userId)}`;
-        } catch {
-            return fallback;
-        }
+        return `${window.location.origin}/public_profile.html?id=${encodeURIComponent(userId)}`;
     }
 
     function createQrCode(elementId, url, size = 210) {
