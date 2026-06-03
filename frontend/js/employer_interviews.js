@@ -7,6 +7,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         return;
     }
 
+    if (!user.nome_azienda || !user.descrizione_azienda || !user.citta) {
+        window.location.href = 'employer_profile.html';
+        return;
+    }
+
     // Logout
     document.getElementById('btnLogout').addEventListener('click', () => {
         localStorage.removeItem('user');
@@ -17,7 +22,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     try {
         const res = await fetch(`/api/employer/interviews?employer_id=${user.id}`);
-        const interviews = await res.json();
+        if (!res.ok) throw new Error('Errore nel recupero dei colloqui');
+        const data = await res.json();
+        const interviews = Array.isArray(data) ? data : [];
 
         if (interviews.length === 0) {
             container.innerHTML = `
@@ -29,7 +36,19 @@ document.addEventListener('DOMContentLoaded', async () => {
             return;
         }
 
-        container.innerHTML = '';
+        const counts = interviews.reduce((acc, iv) => {
+            acc[iv.status] = (acc[iv.status] || 0) + 1;
+            return acc;
+        }, { pending: 0, accepted: 0, rejected: 0 });
+
+        container.innerHTML = `
+            <div style="display: flex; flex-wrap: wrap; gap: 0.7rem; margin-bottom: 1.4rem;">
+                <span class="status-badge" style="background: rgba(255,255,255,0.08); color: var(--text-main); border: 1px solid rgba(255,255,255,0.18);">Tutti: ${interviews.length}</span>
+                <span class="status-badge status-pending">In attesa: ${counts.pending || 0}</span>
+                <span class="status-badge status-accepted">Accettati: ${counts.accepted || 0}</span>
+                <span class="status-badge status-rejected">Rifiutati: ${counts.rejected || 0}</span>
+            </div>
+        `;
         interviews.forEach(iv => {
             let statusBadge = '';
 

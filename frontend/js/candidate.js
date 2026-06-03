@@ -11,6 +11,45 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // Prendo il div vuoto dove andrò a mettere tutte le righe per inserire le lingue conosciute
     const lingueContainer = document.getElementById('lingueContainer');
+    const photoPreview = document.getElementById('profilePhotoPreview');
+    const cvFoto = document.getElementById('cvFoto');
+    const cvFotoUrl = document.getElementById('cvFotoUrl');
+    const btnPhotoFile = document.getElementById('btnProfilePhotoFile');
+    const btnPhotoLink = document.getElementById('btnProfilePhotoLink');
+    let currentFotoProfilo = user.foto_profilo || `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent((user.nome || '') + (user.cognome || ''))}&backgroundColor=e2e8f0`;
+
+    function setPhotoPreview(src) {
+        if (src) photoPreview.src = src;
+    }
+
+    function readFileAsDataUrl(file) {
+        return new Promise((resolve) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(reader.result);
+            reader.readAsDataURL(file);
+        });
+    }
+
+    function setPhotoMode(mode) {
+        const useFile = mode === 'file';
+        cvFoto.style.display = useFile ? 'block' : 'none';
+        cvFotoUrl.style.display = useFile ? 'none' : 'block';
+        btnPhotoFile.classList.toggle('active', useFile);
+        btnPhotoLink.classList.toggle('active', !useFile);
+    }
+
+    setPhotoPreview(currentFotoProfilo);
+    btnPhotoFile.addEventListener('click', () => setPhotoMode('file'));
+    btnPhotoLink.addEventListener('click', () => setPhotoMode('link'));
+    cvFoto.addEventListener('change', async () => {
+        if (cvFoto.files.length > 0) {
+            setPhotoPreview(await readFileAsDataUrl(cvFoto.files[0]));
+        }
+    });
+    cvFotoUrl.addEventListener('input', () => {
+        const url = cvFotoUrl.value.trim();
+        if (url) setPhotoPreview(url);
+    });
 
     // Questa è una funzione "Helper" (aiutante) che serve a creare dinamicamente i campi per le lingue
     // Così se uno sa 5 lingue posso chiamarla 5 volte invece di scrivere l'HTML a mano
@@ -55,6 +94,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                 document.getElementById('cvLuogo').value = data.luogo_preferito || '';
                 document.getElementById('cvSmartworking').checked = !!data.smartworking;
                 document.getElementById('cvDisponibileOvunque').checked = !!data.disponibile_ovunque;
+                currentFotoProfilo = data.foto_profilo || currentFotoProfilo;
+                setPhotoPreview(currentFotoProfilo);
 
                 // Parse competenze linguistiche (JSON)
                 try {
@@ -92,6 +133,13 @@ document.addEventListener('DOMContentLoaded', async () => {
         const luogo_preferito = document.getElementById('cvLuogo').value;
         const smartworking = document.getElementById('cvSmartworking').checked;
         const disponibile_ovunque = document.getElementById('cvDisponibileOvunque').checked;
+        let foto_profilo = currentFotoProfilo;
+
+        if (cvFoto.style.display !== 'none' && cvFoto.files.length > 0) {
+            foto_profilo = await readFileAsDataUrl(cvFoto.files[0]);
+        } else if (cvFotoUrl.style.display !== 'none' && cvFotoUrl.value.trim()) {
+            foto_profilo = cvFotoUrl.value.trim();
+        }
 
         // Questa è la parte dove "pesco" i dati dalle righe dinamiche delle lingue
         const lingueRows = document.querySelectorAll('.lingua-row');
@@ -113,12 +161,15 @@ document.addEventListener('DOMContentLoaded', async () => {
                     user_id: user.id,
                     bio, competenze, linguaggi, telefono, instagram, linkedin, github,
                     luogo_preferito, disponibile_ovunque,
-                    competenze_linguistiche, smartworking
+                    competenze_linguistiche, smartworking, foto_profilo
                 })
             });
             const data = await res.json();
 
             if (res.ok) {
+                if (data.foto_profilo) {
+                    localStorage.setItem('user', JSON.stringify({ ...user, foto_profilo: data.foto_profilo }));
+                }
                 alert("Il tuo CV è stato aggiornato con successo sulla tua DevCard!");
                 window.location.href = 'candidate_home.html';
             } else {

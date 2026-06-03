@@ -193,6 +193,25 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    function isCandidateCvComplete(cv) {
+        return !!(
+            cv &&
+            cv.bio &&
+            cv.competenze &&
+            cv.linguaggi &&
+            (cv.luogo_preferito || cv.disponibile_ovunque)
+        );
+    }
+
+    function isEmployerProfileComplete(userData) {
+        return !!(
+            userData &&
+            userData.nome_azienda &&
+            userData.descrizione_azienda &&
+            userData.citta
+        );
+    }
+
     // =============================
     // LOGIN (PARTE IMPORTANTE)
     // =============================
@@ -220,9 +239,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 
                 // Lo mando alla pagina giusta a seconda di chi è
                 if (data.user.ruolo === 'candidato') {
-                    window.location.href = 'candidate_home.html';
+                    try {
+                        const cvRes = await fetch(`/api/cv/${data.user.id}`);
+                        const cvData = cvRes.ok ? await cvRes.json() : null;
+                        window.location.href = isCandidateCvComplete(cvData) ? 'candidate_home.html' : 'candidate.html';
+                    } catch {
+                        window.location.href = 'candidate.html';
+                    }
                 } else {
-                    window.location.href = 'employer.html';
+                    window.location.href = isEmployerProfileComplete(data.user) ? 'employer.html' : 'employer_profile.html';
                 }
             } else {
                 // Se la password è sbagliata stampo un alert bruttino
@@ -252,6 +277,11 @@ document.addEventListener('DOMContentLoaded', () => {
         let anni_esperienza = 0;
         let max_distanza_km = null;
         let foto_profilo = null;
+        let bio = null;
+        let linguaggi = null;
+        let telefono = null;
+        let linkedin = null;
+        let github = null;
 
         if (ruolo === 'candidato') {
             citta = document.getElementById('regCitta').value;
@@ -260,6 +290,11 @@ document.addEventListener('DOMContentLoaded', () => {
             eta = document.getElementById('regEta').value || null;
             anni_esperienza = document.getElementById('regExp').value || 0;
             max_distanza_km = document.getElementById('regMaxDistanza').value || null;
+            bio = document.getElementById('regBio').value || null;
+            linguaggi = document.getElementById('regLang').value || null;
+            telefono = document.getElementById('regPhone').value || null;
+            linkedin = document.getElementById('regLinkedIn').value || null;
+            github = document.getElementById('regGitHub').value || null;
 
             // Check foto da file o da URL
             const regFotoInput = document.getElementById('regFoto');
@@ -281,7 +316,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const response = await fetch('/api/register', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ ruolo, nome, cognome, eta, anni_esperienza, max_distanza_km, citta, lat, lon, email, password, foto_profilo })
+                body: JSON.stringify({ ruolo, nome, cognome, eta, anni_esperienza, max_distanza_km, citta, lat, lon, email, password, foto_profilo, bio, linguaggi, telefono, linkedin, github })
             });
             const data = await response.json();
 

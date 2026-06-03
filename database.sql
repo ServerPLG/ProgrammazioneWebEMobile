@@ -29,7 +29,7 @@ CREATE TABLE IF NOT EXISTS cvs (
     user_id INT UNIQUE NOT NULL,
     bio TEXT,
     competenze TEXT,
-    linguaggi VARCHAR(255),
+    linguaggi TEXT,
     telefono VARCHAR(20),
     instagram VARCHAR(100),
     luogo_preferito VARCHAR(100),

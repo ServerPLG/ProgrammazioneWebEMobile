@@ -51,6 +51,7 @@ db.execute(`
 db.execute("ALTER TABLE interview_requests ADD COLUMN data_colloquio DATE").catch(() => {});
 db.execute("ALTER TABLE interview_requests ADD COLUMN ora_colloquio TIME").catch(() => {});
 db.execute("ALTER TABLE interview_requests ADD COLUMN luogo_colloquio VARCHAR(255)").catch(() => {});
+db.execute("ALTER TABLE cvs MODIFY COLUMN linguaggi TEXT").catch(() => {});
 
 // =============================
 // HELPER: Geocoding con OpenStreetMap Nominatim
@@ -108,7 +109,7 @@ app.get('/api/server-ip', (req, res) => {
 app.post('/api/register', async (req, res) => {
     try {
         // Prendo tutti i dati dal body della richiesta (quello che manda il form)
-        let { nome, cognome, eta, anni_esperienza, max_distanza_km, citta, lat, lon, email, password, ruolo, foto_profilo } = req.body;
+        let { nome, cognome, eta, anni_esperienza, max_distanza_km, citta, lat, lon, email, password, ruolo, foto_profilo, bio, linguaggi, telefono, linkedin, github } = req.body;
 
         // Se è un candidato e non ha messo la foto, gli metto un avatar a caso con dicebear
         if (ruolo === 'candidato' && (!foto_profilo || foto_profilo.trim() === '')) {
@@ -136,6 +137,13 @@ app.post('/api/register', async (req, res) => {
             'INSERT INTO users (nome, cognome, eta, anni_esperienza, max_distanza_km, citta, lat, lon, email, password, ruolo, foto_profilo) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
             [nome, cognome, eta || null, anni_esperienza || 0, max_distanza_km || null, citta || null, lat || null, lon || null, email, hashedPassword, ruolo, foto_profilo || null]
         );
+
+        if (ruolo === 'candidato' && ((bio && bio.trim()) || (linguaggi && linguaggi.trim()) || (telefono && telefono.trim()) || (linkedin && linkedin.trim()) || (github && github.trim()))) {
+            await db.execute(
+                'INSERT INTO cvs (user_id, bio, linguaggi, telefono, linkedin, github) VALUES (?, ?, ?, ?, ?, ?)',
+                [result.insertId, bio || null, linguaggi || null, telefono || null, linkedin || null, github || null]
+            );
+        }
 
         // Rispondo che è andato tutto bene (201 created)
         res.status(201).json({ message: 'Registrazione completata', userId: result.insertId });
@@ -254,10 +262,14 @@ app.get('/api/devcards', async (req, res) => {
             AND u.id NOT IN (
                 SELECT candidate_id FROM employer_interactions WHERE employer_id = ?
             )
+            AND u.id NOT IN (
+                SELECT candidate_id FROM interview_requests
+                WHERE employer_id = ? AND status IN ('accepted', 'rejected')
+            )
             ORDER BY RAND()
         `;
 
-        const [devcards] = await db.execute(query, [employer_id]);
+        const [devcards] = await db.execute(query, [employer_id, employer_id]);
 
         // Aggiungi distanza a ogni card
         const result = devcards.map(card => {
@@ -399,7 +411,7 @@ app.get('/api/cv/:userId', async (req, res) => {
 // 4.5 API per i candidati: Upsert CV
 app.post('/api/cv', async (req, res) => {
     try {
-        const { user_id, bio, competenze, linguaggi, telefono, instagram, linkedin, github, luogo_preferito, disponibile_ovunque, competenze_linguistiche, smartworking } = req.body;
+        const { user_id, bio, competenze, linguaggi, telefono, instagram, linkedin, github, luogo_preferito, disponibile_ovunque, competenze_linguistiche, smartworking, foto_profilo } = req.body;
 
         const [users] = await db.execute('SELECT * FROM users WHERE id = ? AND ruolo = ?', [user_id, 'candidato']);
         if (users.length === 0) return res.status(403).json({ error: 'Non autorizzato o utente non trovato' });
@@ -412,6 +424,10 @@ app.post('/api/cv', async (req, res) => {
             }
         }
 
+        if (typeof foto_profilo === 'string' && foto_profilo.trim() !== '') {
+            await db.execute('UPDATE users SET foto_profilo = ? WHERE id = ?', [foto_profilo.trim(), user_id]);
+        }
+
         const [cvs] = await db.execute('SELECT * FROM cvs WHERE user_id = ?', [user_id]);
 
         if (cvs.length > 0) {
@@ -419,13 +435,13 @@ app.post('/api/cv', async (req, res) => {
                 'UPDATE cvs SET bio=?, competenze=?, linguaggi=?, telefono=?, instagram=?, linkedin=?, github=?, luogo_preferito=?, disponibile_ovunque=?, competenze_linguistiche=?, smartworking=? WHERE user_id=?',
                 [bio, competenze, linguaggi, telefono, instagram, linkedin, github, luogo_preferito, disponibile_ovunque, competenze_linguistiche, smartworking, user_id]
             );
-            res.json({ message: 'CV aggiornato con successo' });
+            res.json({ message: 'CV aggiornato con successo', foto_profilo });
         } else {
             await db.execute(
                 'INSERT INTO cvs (user_id, bio, competenze, linguaggi, telefono, instagram, linkedin, github, luogo_preferito, disponibile_ovunque, competenze_linguistiche, smartworking) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
                 [user_id, bio, competenze, linguaggi, telefono, instagram, linkedin, github, luogo_preferito, disponibile_ovunque, competenze_linguistiche, smartworking]
             );
-            res.json({ message: 'CV creato con successo' });
+            res.json({ message: 'CV creato con successo', foto_profilo });
         }
     } catch (error) {
         console.error(error);
@@ -595,10 +611,12 @@ app.post('/api/employer-profile', async (req, res) => {
 });
 
 // --- START ---
-// Qui decido su che porta far girare il server (se non è settata su .env uso la 3000)
+// la porta definita nel .env (che nel tuo caso è la 3333)
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-    // Stampo in console così so che è partito
-    console.log(`Server in esecuzione su http://localhost:${PORT}`);
-    console.log(`(Ricordati di accendere XAMPP per il database!!)`);
+
+// IMPORTANTE: '0.0.0.0' per accettare connessioni esterne al NAS
+app.listen(PORT, '0.0.0.0', () => {
+    console.log(`✅ Server NAS pronto!`);
+    console.log(`🌍 Accessibile da rete locale/Tailscale sulla porta: ${PORT}`);
+    console.log(`💡 Non serve più XAMPP, ora stai usando MariaDB del NAS!`);
 });

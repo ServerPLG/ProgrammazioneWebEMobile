@@ -23,6 +23,8 @@
             z-index: 100;
             align-items: center;
             justify-content: center;
+            padding: 1rem;
+            overflow-y: auto;
         }
         .modal-overlay.active { display: flex; }
         .modal-content {
@@ -32,6 +34,8 @@
             padding: 2.5rem;
             width: 90%;
             max-width: 500px;
+            max-height: calc(100vh - 2rem);
+            overflow-y: auto;
             animation: slideUp 0.3s ease;
         }
         .modal-close {
@@ -88,6 +92,13 @@
     </main>
 
     <!-- Modale (popup) Proponi Colloquio. All'inizio è nascosta -->
+    <div class="candidate-modal-overlay" id="savedCandidateProfileModal">
+        <div class="candidate-modal">
+            <button class="candidate-modal-close" id="closeSavedCandidateProfileModal">&times;</button>
+            <div id="savedCandidateProfileBody"></div>
+        </div>
+    </div>
+
     <div class="modal-overlay" id="interviewModal">
         <div class="modal-content">
             <button class="modal-close" id="closeInterviewModal">&times;</button>
@@ -129,6 +140,7 @@
         </div>
     </div>
 
+    <script src="./js/devcard.js"></script>
     <script src="./js/saved.js"></script>
     <script src="./js/bg-script.js"></script>
 </body>

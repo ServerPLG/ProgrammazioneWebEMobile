@@ -25,24 +25,30 @@
             justify-content: space-between;
             position: relative;
         }
+        .discovery-card-stack {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
         .action-buttons {
             display: flex;
             gap: 2rem;
             justify-content: center;
-            margin-top: 2rem;
+            margin-top: 3rem;
             width: 100%;
             max-width: 450px;
         }
         .btn-action {
-            width: 70px;
-            height: 70px;
+            width: 92px;
+            height: 92px;
             border-radius: 50%;
             border: none;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 2rem;
+            font-size: 2.45rem;
             transition: transform 0.2s, box-shadow 0.2s;
             background: #ffffff;
             border: 4px solid var(--secondary-color);
@@ -158,13 +164,21 @@
             <!-- Questi sono i due bottoni rotondi sotto la card (Scarta e Salva). Di base sono nascosti. -->
             <div class="action-buttons" id="actionButtons" style="display: none;">
                 <!-- Bottone rosso con la X -->
-                <button class="btn-action btn-skip" id="btnSkip" title="Scarta">❌</button>
+                <button class="btn-action btn-skip" id="btnSkip" title="Scarta">&times;</button>
                 <!-- Bottone verde con il cuore -->
-                <button class="btn-action btn-save" id="btnSave" title="Salva nei Preferiti">❤️</button>
+                <button class="btn-action btn-save" id="btnSave" title="Salva nei Preferiti">&#10084;</button>
             </div>
         </div>
 
     </main>
+
+    <!-- Modale Profilo Completo Candidato -->
+    <div class="candidate-modal-overlay" id="candidateProfileModal">
+        <div class="candidate-modal">
+            <button class="candidate-modal-close" id="closeCandidateProfileModal">&times;</button>
+            <div id="candidateProfileBody"></div>
+        </div>
+    </div>
 
     <!-- Modale Cambio Password -->
     <div class="pwd-modal-overlay" id="changePasswordModal">
@@ -190,6 +204,7 @@
         </div>
     </div>
 
+    <script src="./js/devcard.js"></script>
     <script src="./js/employer.js"></script>
     <script src="./js/bg-script.js"></script>
 </body>
