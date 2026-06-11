@@ -1,13 +1,13 @@
-// Importo le librerie che mi servono (installate con npm install)
-const express = require('express'); // Serve per creare il server web, il prof ha detto di usare questo
-const cors = require('cors'); // Boh serve per non avere errori rossi nel browser quando chiamo le API
-const crypto = require('crypto'); // Uso crypto di base per fare un hash semplice (niente cose complicate come bcrypt)
+// Importo le librerie che mi servono
+const express = require('express'); // Serve per creare il server web
+const cors = require('cors'); // Serve per non avere errori nel browser quando chiamo le API
+const crypto = require('crypto');
 require('dotenv').config(); // Per caricare il file .env con la password del database
 const db = require('./db'); // Importo il mio file db.js dove mi connetto al database mysql
 const os = require('os');
-const app = express(); // Inizializzo l'app, sempre così si fa
+const app = express(); // Inizializzo l'app
 
-// Middleware (robe che vengono eseguite prima delle richieste)
+// Middleware
 app.use(cors()); // Attivo cors per tutti
 app.use(express.json({ limit: '50mb' })); // Permetto di inviare JSON fino a 50mb perchè le foto pesano
 // Dico ad express di servire la cartella frontend dove c'è il sito html
@@ -118,7 +118,7 @@ function haversineDistance(lat1, lon1, lat2, lon2) {
 // =============================
 
 
-// 1. Registrazione (quando uno si iscrive)
+// 1. Registrazione
 app.post('/api/register', async (req, res) => {
     try {
         // Prendo tutti i dati dal body della richiesta (quello che manda il form)
@@ -150,7 +150,7 @@ app.post('/api/register', async (req, res) => {
             lon = coords.lon;
         }
 
-        // Cripto la password sennò si vede sul db! Faccio un hash semplice (SHA256)
+        // Cripto la password sennò si vede sul db
         const hashedPassword = crypto.createHash('sha256').update(password).digest('hex');
 
         // Inserisco l'utente nel database (i punti interrogativi servono per evitare SQL injection)
@@ -348,7 +348,7 @@ app.delete('/api/interact', async (req, res) => {
     }
 });
 
-// 3.6 API per i datori: Get DevCards Salvate (Con filtri avanzati)
+// 3.6 API per i datori: Get DevCards Salvate
 app.get('/api/devcards/saved', async (req, res) => {
     try {
         const { employer_id, linguaggio, citta, anniExpMin, lingua } = req.query;

@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
     // Prendo gli elementi dalla pagina HTML usando il loro ID
-    // Se cambio ID nell'HTML ricordarsi di cambiarli pure qui sennò si rompe tutto!
+    // Se cambio ID nell'HTML ricordarsi di cambiarli pure qui
     const loginPanel = document.getElementById('loginPanel');
     const registerPanel = document.getElementById('registerPanel');
     const showRegisterBtn = document.getElementById('showRegister');
