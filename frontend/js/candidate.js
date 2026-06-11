@@ -13,10 +13,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     const lingueContainer = document.getElementById('lingueContainer');
     const photoPreview = document.getElementById('profilePhotoPreview');
     const cvFoto = document.getElementById('cvFoto');
-    const cvFotoUrl = document.getElementById('cvFotoUrl');
-    const btnPhotoFile = document.getElementById('btnProfilePhotoFile');
-    const btnPhotoLink = document.getElementById('btnProfilePhotoLink');
     let currentFotoProfilo = user.foto_profilo || `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent((user.nome || '') + (user.cognome || ''))}&backgroundColor=e2e8f0`;
+    let residenceMap = null;
+    let residenceMarker = null;
 
     function setPhotoPreview(src) {
         if (src) photoPreview.src = src;
@@ -30,25 +29,92 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
-    function setPhotoMode(mode) {
-        const useFile = mode === 'file';
-        cvFoto.style.display = useFile ? 'block' : 'none';
-        cvFotoUrl.style.display = useFile ? 'none' : 'block';
-        btnPhotoFile.classList.toggle('active', useFile);
-        btnPhotoLink.classList.toggle('active', !useFile);
+    function initResidenceMap(centerLat, centerLon, zoom) {
+        residenceMap = L.map('candidateResidenceMap').setView([centerLat || 41.9028, centerLon || 12.4964], zoom || 5);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: 'OpenStreetMap contributors',
+            maxZoom: 19,
+        }).addTo(residenceMap);
+
+        residenceMap.on('click', function (e) {
+            setResidenceMarker(e.latlng.lat, e.latlng.lng);
+            reverseGeocodeResidence(e.latlng.lat, e.latlng.lng);
+        });
+    }
+
+    function setResidenceMarker(lat, lng) {
+        if (residenceMarker) {
+            residenceMarker.setLatLng([lat, lng]);
+        } else {
+            residenceMarker = L.marker([lat, lng], { draggable: true }).addTo(residenceMap);
+            residenceMarker.on('dragend', function () {
+                const pos = residenceMarker.getLatLng();
+                document.getElementById('candidateResidenceLat').value = pos.lat;
+                document.getElementById('candidateResidenceLon').value = pos.lng;
+                reverseGeocodeResidence(pos.lat, pos.lng);
+            });
+        }
+        document.getElementById('candidateResidenceLat').value = lat;
+        document.getElementById('candidateResidenceLon').value = lng;
+        residenceMap.setView([lat, lng], 13);
+    }
+
+    async function reverseGeocodeResidence(lat, lon) {
+        try {
+            const res = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json`, {
+                headers: { 'User-Agent': 'DevCards/1.0' }
+            });
+            const data = await res.json();
+            const city = data.address?.city || data.address?.town || data.address?.village || data.address?.municipality || '';
+            if (city) {
+                document.getElementById('candidateResidenceCity').value = city;
+            }
+            document.getElementById('candidateResidenceSelectedLocation').textContent =
+                data.display_name || 'Posizione selezionata';
+        } catch (err) {
+            console.error('Errore reverse geocode:', err);
+        }
+    }
+
+    document.getElementById('btnSearchCandidateResidenceMap').addEventListener('click', async () => {
+        const query = document.getElementById('candidateResidenceCity').value.trim();
+        if (!query) return;
+        try {
+            const res = await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&limit=1`, {
+                headers: { 'User-Agent': 'DevCards/1.0' }
+            });
+            const data = await res.json();
+            if (data && data.length > 0) {
+                const lat = parseFloat(data[0].lat);
+                const lon = parseFloat(data[0].lon);
+                setResidenceMarker(lat, lon);
+                document.getElementById('candidateResidenceSelectedLocation').textContent = data[0].display_name;
+            } else {
+                document.getElementById('candidateResidenceSelectedLocation').textContent = 'Nessun risultato trovato';
+            }
+        } catch (err) {
+            console.error(err);
+        }
+    });
+
+    function loadResidenceLocation(data) {
+        document.getElementById('candidateResidenceCity').value = data.citta || '';
+        document.getElementById('candidateResidenceLat').value = data.lat || '';
+        document.getElementById('candidateResidenceLon').value = data.lon || '';
+
+        if (data.lat && data.lon) {
+            initResidenceMap(data.lat, data.lon, 13);
+            setResidenceMarker(data.lat, data.lon);
+        } else {
+            initResidenceMap();
+        }
     }
 
     setPhotoPreview(currentFotoProfilo);
-    btnPhotoFile.addEventListener('click', () => setPhotoMode('file'));
-    btnPhotoLink.addEventListener('click', () => setPhotoMode('link'));
     cvFoto.addEventListener('change', async () => {
         if (cvFoto.files.length > 0) {
             setPhotoPreview(await readFileAsDataUrl(cvFoto.files[0]));
         }
-    });
-    cvFotoUrl.addEventListener('input', () => {
-        const url = cvFotoUrl.value.trim();
-        if (url) setPhotoPreview(url);
     });
 
     // Questa è una funzione "Helper" (aiutante) che serve a creare dinamicamente i campi per le lingue
@@ -94,6 +160,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 document.getElementById('cvLuogo').value = data.luogo_preferito || '';
                 document.getElementById('cvSmartworking').checked = !!data.smartworking;
                 document.getElementById('cvDisponibileOvunque').checked = !!data.disponibile_ovunque;
+                loadResidenceLocation(data);
                 currentFotoProfilo = data.foto_profilo || currentFotoProfilo;
                 setPhotoPreview(currentFotoProfilo);
 
@@ -109,13 +176,16 @@ document.addEventListener('DOMContentLoaded', async () => {
                     addLinguaRow();
                 }
             } else {
+                loadResidenceLocation(user);
                 addLinguaRow(); // Default
             }
         } else {
+            loadResidenceLocation(user);
             addLinguaRow();
         }
     } catch (error) {
         console.error("Errore nel caricamento del CV esistente:", error);
+        loadResidenceLocation(user);
         addLinguaRow();
     }
 
@@ -131,14 +201,15 @@ document.addEventListener('DOMContentLoaded', async () => {
         const linkedin = document.getElementById('cvLinkedIn').value;
         const github = document.getElementById('cvGitHub').value;
         const luogo_preferito = document.getElementById('cvLuogo').value;
+        const citta = document.getElementById('candidateResidenceCity').value;
+        const lat = document.getElementById('candidateResidenceLat').value || null;
+        const lon = document.getElementById('candidateResidenceLon').value || null;
         const smartworking = document.getElementById('cvSmartworking').checked;
         const disponibile_ovunque = document.getElementById('cvDisponibileOvunque').checked;
-        let foto_profilo = currentFotoProfilo;
+        let foto_profilo = null;
 
-        if (cvFoto.style.display !== 'none' && cvFoto.files.length > 0) {
+        if (cvFoto.files.length > 0) {
             foto_profilo = await readFileAsDataUrl(cvFoto.files[0]);
-        } else if (cvFotoUrl.style.display !== 'none' && cvFotoUrl.value.trim()) {
-            foto_profilo = cvFotoUrl.value.trim();
         }
 
         // Questa è la parte dove "pesco" i dati dalle righe dinamiche delle lingue
@@ -160,16 +231,18 @@ document.addEventListener('DOMContentLoaded', async () => {
                 body: JSON.stringify({
                     user_id: user.id,
                     bio, competenze, linguaggi, telefono, instagram, linkedin, github,
-                    luogo_preferito, disponibile_ovunque,
+                    luogo_preferito, citta, lat, lon, disponibile_ovunque,
                     competenze_linguistiche, smartworking, foto_profilo
                 })
             });
             const data = await res.json();
 
             if (res.ok) {
+                const updatedUser = { ...user, citta: data.citta, lat: data.lat, lon: data.lon };
                 if (data.foto_profilo) {
-                    localStorage.setItem('user', JSON.stringify({ ...user, foto_profilo: data.foto_profilo }));
+                    updatedUser.foto_profilo = data.foto_profilo;
                 }
+                localStorage.setItem('user', JSON.stringify(updatedUser));
                 alert("Il tuo CV è stato aggiornato con successo sulla tua DevCard!");
                 window.location.href = 'candidate_home.html';
             } else {

@@ -137,30 +137,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Toggle foto da file o link
-    const btnFotoFile = document.getElementById('btnFotoFile');
-    const btnFotoLink = document.getElementById('btnFotoLink');
-    const regFoto = document.getElementById('regFoto');
-    const regFotoUrl = document.getElementById('regFotoUrl');
-
-    btnFotoFile.addEventListener('click', () => {
-        regFoto.style.display = 'block';
-        regFotoUrl.style.display = 'none';
-        btnFotoFile.style.borderColor = 'var(--primary-color)';
-        btnFotoFile.style.color = 'var(--primary-color)';
-        btnFotoLink.style.borderColor = 'var(--card-border)';
-        btnFotoLink.style.color = 'var(--text-muted)';
-    });
-
-    btnFotoLink.addEventListener('click', () => {
-        regFoto.style.display = 'none';
-        regFotoUrl.style.display = 'block';
-        btnFotoLink.style.borderColor = 'var(--primary-color)';
-        btnFotoLink.style.color = 'var(--primary-color)';
-        btnFotoFile.style.borderColor = 'var(--card-border)';
-        btnFotoFile.style.color = 'var(--text-muted)';
-    });
-
     // =============================
     // RECUPERO PASSWORD
     // =============================
@@ -296,19 +272,16 @@ document.addEventListener('DOMContentLoaded', () => {
             linkedin = document.getElementById('regLinkedIn').value || null;
             github = document.getElementById('regGitHub').value || null;
 
-            // Check foto da file o da URL
+            // Check foto da file
             const regFotoInput = document.getElementById('regFoto');
-            const regFotoUrlInput = document.getElementById('regFotoUrl');
 
-            if (regFotoInput.style.display !== 'none' && regFotoInput.files.length > 0) {
+            if (regFotoInput.files.length > 0) {
                 const file = regFotoInput.files[0];
                 foto_profilo = await new Promise((resolve) => {
                     const reader = new FileReader();
                     reader.onloadend = () => resolve(reader.result);
                     reader.readAsDataURL(file);
                 });
-            } else if (regFotoUrlInput.style.display !== 'none' && regFotoUrlInput.value.trim()) {
-                foto_profilo = regFotoUrlInput.value.trim();
             }
         }
 

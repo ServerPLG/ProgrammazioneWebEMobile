@@ -9,6 +9,7 @@
     <title>Profilo - DevCards</title>
     <link rel="icon" type="image/png" href="./logo.png">
     <link rel="stylesheet" href="./css/style.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <style>
         .lingua-row {
             display: flex;
@@ -62,21 +63,34 @@
             display: grid;
             gap: 0.75rem;
         }
-        .photo-source-buttons {
-            display: flex;
-            gap: 0.6rem;
-        }
-        .photo-source-buttons .btn {
-            padding: 0.65rem;
-            font-size: 0.85rem;
-            background: transparent;
+        #candidateResidenceMap {
+            width: 100%;
+            height: 280px;
+            border-radius: 12px;
             border: 1px solid var(--card-border-light);
-            color: var(--text-muted-dark);
+            margin-top: 0.5rem;
+            z-index: 1;
         }
-        .photo-source-buttons .btn.active {
-            border-color: var(--primary-color);
-            color: #008033;
-            background: rgba(0, 204, 82, 0.08);
+        .map-search-row {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+        .map-search-row input { flex: 1; }
+        .map-search-row button {
+            padding: 0.6rem 1rem;
+            border: 1px solid var(--primary-color);
+            background: transparent;
+            color: var(--primary-color);
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+        #candidateResidenceSelectedLocation {
+            font-size: 0.85rem;
+            color: var(--primary-color);
+            margin-top: 0.5rem;
         }
         @media (max-width: 560px) {
             .lingua-row,
@@ -88,9 +102,6 @@
             }
             .profile-photo-preview {
                 margin: 0 auto;
-            }
-            .photo-source-buttons {
-                flex-direction: column;
             }
         }
     </style>
@@ -122,14 +133,22 @@
                     <div class="profile-photo-editor">
                         <img id="profilePhotoPreview" class="profile-photo-preview" src="" alt="Anteprima foto profilo">
                         <div class="profile-photo-actions">
-                            <div class="photo-source-buttons">
-                                <button type="button" id="btnProfilePhotoFile" class="btn active">Da Dispositivo</button>
-                                <button type="button" id="btnProfilePhotoLink" class="btn">Da Link</button>
-                            </div>
                             <input type="file" id="cvFoto" class="form-control" accept="image/*">
-                            <input type="url" id="cvFotoUrl" class="form-control" placeholder="https://esempio.com/foto.jpg" style="display: none;">
                         </div>
                     </div>
+                </div>
+
+                <div class="form-group">
+                    <label style="color: var(--text-dark); font-weight: 600;">Luogo di residenza</label>
+                    <div class="map-search-row">
+                        <input type="text" id="candidateResidenceCity" class="form-control" placeholder="Cerca una citta..." required>
+                        <button type="button" id="btnSearchCandidateResidenceMap">Cerca</button>
+                    </div>
+                    <div id="candidateResidenceMap"></div>
+                    <div id="candidateResidenceSelectedLocation"></div>
+                    <input type="hidden" id="candidateResidenceLat">
+                    <input type="hidden" id="candidateResidenceLon">
+                    <small style="color: var(--text-muted-dark); font-size: 0.8rem;">Clicca sulla mappa o cerca una citta per posizionare la tua residenza</small>
                 </div>
 
                 <div class="form-group">
@@ -209,6 +228,7 @@
             </form>
         </div>
     </main>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="./js/candidate.js"></script>
     <script src="./js/bg-script.js"></script>
 </body>

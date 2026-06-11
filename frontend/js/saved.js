@@ -79,6 +79,15 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 });
 
+function getTomorrowDateValue() {
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    const year = tomorrow.getFullYear();
+    const month = String(tomorrow.getMonth() + 1).padStart(2, "0");
+    const day = String(tomorrow.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+}
+
 function bindSavedCardActions(loadDevCards, savedCards, user) {
     document.querySelectorAll(".saved-card-click").forEach(cardEl => {
         cardEl.addEventListener("click", event => {
@@ -117,6 +126,7 @@ function bindSavedCardActions(loadDevCards, savedCards, user) {
             document.getElementById("interviewCandidateName").textContent = this.dataset.name;
             document.getElementById("interviewResult").innerHTML = "";
             document.getElementById("interviewForm").reset();
+            document.getElementById("ivData").min = getTomorrowDateValue();
             document.getElementById("interviewModal").classList.add("active");
         });
     });
@@ -135,6 +145,8 @@ function setupCandidateProfileModal() {
 }
 
 function setupInterviewModal(user) {
+    document.getElementById("ivData").min = getTomorrowDateValue();
+
     document.getElementById("closeInterviewModal").addEventListener("click", () => {
         document.getElementById("interviewModal").classList.remove("active");
     });
@@ -142,6 +154,13 @@ function setupInterviewModal(user) {
     document.getElementById("interviewForm").addEventListener("submit", async (e) => {
         e.preventDefault();
         const resultEl = document.getElementById("interviewResult");
+        const interviewDate = document.getElementById("ivData").value;
+        const firstValidDate = getTomorrowDateValue();
+
+        if (interviewDate < firstValidDate) {
+            resultEl.innerHTML = '<span style="color: #ff4b4b;">La data del colloquio deve essere successiva a quella corrente.</span>';
+            return;
+        }
 
         try {
             const res = await fetch("/api/interview", {
@@ -154,7 +173,7 @@ function setupInterviewModal(user) {
                     linguaggi_richiesti: document.getElementById("ivLinguaggi").value,
                     range_stipendio: document.getElementById("ivStipendio").value,
                     luogo: document.getElementById("ivLuogo").value,
-                    data_colloquio: document.getElementById("ivData").value,
+                    data_colloquio: interviewDate,
                     ora_colloquio: document.getElementById("ivOra").value,
                     luogo_colloquio: document.getElementById("ivLuogoColloquio").value
                 })

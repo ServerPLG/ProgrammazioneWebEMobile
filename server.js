@@ -70,6 +70,35 @@ async function geocodeCity(cityName) {
     return { lat: null, lon: null };
 }
 
+function isDataImage(fotoProfilo) {
+    return typeof fotoProfilo === 'string' && fotoProfilo.trim().startsWith('data:image/');
+}
+
+function getLocalDateValue(date = new Date()) {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+}
+
+function isValidDateValue(dateValue) {
+    const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(dateValue);
+    if (!match) return false;
+
+    const year = Number(match[1]);
+    const month = Number(match[2]);
+    const day = Number(match[3]);
+    const date = new Date(year, month - 1, day);
+
+    return date.getFullYear() === year &&
+        date.getMonth() === month - 1 &&
+        date.getDate() === day;
+}
+
+function isFutureDateValue(dateValue) {
+    return isValidDateValue(dateValue) && dateValue > getLocalDateValue();
+}
+
 // =============================
 // HELPER: Calcolo distanza Haversine (in KM)
 // =============================
@@ -94,6 +123,14 @@ app.post('/api/register', async (req, res) => {
     try {
         // Prendo tutti i dati dal body della richiesta (quello che manda il form)
         let { nome, cognome, eta, anni_esperienza, max_distanza_km, citta, lat, lon, email, password, ruolo, foto_profilo, bio, linguaggi, telefono, linkedin, github } = req.body;
+
+        if (typeof foto_profilo === 'string') {
+            foto_profilo = foto_profilo.trim();
+        }
+
+        if (ruolo === 'candidato' && foto_profilo && !isDataImage(foto_profilo)) {
+            return res.status(400).json({ error: 'La foto profilo deve essere caricata da file' });
+        }
 
         // Se è un candidato e non ha messo la foto, gli metto un avatar a caso con dicebear
         if (ruolo === 'candidato' && (!foto_profilo || foto_profilo.trim() === '')) {
@@ -356,9 +393,7 @@ app.get('/api/devcards/saved', async (req, res) => {
 
         const result = devcards.map(card => {
             let distanza = null;
-            if (card.disponibile_ovunque) {
-                distanza = 'Remoto';
-            } else if (empLat && empLon && card.lat && card.lon) {
+            if (empLat && empLon && card.lat && card.lon) {
                 distanza = haversineDistance(empLat, empLon, card.lat, card.lon) + ' km';
             }
             return { ...card, distanza };
@@ -395,20 +430,39 @@ app.get('/api/cv/:userId', async (req, res) => {
 // 4.5 API per i candidati: Upsert CV
 app.post('/api/cv', async (req, res) => {
     try {
-        const { user_id, bio, competenze, linguaggi, telefono, instagram, linkedin, github, luogo_preferito, disponibile_ovunque, competenze_linguistiche, smartworking, foto_profilo } = req.body;
+        const { user_id, bio, competenze, linguaggi, telefono, instagram, linkedin, github, luogo_preferito, citta, lat, lon, disponibile_ovunque, competenze_linguistiche, smartworking, foto_profilo } = req.body;
 
         const [users] = await db.execute('SELECT * FROM users WHERE id = ? AND ruolo = ?', [user_id, 'candidato']);
         if (users.length === 0) return res.status(403).json({ error: 'Non autorizzato o utente non trovato' });
 
-        // Se ha indicato un luogo preferito, geocodificalo e aggiorna le coordinate dell'utente
-        if (luogo_preferito && !disponibile_ovunque) {
+        let savedCitta = users[0].citta;
+        let savedLat = users[0].lat;
+        let savedLon = users[0].lon;
+
+        if (citta) {
+            savedCitta = citta;
+            savedLat = lat;
+            savedLon = lon;
+            if (!savedLat || !savedLon) {
+                const coords = await geocodeCity(citta);
+                savedLat = coords.lat;
+                savedLon = coords.lon;
+            }
+            await db.execute('UPDATE users SET citta = ?, lat = ?, lon = ? WHERE id = ?', [savedCitta, savedLat, savedLon, user_id]);
+        } else if (luogo_preferito && !disponibile_ovunque) {
             const coords = await geocodeCity(luogo_preferito);
             if (coords.lat && coords.lon) {
                 await db.execute('UPDATE users SET lat = ?, lon = ? WHERE id = ?', [coords.lat, coords.lon, user_id]);
+                savedLat = coords.lat;
+                savedLon = coords.lon;
             }
         }
 
         if (typeof foto_profilo === 'string' && foto_profilo.trim() !== '') {
+            if (!isDataImage(foto_profilo)) {
+                return res.status(400).json({ error: 'La foto profilo deve essere caricata da file' });
+            }
+
             await db.execute('UPDATE users SET foto_profilo = ? WHERE id = ?', [foto_profilo.trim(), user_id]);
         }
 
@@ -419,13 +473,13 @@ app.post('/api/cv', async (req, res) => {
                 'UPDATE cvs SET bio=?, competenze=?, linguaggi=?, telefono=?, instagram=?, linkedin=?, github=?, luogo_preferito=?, disponibile_ovunque=?, competenze_linguistiche=?, smartworking=? WHERE user_id=?',
                 [bio, competenze, linguaggi, telefono, instagram, linkedin, github, luogo_preferito, disponibile_ovunque, competenze_linguistiche, smartworking, user_id]
             );
-            res.json({ message: 'CV aggiornato con successo', foto_profilo });
+            res.json({ message: 'CV aggiornato con successo', foto_profilo, citta: savedCitta, lat: savedLat, lon: savedLon });
         } else {
             await db.execute(
                 'INSERT INTO cvs (user_id, bio, competenze, linguaggi, telefono, instagram, linkedin, github, luogo_preferito, disponibile_ovunque, competenze_linguistiche, smartworking) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
                 [user_id, bio, competenze, linguaggi, telefono, instagram, linkedin, github, luogo_preferito, disponibile_ovunque, competenze_linguistiche, smartworking]
             );
-            res.json({ message: 'CV creato con successo', foto_profilo });
+            res.json({ message: 'CV creato con successo', foto_profilo, citta: savedCitta, lat: savedLat, lon: savedLon });
         }
     } catch (error) {
         console.error(error);
@@ -443,6 +497,10 @@ app.post('/api/interview', async (req, res) => {
         const { employer_id, candidate_id, posizione_cercata, linguaggi_richiesti, range_stipendio, luogo, data_colloquio, ora_colloquio, luogo_colloquio } = req.body;
         if (!employer_id || !candidate_id || !posizione_cercata || !data_colloquio || !ora_colloquio || !luogo_colloquio) {
             return res.status(400).json({ error: 'Parametri mancanti' });
+        }
+
+        if (!isFutureDateValue(data_colloquio)) {
+            return res.status(400).json({ error: 'La data del colloquio deve essere successiva a quella corrente' });
         }
 
         await db.execute(
