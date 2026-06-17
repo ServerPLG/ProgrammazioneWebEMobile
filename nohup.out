@@ -1,0 +1,13 @@
+◇ injected env (3) from .env // tip: ⌁ auth for agents [www.vestauth.com]
+◇ injected env (0) from .env // tip: ⌘ custom filepath { path: '/custom/path/.env' }
+◇ injected env (0) from .env // tip: ⌘ override existing { override: true }
+╔══════════════════════════════════════════════════╗
+║               DevCards Server Avviato            ║
+╚══════════════════════════════════════════════════╝
+
+  ✅ Database:   SQLite (database.sqlite)
+  🌐 Locale:     http://localhost:3333
+  📡 Rete:       http://100.112.4.78:3333
+
+  Premi Ctrl+C per fermare il server.
+──────────────────────────────────────────────────

@@ -1,0 +1,41 @@
+// Variabili tema Ionic per DevCards.
+// Palette verde coerente con il design originale.
+
+:root {
+  --ion-color-primary: #00cc52;
+  --ion-color-primary-rgb: 0, 204, 82;
+  --ion-color-primary-contrast: #ffffff;
+  --ion-color-primary-contrast-rgb: 255, 255, 255;
+  --ion-color-primary-shade: #00b448;
+  --ion-color-primary-tint: #1ad163;
+
+  --ion-color-secondary: #00ff66;
+  --ion-color-secondary-rgb: 0, 255, 102;
+  --ion-color-secondary-contrast: #000000;
+  --ion-color-secondary-contrast-rgb: 0, 0, 0;
+  --ion-color-secondary-shade: #00e05a;
+  --ion-color-secondary-tint: #1aff75;
+
+  --ion-color-danger: #ff4b4b;
+  --ion-color-danger-rgb: 255, 75, 75;
+  --ion-color-danger-contrast: #ffffff;
+  --ion-color-danger-contrast-rgb: 255, 255, 255;
+  --ion-color-danger-shade: #e04242;
+  --ion-color-danger-tint: #ff5d5d;
+
+  --ion-background-color: transparent;
+  --ion-background-color-rgb: 18, 18, 18;
+  --ion-text-color: #ffffff;
+  --ion-text-color-rgb: 255, 255, 255;
+
+  --ion-font-family: 'Outfit', Arial, sans-serif;
+}
+
+// Le pagine devono lasciare intravedere lo sfondo animato globale.
+ion-content {
+  --background: transparent;
+}
+
+ion-app {
+  background: transparent;
+}

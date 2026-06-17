@@ -1,0 +1,28 @@
+{
+  "name": "devcards",
+  "version": "2.0.0",
+  "description": "DevCards - backend Express + SQLite, frontend Angular + Ionic",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js",
+    "build": "cd frontend && npm run build",
+    "build:install": "cd frontend && npm install && npm run build",
+    "setup": "npm install && cd frontend && npm install && npm run build",
+    "dev:frontend": "cd frontend && npm start"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "cors": "^2.8.6",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "jsonwebtoken": "^9.0.2",
+    "sqlite3": "^5.1.7"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.7"
+  }
+}

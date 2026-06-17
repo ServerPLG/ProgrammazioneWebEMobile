@@ -1,0 +1,70 @@
+<article class="dc-profile-card">
+  <header class="dc-profile-header">
+    <img class="dc-profile-avatar" [src]="avatar" alt="Foto profilo" crossorigin="anonymous" />
+    <div>
+      <p class="dc-profile-kicker">Profilo completo</p>
+      <h2>{{ name }}</h2>
+      <p>{{ card.eta || '?' }} anni - {{ card.citta || 'Citta non specificata' }}</p>
+    </div>
+  </header>
+
+  <section class="dc-profile-section">
+    <h3>Descrizione</h3>
+    <p>{{ card.bio || 'Nessuna descrizione inserita.' }}</p>
+  </section>
+
+  <section class="dc-profile-section">
+    <h3>Linguaggi</h3>
+    <div class="dc-profile-tags">
+      <ng-container *ngIf="programmingLanguages.length; else noLang">
+        <span class="dc-profile-tag" *ngFor="let lang of programmingLanguages">{{ lang }}</span>
+      </ng-container>
+      <ng-template #noLang>
+        <span class="dc-profile-tag is-empty">Non specificati</span>
+      </ng-template>
+    </div>
+  </section>
+
+  <section class="dc-profile-section">
+    <h3>Competenze</h3>
+    <p>{{ card.competenze || 'Non specificate' }}</p>
+  </section>
+
+  <div class="dc-profile-grid">
+    <section class="dc-profile-section">
+      <h3>Lingue</h3>
+      <p>
+        <ng-container *ngIf="spokenLanguages.length; else noSpoken">
+          <ng-container *ngFor="let l of spokenLanguages; let last = last"
+            >{{ l }}<br *ngIf="!last" /></ng-container>
+        </ng-container>
+        <ng-template #noSpoken>Non specificate</ng-template>
+      </p>
+    </section>
+    <section class="dc-profile-section">
+      <h3>Dettagli</h3>
+      <ng-container *ngIf="details.length; else noDetails">
+        <div class="dc-profile-info" *ngFor="let item of details">
+          <span>{{ item.label }}</span>
+          <strong>{{ item.value }}</strong>
+        </div>
+      </ng-container>
+      <ng-template #noDetails>
+        <p>Non specificati</p>
+      </ng-template>
+    </section>
+  </div>
+
+  <section class="dc-profile-section">
+    <h3>Contatti</h3>
+    <div class="dc-profile-links">
+      <div class="dc-profile-info" *ngFor="let item of contacts">
+        <span>{{ item.label }}</span>
+        <strong>{{ item.value }}</strong>
+      </div>
+      <a *ngIf="card.linkedin" [href]="profileHref(card.linkedin)" target="_blank" rel="noopener">LinkedIn: {{ card.linkedin }}</a>
+      <a *ngIf="card.github" [href]="profileHref(card.github)" target="_blank" rel="noopener">GitHub: {{ card.github }}</a>
+      <a *ngIf="card.instagram" [href]="profileHref(card.instagram)" target="_blank" rel="noopener">Social: {{ card.instagram }}</a>
+    </div>
+  </section>
+</article>

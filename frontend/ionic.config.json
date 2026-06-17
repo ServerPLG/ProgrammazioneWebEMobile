@@ -1,0 +1,7 @@
+{
+  "name": "DevCards",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "angular-standalone"
+}

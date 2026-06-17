@@ -1,0 +1,92 @@
+<ion-header class="ion-no-border">
+  <app-page-header subtitle="Home">
+  <button class="nav-btn" (click)="openPasswordModal()">🔒 Password</button>
+  <button class="nav-btn-logout" (click)="logout()">Logout</button>
+</app-page-header>
+</ion-header>
+
+<ion-content>
+  <main class="home-wrapper">
+    <!-- DevCard personale -->
+    <div class="my-card-section">
+      <ng-container *ngIf="cardReady && card; else loadingCard">
+        <app-devcard
+          [card]="card!"
+          [includeBack]="true"
+          [qrData]="publicUrl"
+          [contactMode]="'full'"
+        ></app-devcard>
+        <div class="click-to-flip">Clicca per girare</div>
+        <a routerLink="/candidate" class="edit-btn">Modifica Profilo</a>
+        <button type="button" class="edit-btn" style="margin-top: 0.8rem;" (click)="printCard()">Stampa DevCard</button>
+      </ng-container>
+      <ng-template #loadingCard>
+        <p style="color: var(--text-muted-dark); text-align: center;">Caricamento della tua DevCard...</p>
+      </ng-template>
+    </div>
+
+    <!-- Offerte di colloquio -->
+    <div class="interviews-section">
+      <h3 class="section-title">📩 Offerte di Colloquio</h3>
+      <div>
+        <ng-container *ngIf="interviewsLoaded; else loadingIv">
+          <p class="text-muted" *ngIf="interviews.length === 0">Nessuna offerta di colloquio ricevuta al momento.</p>
+
+          <div class="interview-card" *ngFor="let iv of interviews">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem;">
+              <h4 class="company-name" (click)="openCompany(iv)">{{ companyName(iv) }}</h4>
+              <span class="status-badge" [ngClass]="{
+                'status-accepted': iv.status === 'accepted',
+                'status-rejected': iv.status === 'rejected',
+                'status-pending': iv.status === 'pending'
+              }">
+                {{ iv.status === 'accepted' ? 'Accettato' : iv.status === 'rejected' ? 'Rifiutato' : 'In attesa' }}
+              </span>
+            </div>
+            <div class="interview-meta">
+              <span>Ruolo: {{ iv.posizione_cercata || 'N/D' }}</span>
+              <span>Stipendio: {{ iv.range_stipendio || 'Non specificato' }}</span>
+              <span>Luogo: {{ iv.luogo || iv.azienda_citta || 'N/D' }} <ng-container *ngIf="iv.distanza">({{ iv.distanza }})</ng-container></span>
+              <span style="width: 100%; margin-top: 0.3rem; color: var(--text-muted);">Data: {{ formatDate(iv.data_colloquio) }} alle {{ formatTime(iv.ora_colloquio) }}</span>
+              <span *ngIf="iv.luogo_colloquio" style="width: 100%; margin-top: 0.3rem; color: var(--text-muted);">Colloquio presso: {{ iv.luogo_colloquio }}</span>
+            </div>
+            <p *ngIf="iv.linguaggi_richiesti" style="font-size: 0.85rem; margin: 0.5rem 0;">Linguaggi: <span>{{ iv.linguaggi_richiesti }}</span></p>
+
+            <div class="interview-actions" *ngIf="iv.status === 'pending'">
+              <ion-button class="btn-accept" (click)="respond(iv, 'accepted')">Accetta</ion-button>
+              <ion-button class="btn-reject" (click)="respond(iv, 'rejected')">Rifiuta</ion-button>
+            </div>
+          </div>
+        </ng-container>
+        <ng-template #loadingIv>
+          <p style="color: var(--text-muted-dark);">Caricamento...</p>
+        </ng-template>
+      </div>
+    </div>
+  </main>
+
+  <!-- Modale dettaglio azienda -->
+  <div class="modal-overlay" [class.active]="companyOpen">
+    <div class="modal-content">
+      <button class="modal-close" type="button" (click)="closeCompany()">&times;</button>
+      <div *ngIf="company">
+        <h3 style="color: var(--primary-color); margin-bottom: 1rem;">
+          {{ company.nome_azienda || (company.nome || '') + ' ' + (company.cognome || '') }}
+        </h3>
+        <p style="color: var(--text-muted-dark); margin-bottom: 0.5rem;">{{ company.citta || 'Citta non specificata' }}</p>
+        <app-map-picker
+          *ngIf="company.lat && company.lon"
+          [readOnly]="true"
+          [lat]="company.lat"
+          [lon]="company.lon"
+          [zoom]="13"
+          [popupText]="company.nome_azienda || company.nome || ''"
+        ></app-map-picker>
+        <h4 class="devcard-section-label" style="margin-top: 1.5rem;">Descrizione</h4>
+        <p style="color: #333; line-height: 1.6;">{{ company.descrizione_azienda || 'Nessuna descrizione disponibile.' }}</p>
+      </div>
+    </div>
+  </div>
+
+  <app-change-password-modal #pwdModal [userId]="user.id"></app-change-password-modal>
+</ion-content>

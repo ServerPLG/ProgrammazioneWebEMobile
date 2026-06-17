@@ -1,0 +1,118 @@
+<ion-header class="ion-no-border">
+  <app-page-header subtitle="Profilo">
+  <a class="nav-btn" routerLink="/candidate-home">🏠 Home</a>
+  <button class="nav-btn-logout" (click)="logout()">Logout</button>
+</app-page-header>
+</ion-header>
+
+<ion-content>
+  <main class="page-main narrow">
+    <div class="glass-panel" style="max-width: 100%;">
+      <h2 class="title" style="font-size: 2rem; text-align: left; margin-bottom: 2rem;">👤 Profilo</h2>
+
+      <form (ngSubmit)="save()" *ngIf="loaded">
+        <div class="form-group">
+          <label>Foto Profilo</label>
+          <div class="profile-photo-editor">
+            <img class="profile-photo-preview" [src]="photoPreview" alt="Anteprima foto profilo" />
+            <div class="profile-photo-actions">
+              <input type="file" class="form-control" accept="image/*" (change)="onFotoSelected($event)" />
+              <ion-button expand="block" fill="outline" (click)="takePhoto()">📷 Scatta foto</ion-button>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Luogo di residenza</label>
+          <app-map-picker
+            inputName="candidateResidenceCity"
+            [lat]="lat"
+            [lon]="lon"
+            [zoom]="13"
+            [initialCity]="citta"
+            (locationChange)="onLocation($event)"
+          ></app-map-picker>
+          <small class="field-hint">Clicca sulla mappa o cerca una citta per posizionare la tua residenza</small>
+        </div>
+
+        <div class="form-group">
+          <label>Breve Biografia (Testo Libero)</label>
+          <ion-textarea name="cvBio" class="form-control" [class.input-invalid]="isMissing('bio')" [rows]="5" [(ngModel)]="cv.bio" required placeholder="Parlaci di te, delle tue esperienze e dei tuoi obiettivi..."></ion-textarea>
+          <small class="error-text" *ngIf="isMissing('bio')">Questo campo è obbligatorio</small>
+        </div>
+
+        <div class="form-group">
+          <label>Competenze (separate da virgola)</label>
+          <ion-input type="text" name="cvComp" class="form-control" [class.input-invalid]="isMissing('competenze')" [(ngModel)]="cv.competenze" required placeholder="Es. Problem Solving, Teamwork, UI Design"></ion-input>
+          <small class="error-text" *ngIf="isMissing('competenze')">Questo campo è obbligatorio</small>
+        </div>
+
+        <div class="form-group">
+          <label>Linguaggi di Programmazione (separati da virgola)</label>
+          <ion-input type="text" name="cvLang" class="form-control" [class.input-invalid]="isMissing('linguaggi')" [(ngModel)]="cv.linguaggi" required placeholder="Es. JavaScript, HTML, CSS, Python"></ion-input>
+          <small class="error-text" *ngIf="isMissing('linguaggi')">Questo campo è obbligatorio</small>
+        </div>
+
+        <div class="form-group">
+          <label>Luogo in cui preferisci lavorare</label>
+          <ion-input type="text" name="cvLuogo" class="form-control" [class.input-invalid]="isMissing('luogo_preferito')" [(ngModel)]="cv.luogo_preferito" required placeholder="Es. Milano, Roma, Remoto"></ion-input>
+          <small class="error-text" *ngIf="isMissing('luogo_preferito')">Questo campo è obbligatorio</small>
+          <small class="field-hint">Verra geolocalizzato automaticamente via OpenStreetMap</small>
+        </div>
+
+        <div class="form-group checkbox-row">
+          <ion-checkbox name="cvDisponibileOvunque" [(ngModel)]="cv.disponibile_ovunque" labelPlacement="end">Disponibile a lavorare ovunque</ion-checkbox>
+        </div>
+
+        <div class="form-group checkbox-row">
+          <ion-checkbox name="cvSmartworking" [(ngModel)]="cv.smartworking" labelPlacement="end">Disponibile a lavorare in Smartworking</ion-checkbox>
+        </div>
+
+        <div class="form-group" style="margin-top: 1.5rem;">
+          <label>Competenze Linguistiche</label>
+          <div>
+            <div class="lingua-row" *ngFor="let l of lingue; let i = index">
+              <ion-input type="text" class="form-control" [name]="'linguaNome' + i" [(ngModel)]="l.lingua" placeholder="Es. Inglese"></ion-input>
+              <ion-select class="form-control" [name]="'linguaLiv' + i" [(ngModel)]="l.livello" interface="popover">
+                <ion-select-option *ngFor="let liv of livelli" [value]="liv">{{ liv }}</ion-select-option>
+              </ion-select>
+              <button type="button" class="remove-lingua" title="Rimuovi" (click)="removeLingua(i)">✕</button>
+            </div>
+          </div>
+          <button type="button" class="add-lingua-btn" (click)="addLingua()">+ Aggiungi Lingua</button>
+        </div>
+
+        <h3 style="margin: 3rem 0 1.5rem; color: var(--text-dark); font-size: 1.2rem; border-bottom: 1px solid var(--card-border); padding-bottom: 0.5rem;">
+          I tuoi contatti privati
+        </h3>
+        <p style="font-size: 0.85rem; color: var(--text-muted-dark); margin-bottom: 1.5rem;">
+          Questi dati saranno nascosti nella tua DevCard finche un Datore di lavoro non clicca su "Contatta".
+        </p>
+
+        <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+          <div class="form-group" style="flex: 1; min-width: 250px;">
+            <label>Numero di Telefono</label>
+            <ion-input type="tel" name="cvPhone" class="form-control" [(ngModel)]="cv.telefono" placeholder="+39 ..."></ion-input>
+          </div>
+          <div class="form-group" style="flex: 1; min-width: 250px;">
+            <label>Profilo LinkedIn</label>
+            <ion-input type="url" name="cvLinkedIn" class="form-control" [(ngModel)]="cv.linkedin" placeholder="https://linkedin.com/in/..."></ion-input>
+          </div>
+        </div>
+
+        <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+          <div class="form-group" style="flex: 1; min-width: 250px;">
+            <label>Profilo GitHub</label>
+            <ion-input type="url" name="cvGitHub" class="form-control" [(ngModel)]="cv.github" placeholder="https://github.com/..."></ion-input>
+          </div>
+          <div class="form-group" style="flex: 1; min-width: 250px;">
+            <label>Link Social (Instagram/Altro)</label>
+            <ion-input type="url" name="cvInsta" class="form-control" [(ngModel)]="cv.instagram" placeholder="https://..."></ion-input>
+          </div>
+        </div>
+
+        <ion-button type="submit" expand="block" class="btn" style="margin-top: 2rem;">Salva il CV e Aggiorna la tua DevCard</ion-button>
+      </form>
+    </div>
+  </main>
+</ion-content>

@@ -1,0 +1,17 @@
+<ion-content>
+  <main class="public-profile-page">
+    <header class="public-profile-header">
+      <div>
+        <h1 class="brand-font">DevCards</h1>
+        <p>Profilo completo candidato</p>
+      </div>
+    </header>
+    <section class="public-profile-wrapper">
+      <div class="public-profile-loading" *ngIf="loading">Caricamento profilo...</div>
+      <div class="dc-profile-card" *ngIf="error">
+        <p class="text-error">{{ error }}</p>
+      </div>
+      <app-full-profile *ngIf="card && !error" [card]="card!"></app-full-profile>
+    </section>
+  </main>
+</ion-content>
