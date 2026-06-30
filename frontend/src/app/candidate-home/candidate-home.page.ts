@@ -152,13 +152,36 @@ export class CandidateHomePage implements OnInit, OnDestroy {
   }
 
   printCard(): void {
+    // La DevCard vive dentro <ion-content> (shadow DOM, position:absolute,
+    // overflow:hidden): stampandola "in loco" Ionic ne ritaglia il contenuto e
+    // la stampa esce sballata. Per una stampa affidabile cloniamo le due facce
+    // in un contenitore figlio diretto di <body>, fuori dai container Ionic.
+    const source = document.querySelector(
+      'app-devcard .dc-flip-card'
+    ) as HTMLElement | null;
+    if (!source) {
+      window.print();
+      return;
+    }
+
+    const printRoot = document.createElement('div');
+    printRoot.className = 'dc-print-root';
+
+    const clone = source.cloneNode(true) as HTMLElement;
+    clone.classList.remove('is-flipped'); // stampa sempre fronte poi retro
+    printRoot.appendChild(clone);
+    document.body.appendChild(printRoot);
     document.body.classList.add('card-print-page');
+
     const cleanup = () => {
       document.body.classList.remove('card-print-page');
+      printRoot.remove();
       window.removeEventListener('afterprint', cleanup);
     };
     window.addEventListener('afterprint', cleanup);
-    window.print();
+
+    // Lasciamo al browser un frame per applicare il layout di stampa.
+    setTimeout(() => window.print(), 60);
   }
 
   logout(): void {

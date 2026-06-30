@@ -121,9 +121,11 @@ npm install
 npm start
 ```
 
-Il frontend sara' disponibile su `http://localhost:4200`.
+Il frontend sara' disponibile su `http://localhost:4200`. Il dev server e' avviato con `--host 0.0.0.0` (vedi lo script `start` in `package.json` e l'opzione `host` in `angular.json`), quindi e' raggiungibile anche da altri dispositivi sulla stessa Wi-Fi all'indirizzo `http://IP-LAN-del-PC:4200`: e' cosi' che il QR della DevCard funziona dal telefono.
 
 Servono quindi due processi attivi contemporaneamente (due terminali): il frontend ha bisogno del backend acceso per le API.
+
+> Se il QR non si apre dal telefono ("sito irraggiungibile") pur essendo sulla stessa rete, le cause piu' comuni sono: server non riavviati dopo le modifiche, **firewall di Windows** che blocca le porte `4200`/`3000` sulle reti private (consenti l'accesso a Node), oppure una rete Wi-Fi "ospiti" che isola i dispositivi. All'avvio il backend stampa in console tutti gli IP rilevati: usa quello della scheda Wi-Fi (di solito `192.168.x.x`).
 
 Credenziali demo candidato:
 
@@ -246,14 +248,14 @@ Metodi:
 
 - `ngOnInit()`: legge l'utente, si iscrive a `profileEvents.card$` (per ricevere la card aggiornata), carica colloqui e DevCard.
 - `loadCard()`: carica il CV con `getCv()`; se non e' completo reindirizza a `/candidate`; altrimenti costruisce l'URL pubblico e pubblica la card.
-- `buildPublicUrl()`: costruisce il link al profilo pubblico. Se l'app gira su `localhost`/`127.0.0.1`, chiama `getServerIp()` per sostituire l'host con l'IP di rete locale, cosi' il QR e' raggiungibile da altri dispositivi sulla stessa rete.
+- `buildPublicUrl()`: costruisce il link al profilo pubblico. Se l'app gira su `localhost`/`127.0.0.1`, chiama `getServerIp()` per sostituire l'host con l'IP di rete locale (mantenendo la porta `4200` del dev server), cosi' il QR e' raggiungibile da altri dispositivi sulla stessa Wi-Fi. Perche' questo funzioni, il dev server Angular e' avviato con `--host 0.0.0.0` (vedi `angular.json` / `package.json`), in modo da restare in ascolto anche sull'IP di rete e non solo su `localhost`.
 - `loadInterviews()`: carica i colloqui ricevuti con `getCandidateInterviews()`.
 - `respond(interview, status)`: accetta o rifiuta un colloquio con `setInterviewStatus()`, poi ricarica l'elenco.
 - `companyName(iv)`: ricava il nome azienda da mostrare.
 - `openCompany(iv)` / `closeCompany()`: caricano e mostrano la scheda azienda con `getEmployer()`.
 - `formatDate(value)` / `formatTime(value)`: formattano data e ora del colloquio.
 - `openPasswordModal()`: apre il modale di cambio password.
-- `printCard()`: aggiunge una classe CSS dedicata e lancia `window.print()` per stampare la DevCard, ripulendo lo stato a stampa conclusa.
+- `printCard()`: stampa la DevCard su due pagine (fronte + retro col QR), in formato biglietto da visita 55x85 mm. Poiche' la card vive dentro `ion-content` (shadow DOM di Ionic, con `position: fixed`/`overflow: hidden` sul `body`), stamparla "in loco" la ritagliava: per questo il metodo **clona** le due facce in un contenitore (`.dc-print-root`) figlio diretto di `<body>`, fuori dai container Ionic, aggiunge la classe `card-print-page`, lancia `window.print()` e ripulisce tutto al termine (`afterprint`). Le regole `@media print` in `global.scss` impaginano il fronte sulla prima pagina e il retro sulla seconda (`page-break-before: always`) e riportano `html`/`body` in flusso normale per non tagliare la seconda pagina.
 - `logout()`.
 
 ### EmployerDiscoveryPage (`employer-discovery/employer-discovery.page.ts`)
@@ -730,10 +732,10 @@ Stessa forma della scheda pubblica, ma riferita al datore loggato.
 
 ```json
 // risposta 200
-{ "ip": "localhost" }
+{ "ip": "192.168.1.100" }
 ```
 
-Restituisce l'IP locale del server; la home del candidato lo usa per costruire un QR raggiungibile in rete locale. La rotta `/` risponde con un health check: `{ "message": "DevCards backend attivo" }`.
+Restituisce l'IP di rete locale del server (la vera scheda Wi-Fi/LAN); la home del candidato lo usa per costruire un QR raggiungibile in rete locale. Se non e' possibile determinarlo, ripiega su `"localhost"`. La rotta `/` risponde con un health check: `{ "message": "DevCards backend attivo" }`.
 
 ## Dettaglio tecnico del backend (funzione per funzione)
 
@@ -741,7 +743,7 @@ Il backend segue il flusso `routes -> controllers -> models -> db`. Di seguito o
 
 ### server.js
 
-Entry point: configura CORS (accetta richieste da qualsiasi origine), abilita la lettura del corpo JSON (limite 50mb per le foto base64), monta le sei aree di rotte sotto `/api`, espone `GET /` come health check; infine, in una funzione `async`, verifica la connessione al DB, inizializza il database e mette il server in ascolto sulla porta `3000`. Non serve il frontend.
+Entry point: configura CORS (accetta richieste da qualsiasi origine), abilita la lettura del corpo JSON (limite 50mb per le foto base64), monta le sei aree di rotte sotto `/api`, espone `GET /` come health check; infine, in una funzione `async`, verifica la connessione al DB, inizializza il database e mette il server in ascolto sulla porta `3000` legato a `0.0.0.0` (tutte le interfacce, cosi' e' raggiungibile in rete locale). All'avvio stampa in console l'indirizzo locale, quello di rete e l'elenco di tutti gli IP della macchina (utile per capire quale usare dal telefono). Non serve il frontend.
 
 ### db.js (connessione SQLite)
 
@@ -802,7 +804,7 @@ Collegano metodo + indirizzo al metodo del controller corrispondente (vedi la se
 
 **miscController.js**
 
-- `getServerIp(req, res)` - restituisce l'IP locale del server (per i QR validi in rete locale).
+- `getServerIp(req, res)` - restituisce (in modo asincrono) l'IP di rete locale del server, per i QR validi in rete locale.
 
 ### models/
 
@@ -845,7 +847,10 @@ Collegano metodo + indirizzo al metodo del controller corrispondente (vedi la se
 ### utils/
 
 - `geo.js` -> `geocodeCity(cityName)` (citta' -> coordinate via Nominatim), `haversineDistance(lat1, lon1, lat2, lon2)` (distanza in km).
-- `net.js` -> `localIp()` (primo IPv4 locale della macchina, o "localhost").
+- `net.js` -> rilevamento dell'IP di rete locale per i QR, robusto anche con adattatori virtuali (VirtualBox/WSL/Docker/Hyper-V) o VPN installati:
+  - `localIp()` (asincrono) - chiede al sistema operativo quale IP userebbe per uscire verso la rete: apre un socket UDP e fa `connect` verso un IP pubblico (NON invia pacchetti, imposta solo la rotta) e ne legge l'indirizzo locale. Cosi' si ottiene l'IP della vera scheda Wi-Fi/LAN. Se fallisce, ripiega su `localIpSync()`.
+  - `localIpSync()` (sincrono) - euristica su `os.networkInterfaces()`: tra gli IPv4 non interni preferisce le reti domestiche tipiche (`192.168.*`, `10.*`, `172.16-31.*`) e penalizza gli adattatori dal nome "virtuale" (VirtualBox, VMware, vEthernet/WSL, Docker, VPN...).
+  - `candidateIps()` - elenco di tutti gli IPv4 non interni con il nome dell'adattatore (mostrato in console all'avvio del server).
 - `validators.js` -> `isDataImage(foto)` (e' un'immagine data URL?), `getLocalDateValue(date)` (data come `AAAA-MM-GG`), `isValidDateValue(v)` (data valida?), `isFutureDateValue(v)` (data valida e futura?).
 
 ## Modello dati

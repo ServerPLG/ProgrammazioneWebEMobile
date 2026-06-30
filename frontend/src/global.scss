@@ -1086,6 +1086,16 @@ app-devcard {
   }
 }
 
+/* Contenitore usato SOLO per la stampa della DevCard: clone delle due facce
+   fuori da ion-content. A schermo resta fuori dalla viewport (nessun lampeggio);
+   in @media print viene riportato in flusso normale. */
+.dc-print-root {
+  position: fixed;
+  left: -10000px;
+  top: 0;
+  width: 55mm;
+}
+
 @media print {
   @page {
     size: 55mm 85mm;
@@ -1098,12 +1108,40 @@ app-devcard {
     print-color-adjust: exact !important;
   }
 
+  /* Ionic mette su <body>: position:fixed; height:100%; overflow:hidden.
+     In stampa questo TAGLIA tutto cio' che supera la prima pagina (cioe' il
+     retro), per cui usciva solo il fronte. Riportiamo html/body in flusso
+     normale cosi' entrambe le facce vengono impaginate (fronte + retro). */
+  html,
+  body.card-print-page {
+    position: static !important;
+    overflow: visible !important;
+    height: auto !important;
+    max-height: none !important;
+  }
+
   body.card-print-page {
     background: #fff !important;
     color: #000 !important;
     width: 55mm !important;
     min-width: 55mm !important;
     margin: 0 !important;
+  }
+
+  /* Stampa SOLO la card clonata (.dc-print-root, figlia diretta di <body>),
+     nascondendo ion-app e tutto il resto della UI Ionic. */
+  body.card-print-page > *:not(.dc-print-root) {
+    display: none !important;
+  }
+
+  body.card-print-page .dc-print-root {
+    display: block !important;
+    position: static !important;
+    left: auto !important;
+    top: auto !important;
+    width: 55mm !important;
+    margin: 0 auto !important;
+    padding: 0 !important;
   }
 
   body.card-print-page ion-header,

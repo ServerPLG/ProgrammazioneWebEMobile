@@ -11,7 +11,7 @@ require('dotenv').config({ path: path.join(__dirname, '..', '.env') });
 
 const db = require('./db');
 const initDatabase = require('./config/initDb');
-const { localIp } = require('./utils/net');
+const { localIp, localIpSync, candidateIps } = require('./utils/net');
 
 const app = express();
 
@@ -47,9 +47,17 @@ const PORT = process.env.PORT || 3000;
     process.exit(1);
   }
   await initDatabase(); // crea le tabelle se non esistono e inserisce i dati iniziali
-  app.listen(PORT, '0.0.0.0', () => {
+  app.listen(PORT, '0.0.0.0', async () => {
+    const lanIp = await localIp();
     console.log('DevCards server avviato.');
     console.log(`  Locale: http://localhost:${PORT}`);
-    console.log(`  Rete:   http://${localIp()}:${PORT}`);
+    console.log(`  Rete:   http://${lanIp}:${PORT}`);
+    // Elenco di tutti gli IP della macchina: se il QR non funziona dal telefono,
+    // prova quello della tua scheda Wi-Fi tra questi.
+    const all = candidateIps();
+    if (all.length > 1) {
+      console.log('  Altri IP rilevati (per QR/telefono sulla stessa Wi-Fi):');
+      for (const c of all) console.log(`    - ${c.address}  (${c.name})`);
+    }
   });
 })();
