@@ -1,0 +1,29 @@
+# ---- Dipendenze ----
+node_modules/
+
+# NOTA: il .env viene volutamente versionato (incluso nel repo).
+
+# ---- Database (rigenerato dal seed all'avvio) ----
+*.sqlite
+*.sqlite3
+
+# ---- Output di build ----
+/dist
+dist/
+frontend/www/
+frontend/.angular/
+out-tsc/
+
+# ---- App mobile Capacitor (rigenerata da "npx cap add android") ----
+frontend/android/
+
+# ---- IDE / Sistema operativo ----
+.idea/
+.vscode/
+*.log
+.DS_Store
+Thumbs.db
+
+# ---- Opzionale: credenziali demo in chiaro ----
+# Togli il commento se NON vuoi pubblicare l'elenco di email/password demo:
+# credenziali.txt

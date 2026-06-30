@@ -6,13 +6,13 @@ export const routes: Routes = [
   {
     path: 'login',
     loadComponent: () =>
-      import('./pages/login/login.page').then((m) => m.LoginPage),
+      import('./login/login.page').then((m) => m.LoginPage),
   },
   {
     path: 'candidate',
     canActivate: [candidateGuard],
     loadComponent: () =>
-      import('./pages/candidate-profile/candidate-profile.page').then(
+      import('./candidate-profile/candidate-profile.page').then(
         (m) => m.CandidateProfilePage
       ),
   },
@@ -20,7 +20,7 @@ export const routes: Routes = [
     path: 'candidate-home',
     canActivate: [candidateGuard],
     loadComponent: () =>
-      import('./pages/candidate-home/candidate-home.page').then(
+      import('./candidate-home/candidate-home.page').then(
         (m) => m.CandidateHomePage
       ),
   },
@@ -28,7 +28,7 @@ export const routes: Routes = [
     path: 'employer',
     canActivate: [employerGuard],
     loadComponent: () =>
-      import('./pages/employer-discovery/employer-discovery.page').then(
+      import('./employer-discovery/employer-discovery.page').then(
         (m) => m.EmployerDiscoveryPage
       ),
   },
@@ -36,7 +36,7 @@ export const routes: Routes = [
     path: 'employer-profile',
     canActivate: [employerGuard],
     loadComponent: () =>
-      import('./pages/employer-profile/employer-profile.page').then(
+      import('./employer-profile/employer-profile.page').then(
         (m) => m.EmployerProfilePage
       ),
   },
@@ -44,7 +44,7 @@ export const routes: Routes = [
     path: 'employer-interviews',
     canActivate: [employerGuard],
     loadComponent: () =>
-      import('./pages/employer-interviews/employer-interviews.page').then(
+      import('./employer-interviews/employer-interviews.page').then(
         (m) => m.EmployerInterviewsPage
       ),
   },
@@ -52,14 +52,14 @@ export const routes: Routes = [
     path: 'saved',
     canActivate: [employerGuard],
     loadComponent: () =>
-      import('./pages/saved-devcards/saved-devcards.page').then(
+      import('./saved-devcards/saved-devcards.page').then(
         (m) => m.SavedDevcardsPage
       ),
   },
   {
     path: 'public-profile/:id',
     loadComponent: () =>
-      import('./pages/public-profile/public-profile.page').then(
+      import('./public-profile/public-profile.page').then(
         (m) => m.PublicProfilePage
       ),
   },

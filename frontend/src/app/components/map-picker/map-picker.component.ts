@@ -22,7 +22,6 @@ export interface MapLocation {
   displayName: string;
 }
 
-// Correzione percorsi icone Leaflet (usa la CDN ufficiale).
 const ICON = L.icon({
   iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
   iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
@@ -33,9 +32,6 @@ const ICON = L.icon({
   shadowSize: [41, 41],
 });
 
-/**
- * Mappa Leaflet riutilizzabile per selezionare/visualizzare una posizione.
- */
 @Component({
   selector: 'app-map-picker',
   standalone: true,
@@ -150,12 +146,6 @@ export class MapPickerComponent implements AfterViewInit, OnDestroy {
     this.search();
   }
 
-  /**
-   * Ottiene la posizione GPS del dispositivo tramite Capacitor Geolocation,
-   * posiziona il marker e ricava la citta' con il reverse geocoding gia' usato
-   * per i click sulla mappa. In browser usa la geolocalizzazione del browser
-   * (richiede contesto sicuro: funziona su localhost).
-   */
   async useMyLocation(): Promise<void> {
     try {
       const pos = await Geolocation.getCurrentPosition({ enableHighAccuracy: true });

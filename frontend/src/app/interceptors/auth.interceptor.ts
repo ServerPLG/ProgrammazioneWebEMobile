@@ -4,13 +4,6 @@ import { Router } from '@angular/router';
 import { catchError, throwError } from 'rxjs';
 import { AuthService } from '../services/auth.service';
 
-/**
- * Interceptor di autenticazione JWT.
- * - Allega l'header "Authorization: Bearer <token>" alle chiamate /api quando
- *   c'è un token salvato (le rotte protette del backend lo richiedono).
- * - Se il server risponde 401 (token mancante/scaduto) pulisce la sessione e
- *   riporta l'utente al login.
- */
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const auth = inject(AuthService);
   const router = inject(Router);

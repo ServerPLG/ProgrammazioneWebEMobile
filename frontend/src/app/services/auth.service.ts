@@ -1,9 +1,6 @@
 import { Injectable } from '@angular/core';
 import { User } from '../models/models';
 
-/**
- * Gestione dell'utente autenticato, con stato persistito in localStorage.
- */
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   private readonly STORAGE_KEY = 'user';
@@ -22,7 +19,6 @@ export class AuthService {
     localStorage.setItem(this.STORAGE_KEY, JSON.stringify(user));
   }
 
-  /** Token JWT ricevuto al login, da inviare nelle chiamate protette. */
   getToken(): string | null {
     return localStorage.getItem(this.TOKEN_KEY);
   }
@@ -31,7 +27,6 @@ export class AuthService {
     localStorage.setItem(this.TOKEN_KEY, token);
   }
 
-  /** Aggiorna solo alcuni campi dell'utente salvato. */
   patchUser(patch: Partial<User>): User | null {
     const current = this.getUser();
     if (!current) return null;
@@ -57,7 +52,6 @@ export class AuthService {
     return this.getUser()?.ruolo === 'datore';
   }
 
-  /** Verifica se il profilo azienda del datore e' completo. */
   isEmployerProfileComplete(user: User | null): boolean {
     return !!(
       user &&

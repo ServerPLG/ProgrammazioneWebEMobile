@@ -20,9 +20,6 @@ interface Contact {
   icon: 'phone' | 'email' | 'linkedin' | 'github';
 }
 
-/**
- * DevCard compatta (fronte) con eventuale retro a QR code.
- */
 @Component({
   selector: 'app-devcard',
   standalone: true,
@@ -32,9 +29,9 @@ interface Contact {
 export class DevcardComponent implements OnChanges {
   @Input({ required: true }) card!: DevCard;
   @Input() showDistance = false;
-  /** Mostra il retro con QR (card girabile). */
+
   @Input() includeBack = false;
-  /** URL da codificare nel QR (richiesto se includeBack). */
+
   @Input() qrData = '';
 
   flipped = false;

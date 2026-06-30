@@ -2,7 +2,6 @@ import { DevCard, SpokenLanguage } from '../models/models';
 
 export const CARD_LANGUAGE_LIMIT = 6;
 
-/** Divide una stringa CSV in array ripulito. */
 export function splitCsv(value: string | null | undefined): string[] {
   return String(value || '')
     .split(',')
@@ -10,7 +9,6 @@ export function splitCsv(value: string | null | undefined): string[] {
     .filter(Boolean);
 }
 
-/** Interpreta le competenze linguistiche (formato JSON oppure testo semplice). */
 export function parseSpokenLanguages(raw: string | null | undefined): string[] {
   if (!raw) return [];
   try {
@@ -24,17 +22,15 @@ export function parseSpokenLanguages(raw: string | null | undefined): string[] {
         );
     }
   } catch {
-    // fallback al formato testo semplice
+
   }
   return splitCsv(raw);
 }
 
-/** Nome completo del candidato. */
 export function getCandidateName(card: DevCard | null | undefined): string {
   return `${card?.nome || ''} ${card?.cognome || ''}`.trim() || 'Candidato';
 }
 
-/** Avatar del candidato (foto caricata oppure avatar generato). */
 export function getAvatar(card: DevCard | null | undefined): string {
   if (card?.foto_profilo) return card.foto_profilo;
   return `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(
@@ -42,7 +38,6 @@ export function getAvatar(card: DevCard | null | undefined): string {
   )}&backgroundColor=e2e8f0`;
 }
 
-/** Verifica se il CV del candidato e' completo. */
 export function isCandidateCvComplete(card: DevCard | null | undefined): boolean {
   return !!(
     card &&

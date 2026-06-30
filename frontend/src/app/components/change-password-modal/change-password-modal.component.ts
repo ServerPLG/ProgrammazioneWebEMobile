@@ -4,7 +4,6 @@ import { FormsModule } from '@angular/forms';
 import { IonInput, IonButton } from '@ionic/angular/standalone';
 import { ApiService } from '../../services/api.service';
 
-/** Modale "Cambia Password" riutilizzabile. */
 @Component({
   selector: 'app-change-password-modal',
   standalone: true,

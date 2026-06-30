@@ -1,8 +1,11 @@
-// L'app viene servita da Express, quindi le API sono relative ("/api/...").
-// In sviluppo con "ionic serve" si puo' puntare al backend impostando apiUrl.
+// Ambiente di SVILUPPO (ng serve con proxy.conf.json, porta 4200).
+// Le chiamate /api vengono inoltrate al backend su :3000 dal proxy di Angular.
 export const environment = {
   production: false,
-  // Lascia vuoto per usare percorsi relativi (build servita da Express).
-  // Per "ionic serve" su porta diversa, usa: 'http://localhost:3333'
+  // Il proxy.conf.json inoltra /api/* -> http://localhost:3000/api/* automaticamente.
   apiUrl: '',
+  // App nativa (Android/iOS): non puo' usare percorsi relativi ne' "localhost"
+  // (sul telefono punta al telefono). Emulatore Android: http://10.0.2.2:3000;
+  // telefono reale: http://IP-LAN-del-PC:3000 (es. http://192.168.1.100:3000).
+  nativeApiUrl: 'http://10.0.2.2:3000',
 };

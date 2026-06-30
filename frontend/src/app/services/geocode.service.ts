@@ -7,15 +7,10 @@ export interface GeoResult {
   city: string;
 }
 
-/**
- * Geocodifica tramite OpenStreetMap Nominatim.
- * Le chiamate vanno direttamente al servizio pubblico OSM.
- */
 @Injectable({ providedIn: 'root' })
 export class GeocodeService {
   private readonly headers = { 'User-Agent': 'DevCards/1.0' };
 
-  /** Cerca una citta' e restituisce il primo risultato. */
   async search(query: string): Promise<GeoResult | null> {
     const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&limit=1`;
     try {
@@ -35,7 +30,6 @@ export class GeocodeService {
     return null;
   }
 
-  /** Reverse geocoding: da coordinate a citta'/indirizzo. */
   async reverse(lat: number, lon: number): Promise<GeoResult | null> {
     const url = `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json`;
     try {
